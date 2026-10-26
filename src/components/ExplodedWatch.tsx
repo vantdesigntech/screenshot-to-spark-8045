@@ -32,7 +32,7 @@ const steel = (id: string) => (
 
 function Bracelet({ flip }: { flip?: boolean }) {
   return (
-    <svg viewBox="0 0 100 140" className="absolute left-1/2 h-[46%] w-[30%]" style={{ [flip ? "top" : "bottom"]: "86%", transform: `translateX(-50%) ${flip ? "scaleY(-1)" : ""}` }}>
+    <svg viewBox="0 0 100 140" preserveAspectRatio="none" className="absolute h-[46%] w-[30%]" style={{ left: "35%", [flip ? "top" : "bottom"]: "86%", transform: flip ? "scaleY(-1)" : undefined }}>
       <defs>{steel("br")}</defs>
       {Array.from({ length: 6 }).map((_, i) => (
         <g key={i} transform={`translate(0 ${i * 23})`}>
