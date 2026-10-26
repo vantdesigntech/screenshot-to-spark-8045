@@ -7,7 +7,7 @@ const HOTSPOTS: Hotspot[] = [
   { n: "01", label: "Bezel & Sapphire Crystal", cats: ["bezels", "crystals"], pos: "left-[6%] top-[6%]", side: "left" },
   { n: "02", label: "Dial & Hands", cats: ["dials"], pos: "left-[2%] top-[36%]", side: "left" },
   { n: "03", label: "Movement · Calibre 3230 / ETA", cats: ["movements"], pos: "right-[0%] top-[46%]", side: "right" },
-  { n: "04", label: "Oyster Bracelet · 20mm lugs", cats: ["straps"], pos: "right-[4%] top-[12%]", side: "right" },
+  { n: "04", label: "Oyster Bracelet · 20mm lugs", cats: ["straps"], pos: "right-[2%] bottom-[22%]", side: "right" },
 ];
 
 function Layer({ open, z, x = 0, y = 0, rest = 0, children }: { open: boolean; z: number; x?: number; y?: number; rest?: number; children: ReactNode }) {
@@ -32,7 +32,7 @@ const steel = (id: string) => (
 
 function Bracelet({ flip }: { flip?: boolean }) {
   return (
-    <svg viewBox="0 0 100 140" className="absolute left-1/2 h-[46%] w-[26%] -translate-x-1/2" style={{ [flip ? "top" : "bottom"]: "86%", transform: `translateX(-50%) ${flip ? "scaleY(-1)" : ""}` }}>
+    <svg viewBox="0 0 100 140" className="absolute left-1/2 h-[46%] w-[30%]" style={{ [flip ? "top" : "bottom"]: "86%", transform: `translateX(-50%) ${flip ? "scaleY(-1)" : ""}` }}>
       <defs>{steel("br")}</defs>
       {Array.from({ length: 6 }).map((_, i) => (
         <g key={i} transform={`translate(0 ${i * 23})`}>
