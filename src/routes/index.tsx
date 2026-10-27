@@ -31,7 +31,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { AccountControls, useAccount } from "@/components/AccountProvider";
 import { Button } from "@/components/ui/button";
-import { loadAccount, saveAccount } from "@/lib/account.functions";
+import { loadAccount, saveAccount, type AccountPatch } from "@/lib/account.functions";
 import { canUsePersonalAction, canRunExtendedSearch, dailySearches, FREE_SEARCH_LIMIT } from "@/lib/account-rules";
 import { ExplodedWatch } from "@/components/ExplodedWatch";
 import {
@@ -203,7 +203,7 @@ function Index() {
   };
   const openPricing = () => { if (requireAccount()) setShowPricingModal(true); };
   const openWhatsapp = () => { if (requireAccount()) setShowWhatsappModal(true); };
-  const savePersonal = async (data: Parameters<typeof persistAccount>[0]["data"]) => {
+  const savePersonal = async (data: AccountPatch) => {
     try { await persistAccount({ data }); return true; }
     catch { triggerToast("No se pudo guardar en la nube. Inténtalo de nuevo."); return false; }
   };
@@ -294,11 +294,12 @@ function Index() {
     const map: Record<string, { oemMin?: number; genericMin?: number }> = {};
     for (const p of allPartsPool) {
       if (!p.pairGroupId) continue;
-      if (!map[p.pairGroupId]) map[p.pairGroupId] = {};
+      const group = map[p.pairGroupId] ?? {};
+      map[p.pairGroupId] = group;
       if (p.origin === "oem") {
-        map[p.pairGroupId].oemMin = Math.min(map[p.pairGroupId].oemMin ?? Infinity, p.priceEur);
+        group.oemMin = Math.min(group.oemMin ?? Infinity, p.priceEur);
       } else {
-        map[p.pairGroupId].genericMin = Math.min(map[p.pairGroupId].genericMin ?? Infinity, p.priceEur);
+        group.genericMin = Math.min(group.genericMin ?? Infinity, p.priceEur);
       }
     }
     return map;
