@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import type { Category, WatchModelSpec } from "@/lib/parts";
+import { WATCH_MODELS, type Category, type WatchModelSpec } from "@/lib/parts";
 
 function Layer({
   open,
@@ -57,10 +57,10 @@ function Layer({
 }
 
 export function ExplodedWatch({
-  model,
+  model = WATCH_MODELS[0],
   onSelect,
 }: {
-  model: WatchModelSpec;
+  model?: WatchModelSpec;
   onSelect: (cats: Category[], label?: string) => void;
 }) {
   const [hoverOpen, setHoverOpen] = useState(false);
