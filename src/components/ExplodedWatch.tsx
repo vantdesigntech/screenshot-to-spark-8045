@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { WATCH_MODELS, type Category, type WatchModelSpec } from "@/lib/parts";
+import { Button } from "@/components/ui/button";
+import { ArrowUpRight } from "lucide-react";
 
 function Layer({
   open,
@@ -34,9 +36,9 @@ function Layer({
           : `translate3d(0, 0, ${rest}px) scale(1)`,
         filter:
           highlighted && open
-            ? "drop-shadow(0 0 22px rgba(232, 244, 90, 0.9))"
+            ? "var(--watch-highlight-shadow)"
             : open
-              ? "drop-shadow(0 18px 28px rgba(16, 30, 41, 0.35))"
+              ? "var(--watch-layer-shadow)"
               : undefined,
       }}
     >
@@ -57,30 +59,27 @@ function Layer({
 }
 
 export function ExplodedWatch({
-  model = WATCH_MODELS[0],
+  model: requestedModel,
   onSelect,
 }: {
-  model?: WatchModelSpec;
+  model?: WatchModelSpec | undefined;
   onSelect: (cats: Category[], label?: string) => void;
 }) {
   const [hoverOpen, setHoverOpen] = useState(false);
   const [pinnedOpen, setPinnedOpen] = useState(false);
   const [activeLayer, setActiveLayer] = useState<number | null>(null);
   const [cameraMode, setCameraMode] = useState<"iso" | "side">("iso");
+  const model = requestedModel ?? WATCH_MODELS[0];
+  if (!model) return null;
 
   const open = hoverOpen || pinnedOpen;
   const basePath = `/models/${model.id}`;
 
-  const cameraTransform = !open
-    ? "rotateX(0deg) rotateZ(0deg) scale(1)"
-    : cameraMode === "iso"
-      ? "rotateX(58deg) rotateZ(-36deg) scale(0.82)"
-      : "rotateX(74deg) rotateZ(-14deg) scale(0.80)";
-
   return (
+    <div className="mx-auto w-full min-w-0 max-w-[580px]">
     <div
-      className="relative mx-auto aspect-square w-full max-w-[580px] select-none"
-      onMouseEnter={() => setHoverOpen(true)}
+      className="watch-stage relative mx-auto aspect-square w-full select-none"
+      onPointerEnter={(event) => { if (event.pointerType === "mouse") setHoverOpen(true); }}
       onMouseLeave={() => {
         setHoverOpen(false);
         setActiveLayer(null);
@@ -100,14 +99,12 @@ export function ExplodedWatch({
         </text>
       </svg>
 
-      {/* Ambient Glow */}
-      <div className="pointer-events-none absolute inset-0 m-auto h-1/2 w-1/2 rounded-full bg-lime/35 blur-3xl" />
-
       {/* 3D Photorealistic Stage */}
       <div className="absolute inset-[17%]" style={{ perspective: "1500px" }}>
         <div
-          className="relative h-full w-full transition-transform duration-[900ms] ease-spring preserve-3d"
-          style={{ transform: cameraTransform }}
+          className="watch-camera relative h-full w-full transition-transform duration-[900ms] ease-spring preserve-3d"
+          data-open={open}
+          data-angle={cameraMode}
         >
           {/* Central Technical Axis Spine when Exploded */}
           {open && (
@@ -244,12 +241,13 @@ export function ExplodedWatch({
       {model.hotspots.map((h, i) => {
         const isActive = activeLayer === h.layerIdx;
         return (
-          <button
+          <Button variant="ghost"
             key={h.n}
             onMouseEnter={() => setActiveLayer(h.layerIdx)}
             onMouseLeave={() => setActiveLayer(null)}
             onClick={() => onSelect(h.cats, h.label)}
-            className={`group/hs absolute z-20 flex items-center gap-2.5 text-left transition-all duration-500 ${
+            aria-label={`${h.n} · ${h.label}`}
+            className={`group/hs absolute z-20 flex h-auto items-center gap-2.5 p-0 text-left transition-all duration-500 ${
               h.pos
             } ${h.side === "right" ? "flex-row-reverse text-right" : ""} ${
               open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
@@ -257,7 +255,7 @@ export function ExplodedWatch({
             style={{ transitionDelay: open ? `${180 + i * 70}ms` : "0ms" }}
           >
             <div
-              className={`rounded-2xl border px-3.5 py-2 shadow-soft backdrop-blur transition ${
+              className={`hidden rounded-lg border px-3.5 py-2 shadow-soft backdrop-blur transition md:block ${
                 isActive
                   ? "border-accent bg-primary text-primary-foreground scale-105"
                   : "border-primary/15 bg-card/92 text-foreground hover:border-accent"
@@ -288,13 +286,13 @@ export function ExplodedWatch({
               <span className="absolute inset-0 rounded-full bg-primary animate-ping-soft" />
               <span className="relative">{h.n}</span>
             </span>
-          </button>
+          </Button>
         );
       })}
 
       {/* Bottom Interactive Controls Bar */}
-      <div className="absolute bottom-1 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
-        <button
+      <div className="absolute bottom-1 left-0 right-0 z-20 flex flex-wrap justify-center gap-2">
+        <Button variant="ghost"
           onClick={() => setPinnedOpen((p) => !p)}
           className={`rounded-full border px-4 py-1.5 text-[11px] font-bold tracking-[0.15em] uppercase backdrop-blur transition ${
             pinnedOpen
@@ -302,18 +300,33 @@ export function ExplodedWatch({
               : "border-primary/20 bg-card/80 hover:bg-card"
           }`}
         >
-          {pinnedOpen ? "Vista 3D Fijada ✓" : open ? "Fijar Despiece 3D" : "Hover · Despiezar Reloj"}
-        </button>
+          {pinnedOpen ? "Ensamblar Reloj" : open ? "Fijar Despiece 3D" : "Despiezar Reloj"}
+        </Button>
 
         {open && (
-          <button
+          <Button variant="ghost"
             onClick={() => setCameraMode((m) => (m === "iso" ? "side" : "iso"))}
             className="rounded-full border border-primary/20 bg-card/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur hover:bg-card"
           >
             Ángulo: {cameraMode === "iso" ? "Isométrico" : "Perfil Lateral"}
-          </button>
+          </Button>
         )}
       </div>
+    </div>
+    <div className="grid grid-cols-1 gap-3 pt-5 md:hidden">
+      {model.hotspots.map(h => <Button key={h.n} variant="outline"
+        aria-pressed={activeLayer === h.layerIdx}
+        onClick={() => { setPinnedOpen(true); setActiveLayer(h.layerIdx); onSelect(h.cats, h.label); }}
+        className={`h-auto min-h-24 w-full justify-start gap-3 whitespace-normal p-4 text-left ${activeLayer === h.layerIdx ? "border-accent bg-accent/15" : "bg-card"}`}>
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-xs font-black text-primary-foreground">{h.n}</span>
+        <span className="min-w-0 flex-1 space-y-1">
+          <span className="block text-sm font-bold">{h.label}</span>
+          <span className="block text-xs text-muted-foreground">{h.sublabel}</span>
+          <span className="inline-block rounded bg-secondary px-2 py-1 text-[10px] font-bold">{h.priceHint}</span>
+        </span>
+        <ArrowUpRight className="h-4 w-4 shrink-0" />
+      </Button>)}
+    </div>
     </div>
   );
 }
