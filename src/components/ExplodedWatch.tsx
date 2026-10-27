@@ -1,177 +1,319 @@
 import { useState, type ReactNode } from "react";
-import type { Category } from "@/lib/parts";
+import type { Category, WatchModelSpec } from "@/lib/parts";
 
-type Hotspot = { n: string; label: string; cats: Category[]; pos: string; side: "left" | "right" };
-
-const HOTSPOTS: Hotspot[] = [
-  { n: "01", label: "Bezel & Sapphire Crystal", cats: ["bezels", "crystals"], pos: "left-[6%] top-[6%]", side: "left" },
-  { n: "02", label: "Dial & Hands", cats: ["dials"], pos: "left-[2%] top-[36%]", side: "left" },
-  { n: "03", label: "Movement · Calibre 3230 / ETA", cats: ["movements"], pos: "right-[0%] top-[46%]", side: "right" },
-  { n: "04", label: "Oyster Bracelet · 20mm lugs", cats: ["straps"], pos: "right-[2%] bottom-[22%]", side: "right" },
-];
-
-function Layer({ open, z, x = 0, y = 0, rest = 0, children }: { open: boolean; z: number; x?: number; y?: number; rest?: number; children: ReactNode }) {
+function Layer({
+  open,
+  z,
+  x = 0,
+  y = 0,
+  rest = 0,
+  highlighted = false,
+  dimmed = false,
+  layerTag,
+  children,
+}: {
+  open: boolean;
+  z: number;
+  x?: number;
+  y?: number;
+  rest?: number;
+  highlighted?: boolean;
+  dimmed?: boolean;
+  layerTag?: string;
+  children: ReactNode;
+}) {
+  const scale = highlighted && open ? 1.07 : 1;
   return (
     <div
-      className="absolute inset-0 transition-transform duration-[900ms] ease-spring preserve-3d"
-      style={{ transform: open ? `translate3d(${x}px, ${y}px, ${z}px)` : `translate3d(0,0,${rest}px)` }}
+      className={`absolute inset-0 transition-all duration-[850ms] ease-spring preserve-3d ${
+        dimmed && open ? "opacity-45" : "opacity-100"
+      }`}
+      style={{
+        transform: open
+          ? `translate3d(${x}px, ${y}px, ${z}px) scale(${scale})`
+          : `translate3d(0, 0, ${rest}px) scale(1)`,
+        filter:
+          highlighted && open
+            ? "drop-shadow(0 0 22px rgba(232, 244, 90, 0.9))"
+            : open
+              ? "drop-shadow(0 18px 28px rgba(16, 30, 41, 0.35))"
+              : undefined,
+      }}
     >
       {children}
+      {open && layerTag && (
+        <span
+          className={`pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 rounded-full border px-2.5 py-0.5 text-[8px] font-black uppercase tracking-widest transition-opacity duration-500 ${
+            highlighted
+              ? "border-accent bg-accent text-accent-foreground opacity-100 shadow-soft"
+              : "border-primary/20 bg-card/90 text-muted-foreground opacity-85"
+          }`}
+        >
+          {layerTag}
+        </span>
+      )}
     </div>
   );
 }
 
-const steel = (id: string) => (
-  <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stopColor="#f4f5f7" />
-    <stop offset="0.45" stopColor="#b9bec5" />
-    <stop offset="0.7" stopColor="#e9ebee" />
-    <stop offset="1" stopColor="#8d939b" />
-  </linearGradient>
-);
+export function ExplodedWatch({
+  model,
+  onSelect,
+}: {
+  model: WatchModelSpec;
+  onSelect: (cats: Category[], label?: string) => void;
+}) {
+  const [hoverOpen, setHoverOpen] = useState(false);
+  const [pinnedOpen, setPinnedOpen] = useState(false);
+  const [activeLayer, setActiveLayer] = useState<number | null>(null);
+  const [cameraMode, setCameraMode] = useState<"iso" | "side">("iso");
 
-function Bracelet({ flip }: { flip?: boolean }) {
-  return (
-    <svg viewBox="0 0 100 140" preserveAspectRatio="none" className="absolute h-[46%] w-[30%]" style={{ left: "35%", [flip ? "top" : "bottom"]: "86%", transform: flip ? "scaleY(-1)" : undefined }}>
-      <defs>{steel("br")}</defs>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <g key={i} transform={`translate(0 ${i * 23})`}>
-          <rect x="4" y="2" width="28" height="20" rx="4" fill="url(#br)" stroke="#9aa0a7" strokeWidth="0.6" />
-          <rect x="34" y="2" width="32" height="20" rx="4" fill="url(#br)" stroke="#9aa0a7" strokeWidth="0.6" />
-          <rect x="68" y="2" width="28" height="20" rx="4" fill="url(#br)" stroke="#9aa0a7" strokeWidth="0.6" />
-        </g>
-      ))}
-    </svg>
-  );
-}
+  const open = hoverOpen || pinnedOpen;
+  const basePath = `/models/${model.id}`;
 
-export function ExplodedWatch({ onSelect }: { onSelect: (cats: Category[]) => void }) {
-  const [open, setOpen] = useState(false);
-  const ticks = Array.from({ length: 60 });
+  const cameraTransform = !open
+    ? "rotateX(0deg) rotateZ(0deg) scale(1)"
+    : cameraMode === "iso"
+      ? "rotateX(58deg) rotateZ(-36deg) scale(0.82)"
+      : "rotateX(74deg) rotateZ(-14deg) scale(0.80)";
 
   return (
     <div
-      className="relative mx-auto aspect-square w-full max-w-[560px]"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      className="relative mx-auto aspect-square w-full max-w-[580px] select-none"
+      onMouseEnter={() => setHoverOpen(true)}
+      onMouseLeave={() => {
+        setHoverOpen(false);
+        setActiveLayer(null);
+      }}
     >
-      {/* schematic circles */}
+      {/* Horological Blueprint Background Circles */}
       <svg viewBox="0 0 400 400" className="pointer-events-none absolute inset-0 text-primary/15">
         <circle cx="200" cy="200" r="196" fill="none" stroke="currentColor" strokeDasharray="2 6" />
-        <circle cx="200" cy="200" r="160" fill="none" stroke="currentColor" />
-        <circle cx="200" cy="200" r="120" fill="none" stroke="currentColor" strokeDasharray="1 4" />
+        <circle cx="200" cy="200" r="164" fill="none" stroke="currentColor" />
+        <circle cx="200" cy="200" r="126" fill="none" stroke="currentColor" strokeDasharray="1 4" />
         <line x1="0" y1="200" x2="400" y2="200" stroke="currentColor" strokeDasharray="3 5" />
         <line x1="200" y1="0" x2="200" y2="400" stroke="currentColor" strokeDasharray="3 5" />
-        <circle cx="340" cy="70" r="10" fill="none" stroke="currentColor" />
-        <circle cx="60" cy="330" r="14" fill="none" stroke="currentColor" />
+        <circle cx="340" cy="68" r="10" fill="none" stroke="currentColor" />
+        <circle cx="58" cy="332" r="14" fill="none" stroke="currentColor" />
+        <text x="200" y="16" textAnchor="middle" fontSize="6" fill="currentColor" letterSpacing="2">
+          PHOTOREALISTIC HOROLOGICAL EXPLODED CAD · {model.ref}
+        </text>
       </svg>
-      <div className="absolute inset-0 m-auto h-1/2 w-1/2 rounded-full bg-lime/40 blur-3xl" />
 
-      <div className="absolute inset-[18%]" style={{ perspective: "1400px" }}>
+      {/* Ambient Glow */}
+      <div className="pointer-events-none absolute inset-0 m-auto h-1/2 w-1/2 rounded-full bg-lime/35 blur-3xl" />
+
+      {/* 3D Photorealistic Stage */}
+      <div className="absolute inset-[17%]" style={{ perspective: "1500px" }}>
         <div
           className="relative h-full w-full transition-transform duration-[900ms] ease-spring preserve-3d"
-          style={{ transform: open ? "rotateX(58deg) rotateZ(-38deg) scale(0.82)" : "rotateX(0) rotateZ(0) scale(1)" }}
+          style={{ transform: cameraTransform }}
         >
-          {/* Caseback */}
-          <Layer open={open} z={-200} x={20} y={20}>
-            <svg viewBox="0 0 200 200" className="h-full w-full">
-              <defs>{steel("cb")}</defs>
-              <circle cx="100" cy="100" r="92" fill="url(#cb)" />
-              {[78, 64, 50].map((r) => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="#8d939b" strokeWidth="0.8" />)}
-              <text x="100" y="104" textAnchor="middle" fontSize="8" fill="#5c626a" fontFamily="Red Hat Display" fontWeight="700" letterSpacing="2">OYSTERSTEEL</text>
-            </svg>
+          {/* Central Technical Axis Spine when Exploded */}
+          {open && (
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[2px] -translate-x-1/2 -translate-y-1/2 border-l-2 border-dashed border-primary/40"
+              style={{ transform: "rotateX(90deg) translateZ(0px)" }}
+            />
+          )}
+
+          {/* LAYER 0: Photorealistic Brushed Steel Caseback */}
+          <Layer
+            open={open}
+            z={-210}
+            x={26}
+            y={26}
+            highlighted={activeLayer === 0}
+            dimmed={activeLayer !== null && activeLayer !== 0}
+            layerTag="L6 · CASEBACK OEM"
+          >
+            <img
+              src={`${basePath}/caseback.png`}
+              alt={`${model.name} Caseback`}
+              draggable={false}
+              className="h-full w-full object-contain"
+            />
           </Layer>
-          {/* Middle case + bracelet */}
-          <Layer open={open} z={-100} rest={1}>
-            <div className="absolute inset-0 transition-transform duration-[900ms] ease-spring" style={{ transform: open ? "translateY(-40px)" : "none" }}>
-              <Bracelet />
+
+          {/* LAYER 1 & 2: Photorealistic Middle Case, Crown/Pushers & Brushed Steel Bracelets */}
+          <Layer
+            open={open}
+            z={-110}
+            x={12}
+            y={12}
+            rest={1}
+            highlighted={activeLayer === 1 || activeLayer === 2}
+            dimmed={activeLayer !== null && activeLayer !== 1 && activeLayer !== 2}
+            layerTag="L4/L5 · CASE & BRACELET"
+          >
+            {/* Top Bracelet */}
+            <div
+              className="pointer-events-none absolute inset-0 transition-transform duration-[900ms] ease-spring"
+              style={{ transform: open ? "translateY(-44px)" : "none" }}
+            >
+              <img
+                src={`${basePath}/bracelet-top.png`}
+                alt={`${model.name} Top Bracelet`}
+                draggable={false}
+                className="absolute h-[50%] w-[36%] object-fill"
+                style={{ left: "32%", bottom: "83%" }}
+              />
             </div>
-            <div className="absolute inset-0 transition-transform duration-[900ms] ease-spring" style={{ transform: open ? "translateY(40px)" : "none" }}>
-              <Bracelet flip />
+
+            {/* Bottom Bracelet */}
+            <div
+              className="pointer-events-none absolute inset-0 transition-transform duration-[900ms] ease-spring"
+              style={{ transform: open ? "translateY(44px)" : "none" }}
+            >
+              <img
+                src={`${basePath}/bracelet-bottom.png`}
+                alt={`${model.name} Bottom Bracelet`}
+                draggable={false}
+                className="absolute h-[50%] w-[36%] object-fill"
+                style={{ left: "32%", top: "83%" }}
+              />
             </div>
-            <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full overflow-visible">
-              <defs>{steel("cs")}</defs>
-              <path d="M62 14 L72 -6 L128 -6 L138 14 Z M62 186 L72 206 L128 206 L138 186 Z" fill="url(#cs)" stroke="#9aa0a7" strokeWidth="0.6" />
-              <rect x="190" y="90" width="14" height="20" rx="3" fill="url(#cs)" stroke="#9aa0a7" strokeWidth="0.6" />
-              <circle cx="100" cy="100" r="96" fill="url(#cs)" stroke="#9aa0a7" />
-              <circle cx="100" cy="100" r="82" fill="#2b3036" />
-            </svg>
+
+            {/* Monobloc CNC Middle Case & Crown */}
+            <img
+              src={`${basePath}/midcase.png`}
+              alt={`${model.name} Middle Case`}
+              draggable={false}
+              className="relative h-full w-full object-contain"
+            />
           </Layer>
-          {/* Movement */}
-          <Layer open={open} z={0} rest={2}>
-            <svg viewBox="0 0 200 200" className="h-full w-full">
-              <defs>
-                <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f3dca0" /><stop offset="1" stopColor="#b8893c" /></linearGradient>
-                {steel("mv")}
-              </defs>
-              <circle cx="100" cy="100" r="80" fill="url(#mv)" />
-              <path d="M100 100 L172 70 A80 80 0 0 1 150 160 Z" fill="url(#gold)" opacity="0.9" />
-              {[[70, 70, 18], [130, 60, 12], [65, 130, 14]].map(([x, y, r], i) => (
-                <g key={i}>
-                  <circle cx={x} cy={y} r={r} fill="none" stroke="#b8893c" strokeWidth="2" strokeDasharray="2 2" />
-                  <circle cx={x} cy={y} r="3" fill="#b03060" />
-                </g>
-              ))}
-              <circle cx="100" cy="100" r="6" fill="#5c626a" />
-            </svg>
+
+          {/* LAYER 3: Photorealistic Mechanical Movement / Calibre (Macro Studio Photo) */}
+          <Layer
+            open={open}
+            z={0}
+            rest={2}
+            highlighted={activeLayer === 3}
+            dimmed={activeLayer !== null && activeLayer !== 3}
+            layerTag="L3 · CALIBRE MECÁNICO"
+          >
+            <img
+              src={`${basePath}/movement.png`}
+              alt={`${model.movement} Mechanical Calibre`}
+              draggable={false}
+              className="h-full w-full object-contain"
+            />
           </Layer>
-          {/* Dial & hands */}
-          <Layer open={open} z={100} x={-10} y={-10} rest={3}>
-            <svg viewBox="0 0 200 200" className="h-full w-full">
-              <circle cx="100" cy="100" r="80" fill="#f6f6f4" />
-              {ticks.map((_, i) => {
-                const a = (i * 6 * Math.PI) / 180;
-                const big = i % 5 === 0;
-                const r1 = big ? 62 : 74;
-                return <line key={i} x1={100 + Math.sin(a) * r1} y1={100 - Math.cos(a) * r1} x2={100 + Math.sin(a) * 77} y2={100 - Math.cos(a) * 77} stroke={big ? "#9aa0a7" : "#c9ccd0"} strokeWidth={big ? 3.4 : 0.7} strokeLinecap="round" />;
-              })}
-              <text x="100" y="66" textAnchor="middle" fontSize="7" fontWeight="900" fill="#101e29" fontFamily="Red Hat Display" letterSpacing="1">CHRONO</text>
-              <text x="100" y="140" textAnchor="middle" fontSize="5" fontWeight="500" fill="#5c626a" fontFamily="Red Hat Display" letterSpacing="1">OYSTER PERPETUAL</text>
-              <rect x="146" y="95" width="14" height="10" fill="#fff" stroke="#9aa0a7" strokeWidth="0.6" />
-              <text x="153" y="103" textAnchor="middle" fontSize="7" fontWeight="700" fill="#101e29">26</text>
-              <line x1="100" y1="100" x2="72" y2="74" stroke="#7d838a" strokeWidth="4" strokeLinecap="round" />
-              <line x1="100" y1="100" x2="132" y2="44" stroke="#7d838a" strokeWidth="3" strokeLinecap="round" />
-              <line x1="100" y1="112" x2="100" y2="30" stroke="#101e29" strokeWidth="1" />
-              <circle cx="100" cy="100" r="3.5" fill="#101e29" />
-            </svg>
+
+          {/* LAYER 4: Photorealistic Dial & 3D Hands with Drop Shadow */}
+          <Layer
+            open={open}
+            z={105}
+            x={-14}
+            y={-14}
+            rest={3}
+            highlighted={activeLayer === 4}
+            dimmed={activeLayer !== null && activeLayer !== 4}
+            layerTag="L2 · DIAL & HANDS"
+          >
+            <img
+              src={`${basePath}/dial.png`}
+              alt={`${model.name} Dial and Hands`}
+              draggable={false}
+              className="h-full w-full object-contain"
+            />
           </Layer>
-          {/* Bezel & crystal */}
-          <Layer open={open} z={200} x={-30} y={-30} rest={4}>
-            <svg viewBox="0 0 200 200" className="h-full w-full">
-              <defs>
-                {steel("bz")}
-                <radialGradient id="glass" cx="0.3" cy="0.25" r="0.9"><stop offset="0" stopColor="#fff" stopOpacity="0.55" /><stop offset="0.5" stopColor="#dbe7f2" stopOpacity="0.08" /><stop offset="1" stopColor="#fff" stopOpacity="0.2" /></radialGradient>
-                <mask id="ring"><rect width="200" height="200" fill="#fff" /><circle cx="100" cy="100" r="80" fill="#000" /></mask>
-              </defs>
-              <circle cx="100" cy="100" r="96" fill="url(#bz)" mask="url(#ring)" />
-              <circle cx="100" cy="100" r="80" fill="url(#glass)" stroke="#ffffff" strokeOpacity="0.7" />
-            </svg>
+
+          {/* LAYER 5: Photorealistic Bezel & Optical AR Sapphire Crystal Dome */}
+          <Layer
+            open={open}
+            z={215}
+            x={-32}
+            y={-32}
+            rest={4}
+            highlighted={activeLayer === 5}
+            dimmed={activeLayer !== null && activeLayer !== 5}
+            layerTag="L1 · BEZEL & SAPPHIRE AR"
+          >
+            <img
+              src={`${basePath}/bezel.png`}
+              alt={`${model.name} Bezel and Sapphire Crystal`}
+              draggable={false}
+              className="h-full w-full object-contain"
+            />
           </Layer>
         </div>
       </div>
 
-      {/* hotspots */}
-      {HOTSPOTS.map((h, i) => (
-        <button
-          key={h.n}
-          onClick={() => onSelect(h.cats)}
-          className={`absolute z-10 flex items-center gap-2 transition-all duration-500 ${h.pos} ${h.side === "right" ? "flex-row-reverse" : ""} ${open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}
-          style={{ transitionDelay: open ? `${300 + i * 90}ms` : "0ms" }}
-        >
-          <span className="rounded-full bg-card/90 px-3 py-1.5 text-xs font-medium shadow-soft backdrop-blur hover:bg-accent">{h.label}</span>
-          <span className="relative grid h-7 w-7 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-            <span className="absolute inset-0 rounded-full bg-primary animate-ping-soft" />
-            <span className="relative">{h.n}</span>
-          </span>
-        </button>
-      ))}
+      {/* Interactive Hotspots (01 - 05) with OEM vs Generic Price Preview */}
+      {model.hotspots.map((h, i) => {
+        const isActive = activeLayer === h.layerIdx;
+        return (
+          <button
+            key={h.n}
+            onMouseEnter={() => setActiveLayer(h.layerIdx)}
+            onMouseLeave={() => setActiveLayer(null)}
+            onClick={() => onSelect(h.cats, h.label)}
+            className={`group/hs absolute z-20 flex items-center gap-2.5 text-left transition-all duration-500 ${
+              h.pos
+            } ${h.side === "right" ? "flex-row-reverse text-right" : ""} ${
+              open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
+            }`}
+            style={{ transitionDelay: open ? `${180 + i * 70}ms` : "0ms" }}
+          >
+            <div
+              className={`rounded-2xl border px-3.5 py-2 shadow-soft backdrop-blur transition ${
+                isActive
+                  ? "border-accent bg-primary text-primary-foreground scale-105"
+                  : "border-primary/15 bg-card/92 text-foreground hover:border-accent"
+              }`}
+            >
+              <p className="text-xs font-bold leading-tight">{h.label}</p>
+              <p
+                className={`text-[10px] ${
+                  isActive ? "text-primary-foreground/80" : "text-muted-foreground"
+                }`}
+              >
+                {h.sublabel}
+              </p>
+              <span
+                className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                  isActive ? "bg-accent text-accent-foreground" : "bg-secondary text-foreground"
+                }`}
+              >
+                {h.priceHint}
+              </span>
+            </div>
 
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-primary/20 bg-card/70 px-4 py-1.5 text-[11px] font-bold tracking-[0.2em] uppercase backdrop-blur"
-      >
-        {open ? "Assemble" : "Hover · Explode"}
-      </button>
+            <span
+              className={`relative grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-black transition ${
+                isActive ? "bg-accent text-accent-foreground scale-110" : "bg-primary text-primary-foreground"
+              }`}
+            >
+              <span className="absolute inset-0 rounded-full bg-primary animate-ping-soft" />
+              <span className="relative">{h.n}</span>
+            </span>
+          </button>
+        );
+      })}
+
+      {/* Bottom Interactive Controls Bar */}
+      <div className="absolute bottom-1 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
+        <button
+          onClick={() => setPinnedOpen((p) => !p)}
+          className={`rounded-full border px-4 py-1.5 text-[11px] font-bold tracking-[0.15em] uppercase backdrop-blur transition ${
+            pinnedOpen
+              ? "border-accent bg-accent text-accent-foreground shadow-soft"
+              : "border-primary/20 bg-card/80 hover:bg-card"
+          }`}
+        >
+          {pinnedOpen ? "Vista 3D Fijada ✓" : open ? "Fijar Despiece 3D" : "Hover · Despiezar Reloj"}
+        </button>
+
+        {open && (
+          <button
+            onClick={() => setCameraMode((m) => (m === "iso" ? "side" : "iso"))}
+            className="rounded-full border border-primary/20 bg-card/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur hover:bg-card"
+          >
+            Ángulo: {cameraMode === "iso" ? "Isométrico" : "Perfil Lateral"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
