@@ -73,6 +73,8 @@
     radial-gradient(50% 60% at 8% 0%, oklch(0.85 0.05 240 / 0.7), transparent 70%);
   --shadow-soft: 0 20px 50px -24px color-mix(in oklab, var(--primary) 35%, transparent);
   --ease-spring: cubic-bezier(0.34, 1.45, 0.5, 1);
+  --watch-highlight-shadow: drop-shadow(0 0 22px color-mix(in oklab, var(--accent) 90%, transparent));
+  --watch-layer-shadow: drop-shadow(0 18px 28px color-mix(in oklab, var(--primary) 35%, transparent));
 }
 
 @layer base {
@@ -97,3 +99,27 @@
 
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 @utility animate-spin-slow { animation: spin-slow 60s linear infinite; }
+
+.watch-camera { --watch-spread: 1; transform: rotateX(0deg) rotateZ(0deg) scale(1); }
+.watch-camera[data-open="true"][data-angle="iso"] { transform: rotateX(58deg) rotateZ(-36deg) scale(0.82); }
+.watch-camera[data-open="true"][data-angle="side"] { transform: rotateX(74deg) rotateZ(-14deg) scale(0.80); }
+.chronoparts-page button { min-height: 44px; height: auto; white-space: normal; }
+.chronoparts-page nav button { flex-shrink: 0; white-space: nowrap; }
+.chronoparts-page header > div button { flex-shrink: 0; white-space: nowrap; }
+.chronoparts-page header > div > div > a[href="/sitemap.xml"] { flex-shrink: 0; white-space: nowrap; }
+.chronoparts-page a[class*="rounded"] { min-height: 44px; align-content: center; }
+.chronoparts-page { overflow-wrap: anywhere; letter-spacing: 0; }
+.chronoparts-page nav { overflow-wrap: normal; }
+.chronoparts-page [class*="tracking-"] { letter-spacing: 0; }
+.chronoparts-page article { min-width: 0; }
+@media (max-width: 767px) {
+  .watch-camera { --watch-spread: 0.45; }
+  .watch-camera[data-open="true"][data-angle="iso"] { transform: rotateX(58deg) rotateZ(-36deg) scale(0.68); }
+  .watch-camera[data-open="true"][data-angle="side"] { transform: rotateX(74deg) rotateZ(-14deg) scale(0.68); }
+  .watch-stage { overflow: hidden; }
+  .chronoparts-page nav > div:first-child { flex-wrap: wrap; }
+  .chronoparts-page [class*="grid-cols-2"] > div { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .watch-stage *, .chronoparts-page article { transition-duration: 0ms !important; animation: none !important; }
+}
