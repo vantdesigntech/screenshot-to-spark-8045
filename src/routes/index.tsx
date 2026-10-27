@@ -28,6 +28,11 @@ import {
   TrendingUp,
   Clock,
 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { AccountControls, useAccount } from "@/components/AccountProvider";
+import { Button } from "@/components/ui/button";
+import { loadAccount, saveAccount } from "@/lib/account.functions";
+import { canUsePersonalAction, canRunExtendedSearch, dailySearches, FREE_SEARCH_LIMIT } from "@/lib/account-rules";
 import { ExplodedWatch } from "@/components/ExplodedWatch";
 import {
   CHOLLO_PLATFORMS,
@@ -43,10 +48,6 @@ import {
   resolveBlogFallbackImage,
   type BlogArticle,
 } from "@/lib/seo-blog";
-import {
-  syncFavoriteToSupabase,
-  syncPriceAlertToSupabase,
-} from "@/lib/supabase";
 import {
   CATEGORIES,
   MAX_PRICE,
@@ -113,7 +114,6 @@ const PAIR_GROUPS: { id: string; label: string }[] = [
 ];
 
 const FREE_FAV_LIMIT = 3;
-const FREE_SEARCH_LIMIT = 5;
 
 interface PriceAlert {
   partId: string;
@@ -122,6 +122,11 @@ interface PriceAlert {
 }
 
 function Index() {
+  const { user, openAuth } = useAccount();
+  const fetchAccount = useServerFn(loadAccount);
+  const persistAccount = useServerFn(saveAccount);
+  const [accountLoaded, setAccountLoaded] = useState(false);
+  const [savedRecords, setSavedRecords] = useState<Part[]>([]);
   const [selectedModelId, setSelectedModelId] = useState<WatchModelSpec["id"]>("rolex-op41");
   const [query, setQuery] = useState("");
   const [origin, setOrigin] = useState<Filters["origin"]>("all");
@@ -132,9 +137,9 @@ function Index() {
 
   // Freemium & Pro state
   const [isPro, setIsPro] = useState(false);
-  const [savedIds, setSavedIds] = useState<string[]>(["1", "2"]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
-  const [searchesUsed, setSearchesUsed] = useState(2);
+  const [searchesUsed, setSearchesUsed] = useState(0);
   const [showWatchbox, setShowWatchbox] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [compareGroup, setCompareGroup] = useState<string>("oyster-20mm");
@@ -162,99 +167,68 @@ function Index() {
 
   const dynamicSpecs = useMemo(
     () => [
-      { icon: Ruler, k: "Lug width", v: activeModel.lugWidth },
-      { icon: Droplets, k: "Water resistance", v: activeModel.waterResistance },
-      { icon: Cog, k: "Movement", v: activeModel.movement },
-      { icon: Gem, k: "Material", v: activeModel.material },
+      { icon: Ruler, k: "Lug width", v: activeModel?.lugWidth ?? "—" },
+      { icon: Droplets, k: "Water resistance", v: activeModel?.waterResistance ?? "—" },
+      { icon: Cog, k: "Movement", v: activeModel?.movement ?? "—" },
+      { icon: Gem, k: "Material", v: activeModel?.material ?? "—" },
     ],
     [activeModel]
   );
 
   useEffect(() => {
-    try {
-      const rawFavs = localStorage.getItem("chronoparts_favs");
-      if (rawFavs) setSavedIds(JSON.parse(rawFavs));
-      const rawPro = localStorage.getItem("chronoparts_pro");
-      if (rawPro === "true") setIsPro(true);
-    } catch {
-      // ignore storage errors
-    }
-  }, []);
+    let active = true;
+    setAccountLoaded(false); setSavedIds([]); setSavedRecords([]); setAlerts([]); setIsPro(false); setSearchesUsed(0);
+    setShowWatchbox(false); setShowPricingModal(false); setShowWhatsappModal(false);
+    if (!user) return;
+    void fetchAccount().then(data => {
+      if (!active) return;
+      const favorites = Array.isArray(data.favorites) ? data.favorites as unknown as Part[] : [];
+      setSavedRecords(favorites); setSavedIds(favorites.map(p => p.id));
+      setAlerts(Array.isArray(data.alerts) ? data.alerts as unknown as PriceAlert[] : []);
+      setIsPro(data.pro_demo); setWhatsappInstantAlerts(data.whatsapp_alerts);
+      setSearchesUsed(dailySearches(data.searches_used, data.search_day, new Date().toISOString().slice(0, 10)));
+      setAccountLoaded(true);
+    }).catch(() => { if (active) triggerToast("No se pudo cargar Mi Caja. Inténtalo de nuevo."); });
+    return () => { active = false; };
+  }, [user?.id]);
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => {
-      setToastMsg((cur) => (cur === msg ? null : cur));
-    }, 3500);
+    setTimeout(() => { setToastMsg(cur => cur === msg ? null : cur); }, 3500);
   };
-
-  const togglePlan = (nextPro: boolean) => {
+  const requireAccount = () => {
+    if (!canUsePersonalAction(user, "save")) { openAuth(); return false; }
+    if (!accountLoaded) { triggerToast("Cargando tus datos personales…"); return false; }
+    return true;
+  };
+  const openPricing = () => { if (requireAccount()) setShowPricingModal(true); };
+  const openWhatsapp = () => { if (requireAccount()) setShowWhatsappModal(true); };
+  const savePersonal = async (data: Parameters<typeof persistAccount>[0]["data"]) => {
+    try { await persistAccount({ data }); return true; }
+    catch { triggerToast("No se pudo guardar en la nube. Inténtalo de nuevo."); return false; }
+  };
+  const togglePlan = async (nextPro: boolean) => {
+    if (!requireAccount()) return;
+    if (!await savePersonal({ pro_demo: nextPro })) return;
     setIsPro(nextPro);
-    try {
-      localStorage.setItem("chronoparts_pro", String(nextPro));
-    } catch {
-      // ignore
-    }
-    triggerToast(
-      nextPro
-        ? "Plan Atelier PRO activado: Búsquedas profundas, referencias OEM y favoritos ilimitados."
-        : "Modo Particular Gratis activado (Límite: 3 favoritos y 5 búsquedas extensas)."
-    );
+    triggerToast(nextPro ? "Vista de prueba Atelier PRO activada (demo, sin cobro)." : "Plan Particular Gratis activado.");
   };
-
-  const toggleSavePart = (part: Part) => {
-    if (savedIds.includes(part.id)) {
-      const next = savedIds.filter((id) => id !== part.id);
-      setSavedIds(next);
-      try {
-        localStorage.setItem("chronoparts_favs", JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      triggerToast(`Eliminado de Mi Caja: ${part.title}`);
-      return;
-    }
-
-    if (!isPro && savedIds.length >= FREE_FAV_LIMIT) {
-      setShowPricingModal(true);
-      triggerToast(`Has alcanzado el límite de ${FREE_FAV_LIMIT} piezas guardadas del Plan Gratis.`);
-      return;
-    }
-
-    const next = [...savedIds, part.id];
-    setSavedIds(next);
-    try {
-      localStorage.setItem("chronoparts_favs", JSON.stringify(next));
-    } catch {
-      // ignore
-    }
-    void syncFavoriteToSupabase({
-      id: part.id,
-      title: part.title,
-      priceEur: part.priceEur,
-      store: part.store,
-    });
-    triggerToast(`Guardado en Mi Caja (${next.length}${isPro ? "" : `/${FREE_FAV_LIMIT}`}): ${part.title}`);
+  const toggleSavePart = async (part: Part) => {
+    if (!requireAccount()) return;
+    const removing = savedIds.includes(part.id);
+    if (!removing && !isPro && savedIds.length >= FREE_FAV_LIMIT) { openPricing(); triggerToast(`Has alcanzado el límite de ${FREE_FAV_LIMIT} piezas guardadas.`); return; }
+    const next = removing ? savedRecords.filter(p => p.id !== part.id) : [...savedRecords, part];
+    if (!await savePersonal({ favorites: next })) return;
+    setSavedRecords(next); setSavedIds(next.map(p => p.id));
+    triggerToast(`${removing ? "Eliminado de" : "Guardado en"} Mi Caja: ${part.title}`);
   };
-
-  const handleCreateAlert = (part: Part) => {
-    if (!isPro) {
-      setShowPricingModal(true);
-      triggerToast("Las alertas de bajada de precio y radar NOS son exclusivas del Plan PRO.");
-      return;
-    }
+  const handleCreateAlert = async (part: Part) => {
+    if (!requireAccount()) return;
+    if (!isPro) { openPricing(); triggerToast("Las alertas de bajada de precio son exclusivas del Plan PRO."); return; }
     const targetEur = Math.round(part.priceEur * 0.85);
-    setAlerts((prev) =>
-      prev.some((a) => a.partId === part.id)
-        ? prev
-        : [...prev, { partId: part.id, title: part.title, targetEur }]
-    );
-    void syncPriceAlertToSupabase({
-      partId: part.id,
-      title: part.title,
-      targetEur,
-    });
-    triggerToast(`Alerta PRO creada: te avisaremos cuando baje de ${fmt(targetEur, currency)}.`);
+    const next = alerts.some(a => a.partId === part.id) ? alerts : [...alerts, { partId: part.id, title: part.title, targetEur }];
+    if (!await savePersonal({ alerts: next })) return;
+    setAlerts(next); triggerToast(`Alerta guardada para ${fmt(targetEur, currency)}.`);
   };
 
   useEffect(() => {
@@ -303,7 +277,7 @@ function Index() {
     return base.filter((p) => p.store === storeFilter);
   }, [query, catalogMatches, liveGenerated, storeFilter]);
 
-  const allPartsPool = useMemo(() => [...PARTS, ...liveGenerated], [liveGenerated]);
+  const allPartsPool = useMemo(() => [...PARTS, ...liveGenerated, ...savedRecords.filter(p => !PARTS.some(x => x.id === p.id) && !liveGenerated.some(x => x.id === p.id))], [liveGenerated, savedRecords]);
 
   const savedParts = useMemo(
     () => allPartsPool.filter((p) => savedIds.includes(p.id)),
@@ -342,13 +316,19 @@ function Index() {
     setCategories((cur) => (cur.includes(c) ? cur.filter((x) => x !== c) : [...cur, c]));
 
   const runExtendedSearch = async (term: string) => {
-    if (!isPro && searchesUsed >= FREE_SEARCH_LIMIT) {
-      setShowPricingModal(true);
+    if (!requireAccount()) return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (!canRunExtendedSearch(searchesUsed, isPro)) {
+      openPricing();
       triggerToast("Agotaste tus 5 búsquedas extensas gratis de hoy. Pásate a PRO para búsquedas ilimitadas.");
       return;
     }
     setQuery(term);
-    if (!isPro) setSearchesUsed((n) => Math.min(FREE_SEARCH_LIMIT, n + 1));
+    if (!isPro) {
+      const next = Math.min(FREE_SEARCH_LIMIT, searchesUsed + 1);
+      if (!await savePersonal({ searches_used: next, search_day: today })) return;
+      setSearchesUsed(next);
+    }
     setIsLoadingApi(true);
     const liveItems = await fetchLivePartsFromApi(term);
     setApiResults(liveItems);
@@ -393,8 +373,10 @@ function Index() {
     0
   );
 
+  if (!activeModel) return <p className="p-6">No hay un modelo disponible.</p>;
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen chronoparts-page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBlogJsonLd()) }}
@@ -404,9 +386,9 @@ function Index() {
         <div className="fixed bottom-5 left-1/2 z-50 flex w-[92vw] max-w-md -translate-x-1/2 items-center justify-between gap-3 rounded-full bg-primary px-5 py-3 text-xs font-bold text-primary-foreground shadow-soft sm:w-auto">
           <Sparkles className="h-4 w-4 shrink-0 text-accent" />
           <span className="truncate">{toastMsg}</span>
-          <button onClick={() => setToastMsg(null)} className="shrink-0 opacity-70 hover:opacity-100">
+          <Button variant="ghost" size="sm" onClick={() => setToastMsg(null)} className="shrink-0 opacity-70 hover:opacity-100">
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -434,14 +416,15 @@ function Index() {
             <Link to="/blog" className="inline-flex items-center gap-1 font-bold hover:underline">
               <BookOpen className="h-3.5 w-3.5 text-primary" /> Blog
             </Link>
-            <button onClick={() => setShowPricingModal(true)} className="hover:underline">
+            <Button variant="ghost" size="sm" onClick={() => setShowPricingModal(true)} className="hover:underline">
               Planes (Gratis / PRO)
-            </button>
+            </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setShowWhatsappModal(true)}
+          <div className="flex w-full snap-x items-center gap-2.5 overflow-x-auto pb-2 lg:w-auto">
+            <AccountControls />
+            <Button variant="ghost" size="sm"
+              onClick={() => openWhatsapp()}
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition sm:px-3.5 sm:py-2 ${
                 isPro
                   ? "border-emerald-600/40 bg-emerald-600 text-white shadow-soft hover:bg-emerald-700"
@@ -455,10 +438,10 @@ function Index() {
             >
               {isPro ? <MessageCircle className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5 text-amber-600" />}
               <span>Club WhatsApp PRO</span>
-            </button>
+            </Button>
 
-            <button
-              onClick={() => setShowWatchbox(true)}
+            <Button variant="ghost" size="sm"
+              onClick={() => { if (requireAccount()) setShowWatchbox(true); }}
               className="relative inline-flex items-center gap-2 rounded-full border border-primary/15 bg-card/85 px-3.5 py-1.5 text-xs font-bold backdrop-blur transition hover:bg-card sm:px-4 sm:py-2"
             >
               <Heart className={`h-3.5 w-3.5 ${savedIds.length > 0 ? "fill-destructive text-destructive" : ""}`} />
@@ -467,9 +450,9 @@ function Index() {
                 {savedIds.length}
                 {!isPro ? `/${FREE_FAV_LIMIT}` : ""}
               </span>
-            </button>
+            </Button>
 
-            <button
+            <Button variant="ghost" size="sm"
               onClick={() => togglePlan(!isPro)}
               title="Cambiar entre vista Gratis (Particular) y Plan Atelier PRO"
               className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition sm:px-4 sm:py-2 ${
@@ -480,7 +463,7 @@ function Index() {
             >
               <Crown className="h-3.5 w-3.5" />
               <span>{isPro ? "Plan PRO Activo" : "Plan Gratis · Subir a PRO"}</span>
-            </button>
+            </Button>
           </div>
 
           {/* Mobile Quick Navigation Bar */}
@@ -513,8 +496,8 @@ function Index() {
         </nav>
 
         {/* Interactive Watch Blueprint Model Switcher Bar */}
-        <div className="mx-auto max-w-7xl px-6 pt-2">
-          <div className="inline-flex flex-wrap items-center gap-1.5 rounded-2xl border border-primary/10 bg-card/70 p-1.5 backdrop-blur">
+        <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+          <div className="flex snap-x items-center gap-2.5 overflow-x-auto rounded-lg border border-primary/10 bg-card/70 p-2 backdrop-blur">
             <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
               <Layers className="mr-1 inline h-3.5 w-3.5" />
               Esquema 3D:
@@ -522,30 +505,30 @@ function Index() {
             {WATCH_MODELS.map((m) => {
               const active = m.id === activeModel.id;
               return (
-                <button
+                <Button variant="ghost" size="sm"
                   key={m.id}
                   onClick={() => setSelectedModelId(m.id)}
-                  className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+                  className={`min-h-11 shrink-0 snap-start rounded-lg px-3.5 py-1.5 text-xs font-bold transition ${
                     active
                       ? "bg-primary text-primary-foreground shadow-soft"
                       : "text-muted-foreground hover:bg-card hover:text-foreground"
                   }`}
                 >
                   {m.shortName} <span className="opacity-65">({m.ref.replace("REF. ", "")})</span>
-                </button>
+                </Button>
               );
             })}
           </div>
         </div>
 
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 pb-10 pt-6 lg:grid-cols-[1fr_1.15fr]">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-10 pt-8 sm:px-6 lg:grid-cols-[1fr_1.15fr]">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-card/60 px-3 py-1 text-[11px] font-bold tracking-[0.2em] text-muted-foreground backdrop-blur">
               <span>{activeModel.ref}</span>
               <span>·</span>
               <span>{activeModel.brand.toUpperCase()} ARCHITECTURE</span>
             </div>
-            <h1 className="mt-4 text-5xl font-black leading-[0.95] tracking-tight md:text-7xl">
+            <h1 className="mt-4 text-4xl font-black leading-tight sm:text-5xl md:text-7xl">
               {activeModel.name}
             </h1>
             <p className="mt-6 font-serif text-3xl leading-tight md:text-4xl">
@@ -559,7 +542,7 @@ function Index() {
               previsualizar el ahorro OEM vs Aftermarket o haz clic para filtrar la pieza abajo.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button
+              <Button variant="ghost" size="sm"
                 onClick={() => {
                   setQuery(activeModel.searchKeyword);
                   setCategories([]);
@@ -568,7 +551,7 @@ function Index() {
                 className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition hover:opacity-95"
               >
                 Ver piezas de {activeModel.shortName} <ArrowUpRight className="h-4 w-4" />
-              </button>
+              </Button>
               <a
                 href="#comparator"
                 className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card/75 px-5 py-3 text-sm font-bold backdrop-blur transition hover:bg-card"
@@ -582,8 +565,8 @@ function Index() {
         </div>
 
         {/* Dynamic Technical Specs Bar */}
-        <div className="mx-auto max-w-7xl px-6 pb-12">
-          <div className="grid grid-cols-2 gap-6 rounded-2xl border border-primary/10 bg-card/60 p-6 backdrop-blur md:grid-cols-4">
+        <div className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 sm:pb-12">
+          <div className="grid grid-cols-2 gap-5 rounded-lg border border-primary/10 bg-card/60 p-6 backdrop-blur md:grid-cols-4">
             {dynamicSpecs.map(({ icon: Icon, k, v }) => (
               <div key={k} className="flex items-center gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-primary/20 bg-card/60">
@@ -599,8 +582,323 @@ function Index() {
         </div>
       </header>
 
+      {/* GLOBAL SEARCH & RESULTS GRID SECTION */}
+      <section id="search" ref={resultsRef} className="mx-auto max-w-7xl scroll-mt-6 px-4 py-10 sm:px-6 sm:py-16">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="font-serif text-4xl md:text-5xl">
+              Find the <em>right</em> part.
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Busca por modelo, calibre o pieza. Cada tarjeta muestra la barra comparativa de ahorro OEM vs Aftermarket.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-2xl border bg-card px-4 py-2.5 text-xs shadow-soft">
+            {isPro ? (
+              <span className="inline-flex items-center gap-1.5 font-bold text-foreground">
+                <Crown className="h-4 w-4 text-amber" /> Plan Atelier PRO: Búsquedas Extensas y Referencias OEM Ilimitadas
+              </span>
+            ) : (
+              <>
+                <div>
+                  <p className="font-bold">
+                    {user ? `Plan Particular (Gratis): ${FREE_SEARCH_LIMIT - searchesUsed} de ${FREE_SEARCH_LIMIT} búsquedas extensas hoy` : "Búsqueda gratuita · Sin registro"}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Favoritos guardados: {savedIds.length}/{FREE_FAV_LIMIT} piezas
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm"
+                  onClick={() => setShowPricingModal(true)}
+                  className="rounded-full bg-accent px-3 py-1.5 text-[11px] font-black text-accent-foreground transition hover:opacity-90"
+                >
+                  Desbloquear PRO
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Search Input Bar */}
+        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border-2 border-primary/30 bg-card p-3 shadow-soft sm:p-4 focus-within:ring-2 focus-within:ring-ring">
+          <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Busca por modelo, calibre o pieza..."
+            aria-label="Busca por modelo, calibre o pieza"
+            className="h-14 min-w-0 flex-1 basis-48 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+          />
+          {query && (
+            <Button variant="ghost" size="sm"
+              onClick={() => setQuery("")}
+              className="rounded-full bg-secondary px-3 py-1 text-xs font-bold text-muted-foreground hover:text-foreground"
+            >
+              Limpiar
+            </Button>
+          )}
+          <Button variant="ghost" size="sm"
+            onClick={() => runExtendedSearch(query || activeModel.searchKeyword)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground transition hover:opacity-90"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            Búsqueda Extensa
+          </Button>
+        </div>
+
+        {/* Quick Search Chips */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-bold text-muted-foreground">Búsquedas rápidas:</span>
+          {QUICK_SEARCHES.map((item) => (
+            <Button variant="ghost" size="sm"
+              key={item}
+              onClick={() => { setQuery(item); resultsRef.current?.scrollIntoView({ behavior: "smooth" }); }}
+              className="rounded-full border bg-card/70 px-3 py-1 font-medium transition hover:border-primary/40 hover:bg-card"
+            >
+              {item}
+            </Button>
+          ))}
+        </div>
+
+        {/* Direct External Multi-Store Launcher when user types any query */}
+        {query.trim().length > 0 && (
+          <div className="mt-5 space-y-3 rounded-2xl border border-primary/15 bg-secondary/60 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs font-bold">
+                <ExternalLink className="h-4 w-4" />
+                <span>
+                  Tiendas Particulares (Gratis) para <em>"{query}"</em>:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(["eBay", "AliExpress", "Chrono24"] as const).map((store) => (
+                  <a
+                    key={store}
+                    href={getStoreSearchUrl(store, query)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-card px-3.5 py-1.5 text-xs font-bold shadow-soft transition hover:bg-accent"
+                  >
+                    <span>Buscar en {store}</span>
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-primary/10 pt-3">
+              <div className="flex items-center gap-2 text-xs font-bold">
+                <Crown className="h-4 w-4 text-primary" />
+                <span>
+                  Tiendas de Nicho &amp; Mayoristas B2B (Plan Atelier PRO) para <em>"{query}"</em>:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {NICHE_PRO_STORES.map((store) =>
+                  isPro ? (
+                    <a
+                      key={store}
+                      href={getStoreSearchUrl(store, query)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-soft transition hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Crown className="h-3 w-3 text-accent" />
+                      <span>{store === "Alibaba" ? "Alibaba (Mayorista B2B)" : `${store} (Nicho PRO)`}</span>
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  ) : (
+                    <Button variant="ghost" size="sm"
+                      key={store}
+                      onClick={() => {
+                        openPricing();
+                        triggerToast(`Activa Atelier PRO para buscar lotes y fornituras en ${store}.`);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-card/80 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition hover:border-primary hover:text-foreground"
+                    >
+                      <Lock className="h-3 w-3" />
+                      <span>{store === "Alibaba" ? "Alibaba B2B" : store} · PRO</span>
+                    </Button>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Origin Filter */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          {ORIGINS.map((o) => (
+            <Button variant="ghost" size="sm"
+              key={o.id}
+              onClick={() => setOrigin(o.id)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                origin === o.id ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"
+              }`}
+            >
+              {o.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Store / Channel Filter (including PRO Niche & Wholesale Stores) */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-primary/10 bg-card/70 p-2.5">
+          <span className="px-2 text-[11px] font-black uppercase tracking-wider text-muted-foreground">
+            Tiendas y Canales:
+          </span>
+          <Button variant="ghost" size="sm"
+            onClick={() => setStoreFilter("all")}
+            className={`rounded-full px-3 py-1 text-xs font-bold transition ${
+              storeFilter === "all" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"
+            }`}
+          >
+            Todas (7 tiendas)
+          </Button>
+          {(["eBay", "AliExpress", "Chrono24"] as const).map((st) => (
+            <Button variant="ghost" size="sm"
+              key={st}
+              onClick={() => setStoreFilter(storeFilter === st ? "all" : st)}
+              className={`rounded-full px-3 py-1 text-xs font-bold transition ${
+                storeFilter === st ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"
+              }`}
+            >
+              {st}
+            </Button>
+          ))}
+          <span className="mx-1 h-4 w-px bg-border" />
+          <Button variant="ghost" size="sm"
+            onClick={() => {
+              setStoreFilter(storeFilter === "niche-pro" ? "all" : "niche-pro");
+              if (!isPro) {
+                triggerToast(
+                  "Mostrando vista previa de Tiendas de Nicho PRO (Alibaba, WatchPlaza, NamokiMods, CousinsUK)."
+                );
+              }
+            }}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-black transition ${
+              storeFilter === "niche-pro"
+                ? "bg-accent text-accent-foreground shadow-soft"
+                : "border border-primary/20 bg-secondary/80 hover:border-primary"
+            }`}
+          >
+            <Crown className="h-3.5 w-3.5" />
+            <span>Tiendas Nicho &amp; Mayoristas PRO</span>
+          </Button>
+          {NICHE_PRO_STORES.map((st) => (
+            <Button variant="ghost" size="sm"
+              key={st}
+              onClick={() => {
+                setStoreFilter(storeFilter === st ? "all" : st);
+                if (!isPro) {
+                  triggerToast(`Canal ${st}: Activa el Plan Atelier PRO para acceso directo a mayoristas y fornituras.`);
+                }
+              }}
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold transition ${
+                storeFilter === st
+                  ? "bg-accent text-accent-foreground"
+                  : "border border-dashed border-primary/25 bg-card hover:border-primary"
+              }`}
+            >
+              {!isPro && <Lock className="h-2.5 w-2.5 opacity-70" />}
+              <span>{st === "Alibaba" ? "Alibaba B2B" : st}</span>
+            </Button>
+          ))}
+        </div>
+
+        {/* Category Filter */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {CATEGORIES.map((c) => (
+            <Button variant="ghost" size="sm"
+              key={c.id}
+              onClick={() => toggleCat(c.id)}
+              className={`rounded-full border px-4 py-1.5 text-sm transition ${
+                categories.includes(c.id)
+                  ? "border-accent bg-accent font-bold text-accent-foreground"
+                  : "hover:border-primary/40"
+              }`}
+            >
+              {c.label}
+            </Button>
+          ))}
+          {categories.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={() => setCategories([])} className="px-2 text-sm text-muted-foreground underline">
+              Clear
+            </Button>
+          )}
+        </div>
+
+        {/* Price Slider + Currency Switcher */}
+        <div className="mt-6 flex flex-wrap items-center gap-6">
+          <label className="flex w-full min-w-0 items-center gap-3 text-sm font-medium sm:w-auto">
+            Max price
+            <input
+              type="range"
+              min={5}
+              max={MAX_PRICE}
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(+e.target.value)}
+              className="min-w-0 flex-1 accent-primary"
+            />
+            <span className="w-20 font-bold">{fmt(maxPrice, currency)}</span>
+          </label>
+          <div className="flex rounded-full bg-secondary p-1 text-xs font-bold">
+            {(["EUR", "USD"] as const).map((c) => (
+              <Button variant="ghost" size="sm"
+                key={c}
+                onClick={() => setCurrency(c)}
+                className={`rounded-full px-3 py-1 ${currency === c ? "bg-card shadow-soft" : ""}`}
+              >
+                {c}
+              </Button>
+            ))}
+          </div>
+          <span className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+            {isLoadingApi && (
+              <span className="rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-black text-accent-foreground">
+                Consultando API Live (:8765)...
+              </span>
+            )}
+            {!isLoadingApi && apiResults.length > 0 && query.trim().length >= 3 && (
+              <span className="rounded-full border border-primary/15 bg-card px-2.5 py-0.5 text-[10px] font-bold text-foreground">
+                Motor Live API Activo ({apiResults.length} en vivo)
+              </span>
+            )}
+            <span>{displayedParts.length} results</span>
+          </span>
+        </div>
+
+        {/* Results Grid */}
+        <div className="mt-10 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {displayedParts.map((p) => {
+            const pairPrices = p.pairGroupId ? groupPriceSummary[p.pairGroupId] : undefined;
+            return (
+              <PartCard
+                key={p.id}
+                p={p}
+                currency={currency}
+                isSaved={savedIds.includes(p.id)}
+                isPro={isPro}
+                hasAlert={alerts.some((a) => a.partId === p.id)}
+                oemCounterpartEur={pairPrices?.oemMin}
+                genericCounterpartEur={pairPrices?.genericMin}
+                onToggleSave={() => toggleSavePart(p)}
+                onAlert={() => handleCreateAlert(p)}
+                onCompare={p.pairGroupId ? () => { if (p.pairGroupId) openComparatorFor(p.pairGroupId); } : undefined}
+                onUnlockPro={() => setShowPricingModal(true)}
+              />
+            );
+          })}
+          {displayedParts.length === 0 && (
+            <p className="col-span-full py-16 text-center font-serif text-2xl text-muted-foreground">
+              No parts match — try widening your filters or write a model name above.
+            </p>
+          )}
+        </div>
+      </section>
+
       {/* SIDE-BY-SIDE 1:1 HOROLOGICAL DUEL SECTION */}
-      <section id="comparator" ref={comparatorRef} className="mx-auto max-w-7xl scroll-mt-6 px-6 pt-14">
+      <section id="comparator" ref={comparatorRef} className="mx-auto max-w-7xl scroll-mt-6 px-4 py-10 sm:px-6 sm:py-16">
         <div className="rounded-3xl border border-primary/15 bg-card p-6 shadow-soft md:p-8">
           <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-5">
             <div>
@@ -615,7 +913,7 @@ function Index() {
             {/* Selector of component group to compare */}
             <div className="flex flex-wrap gap-1.5">
               {PAIR_GROUPS.map((pg) => (
-                <button
+                <Button variant="ghost" size="sm"
                   key={pg.id}
                   onClick={() => setCompareGroup(pg.id)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
@@ -625,13 +923,13 @@ function Index() {
                   }`}
                 >
                   {pg.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
           {/* Side-by-Side Comparison Cards */}
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <div className="mt-6 grid gap-5 sm:gap-6 lg:grid-cols-2">
             {comparedParts.slice(0, 2).map((cp) => {
               const isOem = cp.origin === "oem";
               const otherPart = comparedParts.find((x) => x.id !== cp.id);
@@ -706,8 +1004,8 @@ function Index() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between gap-3 pt-2">
-                    <button
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <Button variant="ghost" size="sm"
                       onClick={() => toggleSavePart(cp)}
                       className="inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-bold hover:bg-secondary"
                     >
@@ -717,7 +1015,7 @@ function Index() {
                         }`}
                       />
                       {savedIds.includes(cp.id) ? "Guardado en Mi Caja" : "Guardar en Mi Caja"}
-                    </button>
+                    </Button>
 
                     <a
                       href={cp.customUrl ?? getStoreSearchUrl(cp.store, `${cp.brand} ${cp.title}`)}
@@ -735,409 +1033,9 @@ function Index() {
         </div>
       </section>
 
-      {/* GLOBAL SEARCH & RESULTS GRID SECTION */}
-      <section id="search" ref={resultsRef} className="mx-auto max-w-7xl scroll-mt-6 px-6 py-16">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 className="font-serif text-4xl md:text-5xl">
-              Find the <em>right</em> part.
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Busca por modelo, calibre o pieza. Cada tarjeta muestra la barra comparativa de ahorro OEM vs Aftermarket.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-2xl border bg-card px-4 py-2.5 text-xs shadow-soft">
-            {isPro ? (
-              <span className="inline-flex items-center gap-1.5 font-bold text-foreground">
-                <Crown className="h-4 w-4 text-amber" /> Plan Atelier PRO: Búsquedas Extensas y Referencias OEM Ilimitadas
-              </span>
-            ) : (
-              <>
-                <div>
-                  <p className="font-bold">
-                    Plan Particular (Gratis): {FREE_SEARCH_LIMIT - searchesUsed} de {FREE_SEARCH_LIMIT} búsquedas extensas hoy
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Favoritos guardados: {savedIds.length}/{FREE_FAV_LIMIT} piezas
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowPricingModal(true)}
-                  className="rounded-full bg-accent px-3 py-1.5 text-[11px] font-black text-accent-foreground transition hover:opacity-90"
-                >
-                  Desbloquear PRO
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Search Input Bar */}
-        <div className="mt-8 flex flex-wrap items-center gap-3 rounded-full border bg-card px-6 py-3.5 shadow-soft focus-within:ring-2 focus-within:ring-ring">
-          <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. Tissot 1990 correa, Seiko NH35 dial, Rolex 20mm oyster strap, Omega 1861..."
-            className="min-w-[220px] flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
-          />
-          {query && (
-            <button
-              onClick={() => setQuery("")}
-              className="rounded-full bg-secondary px-3 py-1 text-xs font-bold text-muted-foreground hover:text-foreground"
-            >
-              Limpiar
-            </button>
-          )}
-          <button
-            onClick={() => runExtendedSearch(query || activeModel.searchKeyword)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-xs font-bold text-primary-foreground transition hover:opacity-90"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
-            Búsqueda Extensa
-          </button>
-        </div>
-
-        {/* Quick Search Chips */}
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-bold text-muted-foreground">Búsquedas rápidas:</span>
-          {QUICK_SEARCHES.map((item) => (
-            <button
-              key={item}
-              onClick={() => runExtendedSearch(item)}
-              className="rounded-full border bg-card/70 px-3 py-1 font-medium transition hover:border-primary/40 hover:bg-card"
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-
-        {/* Direct External Multi-Store Launcher when user types any query */}
-        {query.trim().length > 0 && (
-          <div className="mt-5 space-y-3 rounded-2xl border border-primary/15 bg-secondary/60 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-xs font-bold">
-                <ExternalLink className="h-4 w-4" />
-                <span>
-                  Tiendas Particulares (Gratis) para <em>"{query}"</em>:
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(["eBay", "AliExpress", "Chrono24"] as const).map((store) => (
-                  <a
-                    key={store}
-                    href={getStoreSearchUrl(store, query)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-card px-3.5 py-1.5 text-xs font-bold shadow-soft transition hover:bg-accent"
-                  >
-                    <span>Buscar en {store}</span>
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-primary/10 pt-3">
-              <div className="flex items-center gap-2 text-xs font-bold">
-                <Crown className="h-4 w-4 text-primary" />
-                <span>
-                  Tiendas de Nicho &amp; Mayoristas B2B (Plan Atelier PRO) para <em>"{query}"</em>:
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {NICHE_PRO_STORES.map((store) =>
-                  isPro ? (
-                    <a
-                      key={store}
-                      href={getStoreSearchUrl(store, query)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-soft transition hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <Crown className="h-3 w-3 text-accent" />
-                      <span>{store === "Alibaba" ? "Alibaba (Mayorista B2B)" : `${store} (Nicho PRO)`}</span>
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </a>
-                  ) : (
-                    <button
-                      key={store}
-                      onClick={() => {
-                        setShowPricingModal(true);
-                        triggerToast(`Activa Atelier PRO para buscar lotes y fornituras en ${store}.`);
-                      }}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-card/80 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition hover:border-primary hover:text-foreground"
-                    >
-                      <Lock className="h-3 w-3" />
-                      <span>{store === "Alibaba" ? "Alibaba B2B" : store} · PRO</span>
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Origin Filter */}
-        <div className="mt-6 flex flex-wrap gap-2">
-          {ORIGINS.map((o) => (
-            <button
-              key={o.id}
-              onClick={() => setOrigin(o.id)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                origin === o.id ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"
-              }`}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Store / Channel Filter (including PRO Niche & Wholesale Stores) */}
-        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-primary/10 bg-card/70 p-2.5">
-          <span className="px-2 text-[11px] font-black uppercase tracking-wider text-muted-foreground">
-            Tiendas y Canales:
-          </span>
-          <button
-            onClick={() => setStoreFilter("all")}
-            className={`rounded-full px-3 py-1 text-xs font-bold transition ${
-              storeFilter === "all" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"
-            }`}
-          >
-            Todas (7 tiendas)
-          </button>
-          {(["eBay", "AliExpress", "Chrono24"] as const).map((st) => (
-            <button
-              key={st}
-              onClick={() => setStoreFilter(storeFilter === st ? "all" : st)}
-              className={`rounded-full px-3 py-1 text-xs font-bold transition ${
-                storeFilter === st ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-muted"
-              }`}
-            >
-              {st}
-            </button>
-          ))}
-          <span className="mx-1 h-4 w-px bg-border" />
-          <button
-            onClick={() => {
-              setStoreFilter(storeFilter === "niche-pro" ? "all" : "niche-pro");
-              if (!isPro) {
-                triggerToast(
-                  "Mostrando vista previa de Tiendas de Nicho PRO (Alibaba, WatchPlaza, NamokiMods, CousinsUK)."
-                );
-              }
-            }}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-black transition ${
-              storeFilter === "niche-pro"
-                ? "bg-accent text-accent-foreground shadow-soft"
-                : "border border-primary/20 bg-secondary/80 hover:border-primary"
-            }`}
-          >
-            <Crown className="h-3.5 w-3.5" />
-            <span>Tiendas Nicho &amp; Mayoristas PRO</span>
-          </button>
-          {NICHE_PRO_STORES.map((st) => (
-            <button
-              key={st}
-              onClick={() => {
-                setStoreFilter(storeFilter === st ? "all" : st);
-                if (!isPro) {
-                  triggerToast(`Canal ${st}: Activa el Plan Atelier PRO para acceso directo a mayoristas y fornituras.`);
-                }
-              }}
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold transition ${
-                storeFilter === st
-                  ? "bg-accent text-accent-foreground"
-                  : "border border-dashed border-primary/25 bg-card hover:border-primary"
-              }`}
-            >
-              {!isPro && <Lock className="h-2.5 w-2.5 opacity-70" />}
-              <span>{st === "Alibaba" ? "Alibaba B2B" : st}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Category Filter */}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => toggleCat(c.id)}
-              className={`rounded-full border px-4 py-1.5 text-sm transition ${
-                categories.includes(c.id)
-                  ? "border-accent bg-accent font-bold text-accent-foreground"
-                  : "hover:border-primary/40"
-              }`}
-            >
-              {c.label}
-            </button>
-          ))}
-          {categories.length > 0 && (
-            <button onClick={() => setCategories([])} className="px-2 text-sm text-muted-foreground underline">
-              Clear
-            </button>
-          )}
-        </div>
-
-        {/* Price Slider + Currency Switcher */}
-        <div className="mt-6 flex flex-wrap items-center gap-6">
-          <label className="flex items-center gap-3 text-sm font-medium">
-            Max price
-            <input
-              type="range"
-              min={5}
-              max={MAX_PRICE}
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(+e.target.value)}
-              className="w-56 accent-primary"
-            />
-            <span className="w-20 font-bold">{fmt(maxPrice, currency)}</span>
-          </label>
-          <div className="flex rounded-full bg-secondary p-1 text-xs font-bold">
-            {(["EUR", "USD"] as const).map((c) => (
-              <button
-                key={c}
-                onClick={() => setCurrency(c)}
-                className={`rounded-full px-3 py-1 ${currency === c ? "bg-card shadow-soft" : ""}`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-          <span className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-            {isLoadingApi && (
-              <span className="rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-black text-accent-foreground">
-                Consultando API Live (:8765)...
-              </span>
-            )}
-            {!isLoadingApi && apiResults.length > 0 && query.trim().length >= 3 && (
-              <span className="rounded-full border border-primary/15 bg-card px-2.5 py-0.5 text-[10px] font-bold text-foreground">
-                Motor Live API Activo ({apiResults.length} en vivo)
-              </span>
-            )}
-            <span>{displayedParts.length} results</span>
-          </span>
-        </div>
-
-        {/* Results Grid */}
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {displayedParts.map((p) => {
-            const pairPrices = p.pairGroupId ? groupPriceSummary[p.pairGroupId] : undefined;
-            return (
-              <PartCard
-                key={p.id}
-                p={p}
-                currency={currency}
-                isSaved={savedIds.includes(p.id)}
-                isPro={isPro}
-                hasAlert={alerts.some((a) => a.partId === p.id)}
-                oemCounterpartEur={pairPrices?.oemMin}
-                genericCounterpartEur={pairPrices?.genericMin}
-                onToggleSave={() => toggleSavePart(p)}
-                onAlert={() => handleCreateAlert(p)}
-                onCompare={p.pairGroupId ? () => openComparatorFor(p.pairGroupId!) : undefined}
-                onUnlockPro={() => setShowPricingModal(true)}
-              />
-            );
-          })}
-          {displayedParts.length === 0 && (
-            <p className="col-span-full py-16 text-center font-serif text-2xl text-muted-foreground">
-              No parts match — try widening your filters or write a model name above.
-            </p>
-          )}
-        </div>
-      </section>
-
-      {/* FREEMIUM VS PRO PRICING SECTION */}
-      <section className="border-t bg-card/50 py-16">
-        <div className="mx-auto max-w-5xl px-6">
-          <div className="text-center">
-            <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
-              PLANES PARA PARTICULARES Y COLECCIONISTAS
-            </span>
-            <h2 className="mt-2 font-serif text-4xl md:text-5xl">
-              Empieza <em>gratis</em>, escala tu taller con <em>Atelier PRO</em>.
-            </h2>
-          </div>
-
-          <div className="mt-10 grid gap-8 md:grid-cols-2">
-            <div className="flex flex-col rounded-3xl border bg-card p-8 shadow-soft">
-              <div className="flex items-center justify-between">
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-bold">Particular / Aficionado</span>
-                <span className="text-2xl font-black">0 € / siempre</span>
-              </div>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Ideal para encontrar una correa, cristal o recambio puntual para tu reloj personal.
-              </p>
-              <ul className="mt-6 space-y-3 text-sm">
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> Hasta <strong>5 búsquedas extensas</strong> al día en eBay, AliExpress y Chrono24
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> Guarda hasta <strong>3 componentes favoritos</strong> en Mi Caja
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> Despiece interactivo 3D de los 4 relojes y comparador 1:1
-                </li>
-              </ul>
-              <button
-                onClick={() => togglePlan(false)}
-                className={`mt-8 w-full rounded-full py-3 text-xs font-bold transition ${
-                  !isPro ? "bg-secondary text-foreground" : "border border-primary/20 hover:bg-secondary"
-                }`}
-              >
-                {!isPro ? "Tu Plan Actual" : "Volver al Plan Gratis"}
-              </button>
-            </div>
-
-            <div className="relative flex flex-col rounded-3xl border-2 border-primary bg-card p-8 shadow-soft">
-              <span className="absolute -top-3 right-6 rounded-full bg-accent px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-foreground">
-                Más Popular · Modders & Coleccionistas
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
-                  <Crown className="h-3.5 w-3.5 text-accent" /> Atelier PRO
-                </span>
-                <div className="text-right">
-                  <span className="text-2xl font-black">{currency === "EUR" ? "9,90 €" : "$10.90"}</span>
-                  <span className="text-xs text-muted-foreground"> / mes</span>
-                </div>
-              </div>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Para apasionados de la relojería, restauradores vintage y creadores de mods que buscan el mejor precio.
-              </p>
-              <ul className="mt-6 space-y-3 text-sm">
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> <strong>Tiendas de Nicho y Mayoristas B2B:</strong> Alibaba, WatchPlaza, NamokiMods y CousinsUK
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> <strong>Búsquedas ilimitadas</strong> multi-tienda + códigos de referencia OEM exactos
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> <strong>Mi Caja Ilimitada</strong>: guarda todos los componentes que te gustan y calcula presupuestos
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> <strong>Radar y Alertas de Precio NOS</strong> + <strong>Matriz de Compatibilidad Cruzada</strong>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-emerald-600" /> <strong>Acceso al Club VIP de WhatsApp PRO:</strong> Alertas móviles instantáneas de chollos y compraventa privada
-                </li>
-              </ul>
-              <button
-                onClick={() => togglePlan(true)}
-                className="mt-8 w-full rounded-full bg-primary py-3 text-xs font-bold text-primary-foreground transition hover:bg-accent hover:text-accent-foreground"
-              >
-                {isPro ? "Plan Atelier PRO Activo ✓" : "Activar Prueba Atelier PRO Gratis"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* AI DAILY DEALS / CHOLLOS DIARIOS SECTION (eBay, Wallapop, Chrono24, Todocolección) */}
-      <section id="chollos" ref={chollosRef} className="border-t bg-secondary/20 py-14">
-        <div className="mx-auto max-w-7xl px-6">
+      <section id="chollos" ref={chollosRef} className="border-t bg-secondary/20 py-10 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-amber-800">
@@ -1167,14 +1065,14 @@ function Index() {
                   className="w-full rounded-full border bg-card py-2.5 pl-10 pr-4 text-xs outline-none focus:border-primary"
                 />
               </div>
-              <button
+              <Button variant="ghost" size="sm"
                 onClick={() => runLiveCholloScan()}
                 disabled={isScanningChollos}
                 className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground transition hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
               >
                 <Sparkles className="h-3.5 w-3.5 text-accent" />
                 <span>{isScanningChollos ? "Escaneando con IA..." : "Escanear Chollos en Vivo"}</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -1192,7 +1090,7 @@ function Index() {
             ).map((plat) => {
               const active = cholloPlatform === plat.id;
               return (
-                <button
+                <Button variant="ghost" size="sm"
                   key={plat.id}
                   onClick={() => setCholloPlatform(plat.id)}
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
@@ -1205,13 +1103,13 @@ function Index() {
                   <span className="rounded-full bg-secondary/80 px-2 py-0.5 text-[10px] font-black text-foreground">
                     {plat.badge}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>
 
           {/* Chollos Grid */}
-          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
             {displayedChollos.map((deal, idx) => {
               const isLockedProDeal = Boolean(deal.proEarlyAccess && !isPro);
               const platformColor =
@@ -1275,7 +1173,7 @@ function Index() {
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-5">
+                  <div className="flex flex-1 flex-col p-5 sm:p-6">
                     <div className="flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
                       <span>
                         {deal.brand} · {deal.calibreRef ?? "Calibre Mecánico"}
@@ -1311,15 +1209,15 @@ function Index() {
 
                     <div className="mt-auto pt-4">
                       {isLockedProDeal ? (
-                        <button
+                        <Button variant="ghost" size="sm"
                           onClick={() => {
-                            setShowPricingModal(true);
+                            openPricing();
                             triggerToast("Los chollos con Score > 9.3/10 están reservados para miembros Atelier PRO.");
                           }}
                           className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-accent px-4 py-2.5 text-xs font-black text-accent-foreground transition hover:bg-primary hover:text-primary-foreground"
                         >
                           <Lock className="h-3.5 w-3.5" /> Desbloquear Chollo VIP ({deal.platform})
-                        </button>
+                        </Button>
                       ) : (
                         <a
                           href={deal.url}
@@ -1400,7 +1298,9 @@ function Index() {
                           type="checkbox"
                           checked={whatsappInstantAlerts}
                           onChange={(e) => {
-                            setWhatsappInstantAlerts(e.target.checked);
+                            if (!requireAccount()) return;
+                            const enabled = e.target.checked;
+                            void savePersonal({ whatsapp_alerts: enabled }).then(ok => { if (ok) setWhatsappInstantAlerts(enabled); });
                             triggerToast(
                               e.target.checked
                                 ? "Alertas instantáneas de WhatsApp activadas."
@@ -1421,12 +1321,12 @@ function Index() {
                         <MessageCircle className="h-4 w-4" /> Entrar al Grupo VIP de WhatsApp Ahora
                         <ArrowUpRight className="h-4 w-4" />
                       </a>
-                      <button
-                        onClick={() => setShowWhatsappModal(true)}
+                      <Button variant="ghost" size="sm"
+                        onClick={() => openWhatsapp()}
                         className="rounded-full border py-2 text-xs font-bold hover:bg-secondary"
                       >
                         Ver normas del club y canales por marca
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -1442,14 +1342,14 @@ function Index() {
                       Para evitar spam y proteger los chollos frente a revendedores masivos, el enlace de invitación al
                       Grupo de WhatsApp solo está disponible para suscriptores de <strong>Atelier PRO</strong>.
                     </p>
-                    <button
+                    <Button variant="ghost" size="sm"
                       onClick={() => {
-                        setShowWhatsappModal(true);
+                        openWhatsapp();
                       }}
                       className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-xs font-black text-primary-foreground transition hover:bg-accent hover:text-accent-foreground"
                     >
                       <Crown className="h-4 w-4 text-accent" /> Desbloquear Club WhatsApp con Atelier PRO
-                    </button>
+                    </Button>
                     <p className="mt-2 text-[11px] text-muted-foreground">
                       Incluido sin coste extra dentro de tu suscripción Atelier PRO (9,90 €/mes).
                     </p>
@@ -1461,8 +1361,94 @@ function Index() {
         </div>
       </section>
 
+      {/* FREEMIUM VS PRO PRICING SECTION */}
+      <section className="border-t bg-card/50 py-10 sm:py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="text-center">
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
+              PLANES PARA PARTICULARES Y COLECCIONISTAS
+            </span>
+            <h2 className="mt-2 font-serif text-4xl md:text-5xl">
+              Empieza <em>gratis</em>, escala tu taller con <em>Atelier PRO</em>.
+            </h2>
+          </div>
+
+          <div className="mt-10 grid gap-8 md:grid-cols-2">
+            <div className="flex flex-col rounded-3xl border bg-card p-5 sm:p-6 shadow-soft">
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-bold">Particular / Aficionado</span>
+                <span className="text-2xl font-black">0 € / siempre</span>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Ideal para encontrar una correa, cristal o recambio puntual para tu reloj personal.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" /> Hasta <strong>5 búsquedas extensas</strong> al día en eBay, AliExpress y Chrono24
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" /> Guarda hasta <strong>3 componentes favoritos</strong> en Mi Caja
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" /> Despiece interactivo 3D de los 4 relojes y comparador 1:1
+                </li>
+              </ul>
+              <Button variant="ghost" size="sm"
+                onClick={() => togglePlan(false)}
+                className={`mt-8 w-full rounded-full py-3 text-xs font-bold transition ${
+                  !isPro ? "bg-secondary text-foreground" : "border border-primary/20 hover:bg-secondary"
+                }`}
+              >
+                {!isPro ? "Tu Plan Actual" : "Volver al Plan Gratis"}
+              </Button>
+            </div>
+
+            <div className="relative flex flex-col rounded-3xl border-2 border-primary bg-card p-5 sm:p-6 shadow-soft">
+              <span className="absolute -top-3 right-6 rounded-full bg-accent px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-foreground">
+                Más Popular · Modders & Coleccionistas
+              </span>
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
+                  <Crown className="h-3.5 w-3.5 text-accent" /> Atelier PRO
+                </span>
+                <div className="text-right">
+                  <span className="text-2xl font-black">{currency === "EUR" ? "9,90 €" : "$10.90"}</span>
+                  <span className="text-xs text-muted-foreground"> / mes</span>
+                </div>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Para apasionados de la relojería, restauradores vintage y creadores de mods que buscan el mejor precio.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm">
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" /> <strong>Tiendas de Nicho y Mayoristas B2B:</strong> Alibaba, WatchPlaza, NamokiMods y CousinsUK
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" /> <strong>Búsquedas ilimitadas</strong> multi-tienda + códigos de referencia OEM exactos
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" /> <strong>Mi Caja Ilimitada</strong>: guarda todos los componentes que te gustan y calcula presupuestos
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary" /> <strong>Radar y Alertas de Precio NOS</strong> + <strong>Matriz de Compatibilidad Cruzada</strong>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" /> <strong>Acceso al Club VIP de WhatsApp PRO:</strong> Alertas móviles instantáneas de chollos y compraventa privada
+                </li>
+              </ul>
+              <Button variant="ghost" size="sm"
+                onClick={() => togglePlan(true)}
+                className="mt-8 w-full rounded-full bg-primary py-3 text-xs font-bold text-primary-foreground transition hover:bg-accent hover:text-accent-foreground"
+              >
+                {isPro ? "Plan Atelier PRO Activo ✓" : "Activar Prueba Atelier PRO Gratis"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* BLOG & HOROLOGICAL GUIDES SECTION */}
-      <section id="blog" className="border-t py-14">
+      <section id="blog" className="border-t py-10 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -1488,7 +1474,7 @@ function Index() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
             {SEO_BLOG_ARTICLES.map((art, idx) => (
               <article
                 key={art.slug}
@@ -1536,13 +1522,13 @@ function Index() {
                 </div>
 
                 <div className="m-5 mb-5 mt-4 flex items-center justify-between border-t pt-4">
-                  <button
+                  <Button variant="ghost" size="sm"
                     onClick={() => setActiveBlogArticle(art)}
                     className="inline-flex items-center gap-1 text-xs font-black text-primary hover:underline"
                   >
                     Leer Artículo <ArrowUpRight className="h-3.5 w-3.5" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="ghost" size="sm"
                     onClick={() => {
                       setQuery(art.relatedSearchQuery);
                       resultsRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1551,7 +1537,7 @@ function Index() {
                     className="rounded-full bg-secondary px-3 py-1 text-[10px] font-bold hover:bg-primary hover:text-primary-foreground"
                   >
                     Ver piezas
-                  </button>
+                  </Button>
                 </div>
               </article>
             ))}
@@ -1562,13 +1548,13 @@ function Index() {
       {/* VIP WHATSAPP CLUB MODAL */}
       {showWhatsappModal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-xl rounded-3xl border bg-card p-8 shadow-2xl">
-            <button
+          <div className="relative w-full max-w-xl rounded-3xl border bg-card p-5 sm:p-6 shadow-2xl">
+            <Button variant="ghost" size="sm"
               onClick={() => setShowWhatsappModal(false)}
               className="absolute right-5 top-5 rounded-full bg-secondary p-2"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
             <div className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-3 py-1 text-xs font-black text-white">
               <MessageCircle className="h-3.5 w-3.5" /> CLUB WHATSAPP ATELIER PRO
             </div>
@@ -1632,20 +1618,20 @@ function Index() {
                   </div>
                 </div>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <button
+                  <Button variant="ghost" size="sm"
                     onClick={() => {
                       togglePlan(true);
                     }}
                     className="flex-1 rounded-full bg-emerald-600 py-3 text-xs font-black text-white transition hover:bg-emerald-700"
                   >
                     Activar Atelier PRO y Desbloquear WhatsApp (9,90 €/mes)
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="ghost" size="sm"
                     onClick={() => setShowWhatsappModal(false)}
                     className="rounded-full border px-5 py-3 text-xs font-bold"
                   >
                     Cerrar
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -1656,13 +1642,13 @@ function Index() {
       {/* SEO BLOG ARTICLE READER MODAL */}
       {activeBlogArticle && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 p-4 backdrop-blur-xs">
-          <div className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-3xl border bg-card p-8 shadow-2xl">
-            <button
+          <div className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-3xl border bg-card p-5 sm:p-6 shadow-2xl">
+            <Button variant="ghost" size="sm"
               onClick={() => setActiveBlogArticle(null)}
               className="sticky right-0 top-0 float-right rounded-full bg-secondary p-2"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
             <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-black uppercase tracking-wider">
               {activeBlogArticle.category} · {activeBlogArticle.readTime}
             </span>
@@ -1693,7 +1679,7 @@ function Index() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-              <button
+              <Button variant="ghost" size="sm"
                 onClick={() => {
                   const q = activeBlogArticle.relatedSearchQuery;
                   setActiveBlogArticle(null);
@@ -1703,7 +1689,7 @@ function Index() {
                 className="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
               >
                 Buscar "{activeBlogArticle.relatedSearchQuery}" en el Comparador
-              </button>
+              </Button>
               <Link
                 to="/blog"
                 onClick={() => setActiveBlogArticle(null)}
@@ -1732,9 +1718,9 @@ function Index() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setShowWatchbox(false)} className="rounded-full bg-secondary p-2">
+              <Button variant="ghost" size="sm" onClick={() => setShowWatchbox(false)} className="rounded-full bg-secondary p-2">
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
@@ -1766,12 +1752,12 @@ function Index() {
                       >
                         Tienda
                       </a>
-                      <button
+                      <Button variant="ghost" size="sm"
                         onClick={() => toggleSavePart(sp)}
                         className="rounded-full bg-secondary p-2 text-muted-foreground hover:text-destructive"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))
@@ -1807,15 +1793,15 @@ function Index() {
                   </p>
                 )}
                 {!isPro && savedParts.length >= FREE_FAV_LIMIT && (
-                  <button
+                  <Button variant="ghost" size="sm"
                     onClick={() => {
                       setShowWatchbox(false);
-                      setShowPricingModal(true);
+                      openPricing();
                     }}
                     className="mt-3 w-full rounded-full bg-accent py-2.5 text-xs font-black text-accent-foreground"
                   >
                     Desbloquear Favoritos Ilimitados con Atelier PRO
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -1826,13 +1812,13 @@ function Index() {
       {/* UPGRADE / PRICING MODAL */}
       {showPricingModal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-xl rounded-3xl border bg-card p-8 shadow-2xl">
-            <button
+          <div className="relative w-full max-w-xl rounded-3xl border bg-card p-5 sm:p-6 shadow-2xl">
+            <Button variant="ghost" size="sm"
               onClick={() => setShowPricingModal(false)}
               className="absolute right-5 top-5 rounded-full bg-secondary p-2"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
             <div className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-black text-accent-foreground">
               <Crown className="h-3.5 w-3.5" /> CHRONOPARTS ATELIER PRO
             </div>
@@ -1868,7 +1854,7 @@ function Index() {
               </div>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button
+              <Button variant="ghost" size="sm"
                 onClick={() => {
                   togglePlan(true);
                   setShowPricingModal(false);
@@ -1876,13 +1862,13 @@ function Index() {
                 className="flex-1 rounded-full bg-primary py-3 text-xs font-bold text-primary-foreground transition hover:bg-accent hover:text-accent-foreground"
               >
                 Activar Atelier PRO Ahora (Demo Interactiva)
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost" size="sm"
                 onClick={() => setShowPricingModal(false)}
                 className="rounded-full border px-5 py-3 text-xs font-bold"
               >
                 Seguir en Plan Gratis
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1942,11 +1928,11 @@ function PartCard({
   isSaved: boolean;
   isPro: boolean;
   hasAlert: boolean;
-  oemCounterpartEur?: number;
-  genericCounterpartEur?: number;
+  oemCounterpartEur?: number | undefined;
+  genericCounterpartEur?: number | undefined;
   onToggleSave: () => void;
   onAlert: () => void;
-  onCompare?: () => void;
+  onCompare?: (() => void) | undefined;
   onUnlockPro: () => void;
 }) {
   const refOemPrice = p.equivalentOemPriceEur ?? oemCounterpartEur;
@@ -2020,7 +2006,7 @@ function PartCard({
           </div>
         )}
 
-        <button
+        <Button variant="ghost" size="sm"
           onClick={onToggleSave}
           title={isSaved ? "Quitar de Mi Caja" : "Guardar componente en Mi Caja"}
           className={`absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full backdrop-blur transition ${
@@ -2028,16 +2014,16 @@ function PartCard({
           }`}
         >
           <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
-        </button>
+        </Button>
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
             {p.brand} · {p.spec}
           </p>
           {p.oemRef && (
-            <button
+            <Button variant="ghost" size="sm"
               onClick={!isPro ? onUnlockPro : undefined}
               className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-[10px] font-bold text-muted-foreground"
               title={isPro ? "Referencia técnica verificada" : "Desbloquea referencias OEM exactas con Plan PRO"}
@@ -2050,7 +2036,7 @@ function PartCard({
                   <span>Ref. PRO</span>
                 </>
               )}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -2097,21 +2083,21 @@ function PartCard({
         {/* Action row: Compare 1:1 & Price Alert */}
         <div className="mt-3 flex items-center gap-3 border-t border-border/60 pt-2.5 text-[11px] font-bold text-muted-foreground">
           {onCompare && (
-            <button onClick={onCompare} className="inline-flex items-center gap-1 text-foreground hover:underline">
+            <Button variant="ghost" size="sm" onClick={onCompare} className="inline-flex items-center gap-1 text-foreground hover:underline">
               <Scale className="h-3 w-3" /> Ver Duelo 1:1
-            </button>
+            </Button>
           )}
-          <button
+          <Button variant="ghost" size="sm"
             onClick={onAlert}
             className={`ml-auto inline-flex items-center gap-1 hover:text-foreground ${
               hasAlert ? "text-foreground" : ""
             }`}
           >
-            <Bell className="h-3 w-3" /> {hasAlert ? "Alerta activa" : "Alerta precio"}
-          </button>
+            <Bell className="h-3 w-3" /> {hasAlert ? "Alerta activa" : "Avisar si baja"}
+          </Button>
         </div>
 
-        <div className="mt-auto flex items-end justify-between pt-4">
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5">
           <div>
             <p className="text-2xl font-black">{fmt(p.priceEur, currency)}</p>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -2120,12 +2106,12 @@ function PartCard({
             </p>
           </div>
           {isNicheStore && !isPro ? (
-            <button
+            <Button variant="ghost" size="sm"
               onClick={onUnlockPro}
               className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-black text-accent-foreground transition hover:bg-primary hover:text-primary-foreground"
             >
               <Lock className="h-3 w-3" /> Desbloquear {p.store} PRO
-            </button>
+            </Button>
           ) : (
             <a
               href={storeUrl}

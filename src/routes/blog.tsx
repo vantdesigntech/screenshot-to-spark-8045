@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { AccountControls } from "@/components/AccountProvider";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -28,21 +30,27 @@ export const Route = createFileRoute("/blog")({
         content:
           "Tablas maestras de compatibilidad Seiko NH35 vs ETA 2824, medidas de cristales de zafiro SKX007, referencias OEM Rolex 124300 y correas integradas Tissot PRX.",
       },
+      { property: "og:title", content: "Blog de Relojería y Guías Técnicas — ChronoParts" },
+      { property: "og:description", content: "Guías de compatibilidad, calibres, cristales y recambios OEM frente a aftermarket." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: BlogPage,
 });
 
 function BlogPage() {
-  const [selectedSlug, setSelectedSlug] = useState<string>(SEO_BLOG_ARTICLES[0].slug);
+  const [selectedSlug, setSelectedSlug] = useState<string>(SEO_BLOG_ARTICLES[0]?.slug ?? "");
   const [showJsonLd, setShowJsonLd] = useState(false);
 
-  const activeArticle: BlogArticle =
+  const activeArticle =
     SEO_BLOG_ARTICLES.find((a) => a.slug === selectedSlug) ?? SEO_BLOG_ARTICLES[0];
   const jsonLdObj = buildBlogJsonLd(SEO_BLOG_ARTICLES);
 
+  if (!activeArticle) return <p className="p-6">No hay artículos disponibles.</p>;
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground chronoparts-page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdObj) }}
@@ -64,7 +72,8 @@ function BlogPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center gap-2.5 overflow-x-auto pb-2 sm:w-auto">
+            <AccountControls />
             <a
               href="/sitemap.xml"
               target="_blank"
@@ -73,18 +82,18 @@ function BlogPage() {
             >
               Sitemap.xml ↗
             </a>
-            <button
+            <Button variant="ghost" size="sm"
               onClick={() => setShowJsonLd((s) => !s)}
               className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-[11px] font-bold text-primary-foreground"
             >
               <Code2 className="h-3.5 w-3.5 text-accent" />
               {showJsonLd ? "Ocultar Datos Estructurados" : "Datos Estructurados (Schema.org)"}
-            </button>
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16">
         {showJsonLd && (
           <div className="mb-8 rounded-2xl border border-primary/20 bg-primary p-5 text-primary-foreground shadow-soft">
             <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
@@ -101,23 +110,23 @@ function BlogPage() {
 
         <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
           {/* Sidebar list of guides */}
-          <aside className="space-y-3 lg:col-span-4">
+          <aside className="space-y-5 lg:col-span-4">
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">
               Artículos del Blog ({SEO_BLOG_ARTICLES.length})
             </p>
             {SEO_BLOG_ARTICLES.map((art, idx) => {
               const active = art.slug === activeArticle.slug;
               return (
-                <button
+                <Button variant="ghost" size="sm"
                   key={art.slug}
                   onClick={() => setSelectedSlug(art.slug)}
-                  className={`w-full rounded-2xl border p-4 text-left transition ${
+                  className={`w-full rounded-2xl border p-5 sm:p-6 text-left transition ${
                     active
                       ? "border-primary bg-primary text-primary-foreground shadow-soft"
                       : "border-border bg-card hover:border-primary/40"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <img
                       src={art.heroImage}
                       alt={art.title}
@@ -146,13 +155,13 @@ function BlogPage() {
                   >
                     {art.oemSavingsHighlight}
                   </p>
-                </button>
+                </Button>
               );
             })}
           </aside>
 
           {/* Active article full content */}
-          <article className="rounded-3xl border border-border bg-card p-5 shadow-soft sm:p-6 lg:col-span-8 lg:p-9">
+          <article className="min-w-0 space-y-6 bg-card p-5 sm:p-6 lg:col-span-8 lg:p-9">
             <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-muted-foreground">
               <span className="rounded-full bg-accent px-3 py-0.5 text-[10px] font-black uppercase text-accent-foreground">
                 {activeArticle.category}
@@ -166,8 +175,8 @@ function BlogPage() {
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{activeArticle.subtitle}</p>
 
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/15 bg-secondary/40 p-4">
-              <div className="flex items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-5 border-y border-primary/15 py-5">
+              <div className="flex min-w-0 items-center gap-3">
                 <img
                   src={activeArticle.heroImage}
                   alt={activeArticle.title}
@@ -178,7 +187,7 @@ function BlogPage() {
                   }}
                   className="h-16 w-16 shrink-0 rounded-xl border border-border object-cover"
                 />
-                <div>
+                <div className="min-w-0 break-words">
                   <p className="text-xs font-black uppercase tracking-wider text-primary">
                     {activeArticle.oemSavingsHighlight}
                   </p>
