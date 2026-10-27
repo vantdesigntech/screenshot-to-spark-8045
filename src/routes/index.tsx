@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Search, Ruler, Droplets, Cog, Gem, ArrowUpRight, Truck } from "lucide-react";
 import { ExplodedWatch } from "@/components/ExplodedWatch";
-import { CATEGORIES, MAX_PRICE, PARTS, filterParts, type Category, type Filters, type Part } from "@/lib/parts";
+import { CATEGORIES, MAX_PRICE, PARTS, ROLEX_OP41, filterParts, type Category, type Filters, type Part } from "@/lib/parts";
 
 export const Route = createFileRoute("/")({
   head: () => ({
