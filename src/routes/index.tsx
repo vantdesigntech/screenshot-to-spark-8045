@@ -218,7 +218,7 @@ function Index() {
     const removing = savedIds.includes(part.id);
     if (!removing && !isPro && savedIds.length >= FREE_FAV_LIMIT) { openPricing(); triggerToast(`Has alcanzado el límite de ${FREE_FAV_LIMIT} piezas guardadas.`); return; }
     const next = removing ? savedRecords.filter(p => p.id !== part.id) : [...savedRecords, part];
-    if (!await savePersonal({ favorites: next })) return;
+    if (!await savePersonal({ favorites: next.map(p => ({ ...p })) })) return;
     setSavedRecords(next); setSavedIds(next.map(p => p.id));
     triggerToast(`${removing ? "Eliminado de" : "Guardado en"} Mi Caja: ${part.title}`);
   };
