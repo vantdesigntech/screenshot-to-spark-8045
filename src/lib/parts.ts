@@ -66,3 +66,35 @@ export function filterParts(parts: Part[], f: Filters): Part[] {
     return words.every((w) => hay.includes(w));
   });
 }
+
+export interface WatchHotspot {
+  n: string;
+  label: string;
+  sublabel: string;
+  priceHint: string;
+  cats: Category[];
+  layerIdx: number;
+  pos: string;
+  side: "left" | "right";
+}
+
+export interface WatchModelSpec {
+  id: string;
+  name: string;
+  ref: string;
+  movement: string;
+  hotspots: WatchHotspot[];
+}
+
+export const ROLEX_OP41: WatchModelSpec = {
+  id: "rolex-op41",
+  name: "Oyster Perpetual 41",
+  ref: "REF. 124300",
+  movement: "Calibre 3230",
+  hotspots: [
+    { n: "01", label: "Bezel & Crystal", sublabel: "Sapphire · bezels", priceHint: "OEM vs aftermarket", cats: ["bezels", "crystals"], layerIdx: 5, pos: "left-0 top-[12%]", side: "left" },
+    { n: "02", label: "Dial & Hands", sublabel: "Dials", priceHint: "OEM vs aftermarket", cats: ["dials"], layerIdx: 4, pos: "right-0 top-[30%]", side: "right" },
+    { n: "03", label: "Movement", sublabel: "Calibre · crowns", priceHint: "OEM vs aftermarket", cats: ["movements", "crowns"], layerIdx: 3, pos: "left-0 top-[55%]", side: "left" },
+    { n: "04", label: "Case & Bracelet", sublabel: "Straps", priceHint: "OEM vs aftermarket", cats: ["straps"], layerIdx: 1, pos: "right-0 top-[75%]", side: "right" },
+  ],
+};
