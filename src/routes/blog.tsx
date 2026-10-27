@@ -84,7 +84,7 @@ function BlogPage() {
             </a>
             <Button variant="ghost" size="sm"
               onClick={() => setShowJsonLd((s) => !s)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-[11px] font-bold text-primary-foreground"
+              className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-primary px-3.5 py-1.5 text-[11px] font-bold text-primary-foreground"
             >
               <Code2 className="h-3.5 w-3.5 text-accent" />
               {showJsonLd ? "Ocultar Datos Estructurados" : "Datos Estructurados (Schema.org)"}

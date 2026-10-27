@@ -105,6 +105,7 @@
 .watch-camera[data-open="true"][data-angle="side"] { transform: rotateX(74deg) rotateZ(-14deg) scale(0.80); }
 .chronoparts-page button { min-height: 44px; height: auto; white-space: normal; }
 .chronoparts-page nav button { flex-shrink: 0; white-space: nowrap; }
+.chronoparts-page header > div button { flex-shrink: 0; white-space: nowrap; }
 .chronoparts-page header > div > div > a[href="/sitemap.xml"] { flex-shrink: 0; white-space: nowrap; }
 .chronoparts-page a[class*="rounded"] { min-height: 44px; align-content: center; }
 .chronoparts-page { overflow-wrap: anywhere; letter-spacing: 0; }
