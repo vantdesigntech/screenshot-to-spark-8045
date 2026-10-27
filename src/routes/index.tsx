@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { Search, Ruler, Droplets, Cog, Gem, ArrowUpRight, Truck } from "lucide-react";
 import { ExplodedWatch } from "@/components/ExplodedWatch";
-import { CATEGORIES, MAX_PRICE, PARTS, filterParts, type Category, type Filters, type Part } from "@/lib/parts";
+import { CATEGORIES, MAX_PRICE, PARTS, ROLEX_OP41, filterParts, type Category, type Filters, type Part } from "@/lib/parts";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -65,7 +65,7 @@ function Index() {
             <p className="mt-4 max-w-md text-muted-foreground">Compare original vintage components against aftermarket alternatives. Hover the watch to take it apart — click a part to find it.</p>
             <a href="#search" className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground">Start searching <ArrowUpRight className="h-4 w-4" /></a>
           </div>
-          <ExplodedWatch onSelect={selectFromWatch} />
+          <ExplodedWatch model={ROLEX_OP41} onSelect={selectFromWatch} />
         </div>
 
         <div className="mx-auto max-w-7xl px-6 pb-12">
