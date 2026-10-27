@@ -32,7 +32,7 @@ function Layer({
       }`}
       style={{
         transform: open
-          ? `translate3d(${x}px, ${y}px, ${z}px) scale(${scale})`
+          ? `translate3d(calc(${x}px * var(--watch-spread)), calc(${y}px * var(--watch-spread)), calc(${z}px * var(--watch-spread))) scale(${scale})`
           : `translate3d(0, 0, ${rest}px) scale(1)`,
         filter:
           highlighted && open
@@ -45,7 +45,7 @@ function Layer({
       {children}
       {open && layerTag && (
         <span
-          className={`pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 rounded-full border px-2.5 py-0.5 text-[8px] font-black uppercase tracking-widest transition-opacity duration-500 ${
+          className={`pointer-events-none absolute -right-6 top-1/2 hidden -translate-y-1/2 rounded-full border px-2.5 py-0.5 text-[8px] font-black uppercase tracking-widest transition-opacity duration-500 md:block ${
             highlighted
               ? "border-accent bg-accent text-accent-foreground opacity-100 shadow-soft"
               : "border-primary/20 bg-card/90 text-muted-foreground opacity-85"

@@ -78,7 +78,7 @@ function BlogPage() {
               href="/sitemap.xml"
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-border bg-secondary/60 px-3 py-1.5 text-[11px] font-bold hover:bg-secondary"
+              className="shrink-0 whitespace-nowrap rounded-full border border-border bg-secondary/60 px-3 py-1.5 text-[11px] font-bold hover:bg-secondary"
             >
               Sitemap.xml ↗
             </a>
@@ -120,7 +120,7 @@ function BlogPage() {
                 <Button variant="ghost" size="sm"
                   key={art.slug}
                   onClick={() => setSelectedSlug(art.slug)}
-                  className={`w-full rounded-2xl border p-5 sm:p-6 text-left transition ${
+                  className={`block w-full rounded-lg border p-5 sm:p-6 text-left transition ${
                     active
                       ? "border-primary bg-primary text-primary-foreground shadow-soft"
                       : "border-border bg-card hover:border-primary/40"

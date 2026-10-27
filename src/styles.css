@@ -100,17 +100,19 @@
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 @utility animate-spin-slow { animation: spin-slow 60s linear infinite; }
 
-.watch-camera { transform: rotateX(0deg) rotateZ(0deg) scale(1); }
+.watch-camera { --watch-spread: 1; transform: rotateX(0deg) rotateZ(0deg) scale(1); }
 .watch-camera[data-open="true"][data-angle="iso"] { transform: rotateX(58deg) rotateZ(-36deg) scale(0.82); }
 .watch-camera[data-open="true"][data-angle="side"] { transform: rotateX(74deg) rotateZ(-14deg) scale(0.80); }
 .chronoparts-page button { min-height: 44px; height: auto; white-space: normal; }
 .chronoparts-page nav button { flex-shrink: 0; white-space: nowrap; }
+.chronoparts-page header > div > div > a[href="/sitemap.xml"] { flex-shrink: 0; white-space: nowrap; }
 .chronoparts-page a[class*="rounded"] { min-height: 44px; align-content: center; }
 .chronoparts-page { overflow-wrap: anywhere; letter-spacing: 0; }
 .chronoparts-page nav { overflow-wrap: normal; }
 .chronoparts-page [class*="tracking-"] { letter-spacing: 0; }
 .chronoparts-page article { min-width: 0; }
 @media (max-width: 767px) {
+  .watch-camera { --watch-spread: 0.45; }
   .watch-camera[data-open="true"][data-angle="iso"] { transform: rotateX(58deg) rotateZ(-36deg) scale(0.68); }
   .watch-camera[data-open="true"][data-angle="side"] { transform: rotateX(74deg) rotateZ(-14deg) scale(0.68); }
   .watch-stage { overflow: hidden; }
