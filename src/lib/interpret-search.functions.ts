@@ -29,7 +29,7 @@ export type InterpretResult = {
 export const interpretSearch = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ phrase: z.string().trim().min(1).max(300) }).parse(d))
   .handler(async ({ data }): Promise<InterpretResult> => {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env["LOVABLE_API_KEY"];
     if (!key) {
       return { filters: interpretByKeywords(data.phrase), mode: "keywords", notice: "IA no disponible: búsqueda por palabras clave." };
     }
