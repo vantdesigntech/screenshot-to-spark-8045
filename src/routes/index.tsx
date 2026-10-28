@@ -30,7 +30,11 @@ import {
   RotateCcw,
   Watch,
 } from "lucide-react";
-import { ExplodedWatch } from "@/components/ExplodedWatch";
+import { Button } from "@/components/ui/button";
+import braceletImage from "@/assets/bracelet.jpg";
+import crystalImage from "@/assets/crystal.jpg";
+import movementImage from "@/assets/movement.jpg";
+import strapImage from "@/assets/strap.jpg";
 import {
   CHOLLO_PLATFORMS,
   DAILY_CHOLLOS,
@@ -90,7 +94,7 @@ const QUICK_SEARCHES = [
 ];
 
 const WATCH_PREVIEW_IMAGES: Record<WatchModelSpec["id"], string> = {
-  "rolex-op41": "/images/hero-rolex-op-pistachio.jpg",
+  "rolex-op41": "/blog/blog-2.jpg",
   "omega-speedy": "/models/omega-speedy/dial.png",
   "seiko-skx": "/models/seiko-skx/dial.png",
   "tissot-prx": "/models/tissot-prx/dial.png",
@@ -108,28 +112,28 @@ const COMMON_PARTS_SHORTCUTS: {
     title: "Cristales de zafiro",
     subtitle: "Planos, Double Dome y AR azul",
     savingsCue: "Desde 14 € vs 160 € OEM",
-    image: "/parts/crystal-generic.jpg",
+    image: crystalImage,
   },
   {
     id: "straps",
     title: "Correas y brazaletes",
     subtitle: "Oyster 904L, Jubilee y caucho PRX",
     savingsCue: "Desde 18 € vs 195 € OEM",
-    image: "/parts/strap-generic.jpg",
+    image: strapImage,
   },
   {
     id: "movements",
     title: "Calibres mecánicos",
     subtitle: "Seiko NH35, ETA 2824-2 y Miyota 9015",
     savingsCue: "Desde 39 € vs 245 € OEM",
-    image: "/parts/movement-oem.jpg",
+    image: movementImage,
   },
   {
     id: "bezels",
     title: "Biseles y coronas",
     subtitle: "Insertos cerámicos, juntas y tijas",
     savingsCue: "Ahorro medio -72%",
-    image: "/parts/bezel-generic.jpg",
+    image: braceletImage,
   },
 ];
 
@@ -169,7 +173,6 @@ function Index() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchFocused, setSearchFocused] = useState(false);
   const [exploreTab, setExploreTab] = useState<"watches" | "parts">("watches");
-  const [activeWatchHotspotLabel, setActiveWatchHotspotLabel] = useState<string | null>(null);
 
   // Saved parts ("Mi Caja"), alerts & live API state
   const [savedIds, setSavedIds] = useState<string[]>(["1", "2"]);
@@ -194,16 +197,16 @@ function Index() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const activeModel = useMemo(
-    () => (WATCH_MODELS.find((m) => m.id === selectedModelId) ?? WATCH_MODELS[0])!,
+    () => WATCH_MODELS.find((m) => m.id === selectedModelId) ?? WATCH_MODELS.find((m) => m.id === "rolex-op41"),
     [selectedModelId]
   );
 
   const dynamicSpecs = useMemo(
     () => [
-      { icon: Ruler, k: "Ancho de asas", v: activeModel.lugWidth },
-      { icon: Droplets, k: "Hermeticidad", v: activeModel.waterResistance },
-      { icon: Cog, k: "Calibre", v: activeModel.movement },
-      { icon: Gem, k: "Material", v: activeModel.material },
+      { icon: Ruler, k: "Ancho de asas", v: activeModel?.lugWidth ?? "—" },
+      { icon: Droplets, k: "Hermeticidad", v: activeModel?.waterResistance ?? "—" },
+      { icon: Cog, k: "Calibre", v: activeModel?.movement ?? "—" },
+      { icon: Gem, k: "Material", v: activeModel?.material ?? "—" },
     ],
     [activeModel]
   );
@@ -293,7 +296,6 @@ function Index() {
     setStoreFilter("all");
     setMaxPrice(MAX_PRICE);
     setQuery("");
-    setActiveWatchHotspotLabel(null);
   };
 
   const triggerToast = (msg: string) => {
@@ -436,15 +438,6 @@ function Index() {
     return allPartsPool.filter((p) => p.pairGroupId === compareGroup);
   }, [allPartsPool, compareGroup]);
 
-  const selectFromWatch = (cats: Category[], label?: string) => {
-    setCategories(cats);
-    if (label) {
-      setActiveWatchHotspotLabel(`${activeModel.shortName} · ${label}`);
-      triggerToast(`${activeModel.shortName}: mostrando ${label.toLowerCase()} compatibles`);
-    }
-    resultsRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const toggleCat = (c: Category) =>
     setCategories((cur) => (cur.includes(c) ? cur.filter((x) => x !== c) : [...cur, c]));
 
@@ -510,19 +503,19 @@ function Index() {
   );
 
   return (
-    <div className="min-h-screen bg-[#ffffff] text-[#1d1d1f]">
+    <div className="chrono-home min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBlogJsonLd()) }}
       />
       {/* Toast Notification (Apple Floating Pill) */}
       {toastMsg && (
-        <div className="fixed bottom-5 left-1/2 z-50 flex w-[92vw] max-w-md -translate-x-1/2 items-center justify-between gap-3 rounded-full bg-[#1d1d1f] px-5 py-3 text-[14px] font-normal text-[#ffffff] sm:w-auto">
-          <Sparkles className="h-4 w-4 shrink-0 text-[#2997ff]" />
+        <div className="fixed bottom-5 left-1/2 z-50 flex w-[92vw] max-w-md -translate-x-1/2 items-center justify-between gap-3 rounded-full bg-foreground px-5 py-3 text-[14px] font-normal text-primary-foreground sm:w-auto">
+          <Sparkles className="h-4 w-4 shrink-0 text-apple-primary-dark" />
           <span className="truncate">{toastMsg}</span>
-          <button onClick={() => setToastMsg(null)} className="shrink-0 opacity-70 hover:opacity-100">
+          <Button variant="unstyled" onClick={() => setToastMsg(null)} className="shrink-0 opacity-70 hover:opacity-100">
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -530,36 +523,36 @@ function Index() {
       <nav
         id="top"
         aria-label="Navegación global"
-        className="sticky top-0 z-50 h-[44px] w-full bg-[#000000] text-[#ffffff]"
+        className="sticky top-0 z-50 h-[44px] w-full bg-apple-black text-primary-foreground"
       >
         <div className="mx-auto flex h-full max-w-[1024px] items-center justify-between px-4 sm:px-6">
           <a
             href="#top"
-            className="apple-nav-link text-[14px] font-semibold tracking-[-0.22px] text-[#ffffff] transition-opacity hover:opacity-85"
+            className="apple-nav-link text-[14px] font-semibold text-primary-foreground transition-opacity hover:opacity-85"
           >
             ChronoParts
           </a>
 
-          <div className="flex items-center gap-5 sm:gap-8">
+          <div className="flex items-center gap-4 sm:gap-8">
             <a
               href="#search"
-              className="apple-nav-link text-[#ffffff]/90 transition-opacity hover:text-[#ffffff]"
+              className="apple-nav-link text-primary-foreground/90 transition-opacity hover:text-primary-foreground"
             >
               Buscar
             </a>
             <a
               href="#chollos"
-              className="apple-nav-link text-[#ffffff]/90 transition-opacity hover:text-[#ffffff]"
+              className="apple-nav-link text-primary-foreground/90 transition-opacity hover:text-primary-foreground"
             >
               Chollos
             </a>
             <Link
               to="/marketplace"
-              className="apple-nav-link inline-flex items-center gap-1.5 text-[#ffffff]/90 transition-opacity hover:text-[#ffffff]"
+              className="apple-nav-link hidden items-center gap-1.5 sm:inline-flex text-primary-foreground/90 transition-opacity hover:text-primary-foreground"
               title="Marketplace de relojes completos"
             >
               <span>Marketplace</span>
-              <span className="rounded-full bg-[#272729] px-2 py-0.5 text-[10px] font-normal text-[#2997ff]">
+              <span className="rounded-full bg-apple-tile-1 px-2 py-0.5 text-[10px] font-normal text-apple-primary-dark">
                 Próximamente
               </span>
             </Link>
@@ -567,93 +560,93 @@ function Index() {
 
           {/* Icono único de Perfil (Mi Caja + Cuenta) */}
           <div className="relative">
-            <button
+            <Button variant="unstyled"
               type="button"
               onClick={() => setShowAccountMenu((v) => !v)}
               aria-expanded={showAccountMenu}
               aria-label="Abrir Mi Caja y menú de perfil"
-              className="relative flex h-[32px] items-center gap-1.5 rounded-[8px] bg-[#1d1d1f] px-3 text-[12px] font-normal text-[#ffffff] transition-transform active:scale-95"
+              className="relative flex h-[32px] items-center gap-1.5 rounded-[8px] bg-foreground px-3 text-[12px] font-normal text-primary-foreground transition-transform active:scale-95"
             >
-              <User className="h-3.5 w-3.5 text-[#ffffff]" />
+              <User className="h-3.5 w-3.5 text-primary-foreground" />
               <span className="hidden sm:inline">Mi Caja</span>
               {savedIds.length > 0 && (
-                <span className="grid h-4 min-w-[16px] place-items-center rounded-full bg-[#0066cc] px-1 text-[10px] font-semibold text-[#ffffff]">
+                <span className="grid h-4 min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
                   {savedIds.length}
                 </span>
               )}
-            </button>
+            </Button>
 
             {showAccountMenu && (
-              <div className="absolute right-0 top-10 z-50 w-64 rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-3 text-[#1d1d1f]">
-                <div className="border-b border-[#f0f0f0] pb-2.5 px-2">
-                  <p className="apple-fine-print uppercase text-[#7a7a7a]">
+              <div className="absolute right-0 top-10 z-50 w-64 rounded-[18px] border border-border bg-background p-3 text-foreground">
+                <div className="border-b border-apple-divider pb-2.5 px-2">
+                  <p className="apple-fine-print uppercase text-muted-foreground">
                     Mi espacio
                   </p>
-                  <p className="apple-caption-strong mt-1 text-[#1d1d1f]">
+                  <p className="apple-caption-strong mt-1 text-foreground">
                     Piezas guardadas y accesos
                   </p>
                 </div>
                 <div className="mt-2 space-y-1 text-[14px]">
-                  <button
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => {
                       setShowAccountMenu(false);
                       setShowWatchbox(true);
                     }}
-                    className="flex w-full items-center justify-between rounded-[11px] px-3 py-2 text-left text-[#1d1d1f] transition hover:bg-[#f5f5f7]"
+                    className="flex w-full items-center justify-between rounded-[11px] px-3 py-2 text-left text-foreground transition hover:bg-secondary"
                   >
                     <span className="inline-flex items-center gap-2">
-                      <Heart className="h-3.5 w-3.5 text-[#0066cc]" />
+                      <Heart className="h-3.5 w-3.5 text-primary" />
                       <span>Mi Caja de piezas</span>
                     </span>
-                    <span className="rounded-full bg-[#f5f5f7] px-2 py-0.5 text-[12px] font-semibold text-[#1d1d1f]">
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[12px] font-semibold text-foreground">
                       {savedIds.length}
                     </span>
-                  </button>
+                  </Button>
                   <Link
                     to="/marketplace"
                     onClick={() => setShowAccountMenu(false)}
-                    className="flex w-full items-center justify-between rounded-[11px] px-3 py-2 text-[#1d1d1f] transition hover:bg-[#f5f5f7]"
+                    className="flex w-full items-center justify-between rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary"
                   >
                     <span>Marketplace</span>
-                    <span className="rounded-full bg-[#f5f5f7] px-2 py-0.5 text-[10px] font-semibold text-[#0066cc]">
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-primary">
                       Próximamente
                     </span>
                   </Link>
                   <Link
                     to="/vender"
                     onClick={() => setShowAccountMenu(false)}
-                    className="block rounded-[11px] px-3 py-2 text-[#1d1d1f] transition hover:bg-[#f5f5f7]"
+                    className="block rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary"
                   >
                     Publicar reloj (/vender)
                   </Link>
                   <Link
                     to="/mis-anuncios"
                     onClick={() => setShowAccountMenu(false)}
-                    className="block rounded-[11px] px-3 py-2 text-[#1d1d1f] transition hover:bg-[#f5f5f7]"
+                    className="block rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary"
                   >
                     Mis anuncios (/mis-anuncios)
                   </Link>
                   <Link
                     to="/favoritos"
                     onClick={() => setShowAccountMenu(false)}
-                    className="block rounded-[11px] px-3 py-2 text-[#1d1d1f] transition hover:bg-[#f5f5f7]"
+                    className="block rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary"
                   >
                     Relojes favoritos (/favoritos)
                   </Link>
                   <Link
                     to="/mensajes"
                     onClick={() => setShowAccountMenu(false)}
-                    className="block rounded-[11px] px-3 py-2 text-[#1d1d1f] transition hover:bg-[#f5f5f7]"
+                    className="block rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary"
                   >
                     Mensajes (/mensajes)
                   </Link>
                   <Link
                     to="/blog"
                     onClick={() => setShowAccountMenu(false)}
-                    className="block rounded-[11px] px-3 py-2 text-[#1d1d1f] transition hover:bg-[#f5f5f7]"
+                    className="block rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary"
                   >
-                    Guías útiles (/blog)
+                    Blog
                   </Link>
                 </div>
               </div>
@@ -663,21 +656,21 @@ function Index() {
       </nav>
 
       {/* 2. SUB-NAV FROSTED (DESIGN_apple.md: #f5f5f7 at 80% + backdrop-filter blur, height 52px, 1px rgba(0,0,0,0.08)) */}
-      <div className="sticky top-[44px] z-40 h-[52px] w-full border-b border-[rgba(0,0,0,0.08)] apple-frosted">
+      <div className="sticky top-[44px] z-40 h-[52px] w-full border-b border-border apple-frosted">
         <div className="mx-auto flex h-full max-w-[1024px] items-center justify-between px-4 sm:px-6">
-          <span className="apple-tagline text-[19px] sm:text-[21px] text-[#1d1d1f]">
+          <span className="apple-tagline text-[15px] sm:text-[21px] text-foreground">
             Recambios y Calibres
           </span>
           <div className="flex items-center gap-4">
             <a
               href="#explorar"
-              className="hidden text-[14px] font-normal tracking-[-0.224px] text-[#1d1d1f]/80 hover:text-[#0066cc] sm:inline"
+              className="hidden text-[14px] font-normal text-foreground/80 hover:text-primary sm:inline"
             >
-              Esquema 3D
+              Explorar relojes
             </a>
             <a
               href="#comparator"
-              className="hidden text-[14px] font-normal tracking-[-0.224px] text-[#1d1d1f]/80 hover:text-[#0066cc] sm:inline"
+              className="hidden text-[14px] font-normal text-foreground/80 hover:text-primary sm:inline"
             >
               OEM vs Aftermarket
             </a>
@@ -688,7 +681,7 @@ function Index() {
                 searchSectionRef.current?.scrollIntoView({ behavior: "smooth" });
                 setTimeout(() => searchInputRef.current?.focus(), 200);
               }}
-              className="inline-flex items-center justify-center rounded-full bg-[#0066cc] px-[16px] py-[6px] text-[12px] font-normal text-[#ffffff] transition-transform active:scale-95 focus:outline-2 focus:outline-[#0071e3]"
+              className="inline-flex items-center justify-center rounded-full bg-primary px-[16px] py-[6px] text-[12px] font-normal text-primary-foreground transition-transform active:scale-95 focus:outline-2 focus:outline-ring"
             >
               Buscar recambios
             </a>
@@ -697,23 +690,23 @@ function Index() {
       </div>
 
       {/* 3. HERO — PRODUCT TILE LIGHT (DESIGN_apple.md: Pure White #ffffff, NO gradients, rounded-none, 80px desktop / 48px mobile padding) */}
-      <header className="w-full rounded-none bg-[#ffffff] py-[48px] lg:py-[80px]">
-        <div className="mx-auto grid max-w-[1068px] items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+      <header className="w-full rounded-none bg-background py-8 lg:py-16">
+        <div className="mx-auto grid max-w-[1068px] items-center gap-6 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
           <div>
-            <p className="apple-tagline text-[19px] sm:text-[21px] text-[#0066cc]">
+            <p className="apple-caption font-semibold text-primary">
               ChronoParts · OEM y Aftermarket
             </p>
 
-            <h1 className="apple-hero-display mt-2 text-[34px] text-[#1d1d1f] sm:text-[44px] lg:text-[56px]">
-              Encuentra el recambio exacto para tu reloj.
+            <h1 className="apple-hero-display mt-2 text-[34px] text-foreground sm:text-[44px] lg:text-[56px]">
+              Cada pieza exacta. Al mejor precio.
             </h1>
 
-            <p className="apple-lead mt-4 max-w-lg text-[21px] sm:text-[24px] text-[#7a7a7a]">
+            <p className="apple-body mt-4 max-w-lg text-muted-foreground sm:text-[21px]">
               Compara piezas originales y alternativas compatibles por modelo, referencia o calibre.
             </p>
 
             {/* Two Apple Pill CTAs: button-primary (#0066cc) & button-secondary-pill (1px solid #0066cc) */}
-            <div className="mt-7 flex flex-wrap items-center gap-3.5">
+            <div className="mt-6 flex flex-wrap items-center gap-2">
               <a
                 href="#search"
                 onClick={(e) => {
@@ -721,16 +714,16 @@ function Index() {
                   searchSectionRef.current?.scrollIntoView({ behavior: "smooth" });
                   setTimeout(() => searchInputRef.current?.focus(), 250);
                 }}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[17px] font-normal tracking-[-0.374px] text-[#ffffff] transition-transform active:scale-95 focus:outline-2 focus:outline-[#0071e3]"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-primary px-[22px] py-[11px] text-[17px] font-normal text-primary-foreground transition-transform active:scale-95 focus:outline-2 focus:outline-ring"
               >
                 <span>Buscar recambios</span>
                 <ArrowDown className="h-4 w-4" />
               </a>
               <a
                 href="#explorar"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-[#0066cc] bg-[#ffffff] px-[22px] py-[11px] text-[17px] font-normal tracking-[-0.374px] text-[#0066cc] transition-transform active:scale-95 focus:outline-2 focus:outline-[#0071e3]"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-primary bg-background px-[22px] py-[11px] text-[17px] font-normal text-primary transition-transform active:scale-95 focus:outline-2 focus:outline-ring"
               >
-                Ver despiece 3D
+                Elegir mi reloj
               </a>
             </div>
           </div>
@@ -738,26 +731,13 @@ function Index() {
           {/* Product Render resting on Pure White surface with the ONLY allowed system drop-shadow */}
           <div className="mx-auto flex w-full max-w-[340px] flex-col items-center sm:max-w-[420px] lg:max-w-[460px]">
             <img
-              src="/images/hero-rolex-op-pistachio.jpg"
-              alt="Reloj mecánico protagonista en ChronoParts"
-              className="aspect-[4/3] w-full rounded-[18px] object-cover shadow-product"
+              src="/blog/blog-2.jpg"
+              alt="Fotografía de un reloj Rolex con brazalete de acero"
+              className="aspect-[16/9] w-full rounded-lg object-cover sm:aspect-[4/3]"
             />
-            <div className="mt-5 flex w-full items-center justify-between px-1">
-              <div>
-                <p className="apple-body-strong text-[#1d1d1f]">
-                  {activeModel.brand} {activeModel.shortName}
-                </p>
-                <p className="apple-caption text-[#7a7a7a]">
-                  Ref. {activeModel.ref} · {activeModel.movement}
-                </p>
-              </div>
-              <a
-                href="#explorar"
-                className="apple-caption text-[#0066cc] hover:underline"
-              >
-                Explorar piezas →
-              </a>
-            </div>
+            <a href="#explorar" className="mt-3 inline-flex min-h-11 items-center gap-2 text-[14px] text-primary">
+              <Watch className="h-4 w-4" /> Explorar relojes <ArrowUpRight className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </header>
@@ -766,43 +746,43 @@ function Index() {
       <section
         id="search"
         ref={searchSectionRef}
-        className="w-full scroll-mt-14 bg-[#f5f5f7] px-[22px] py-[48px] lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-secondary px-[22px] py-[48px] lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
           <div className="mb-8 flex flex-col items-center text-center">
-            <h2 className="apple-display-lg text-[32px] text-[#1d1d1f] sm:text-[40px]">
+            <h2 className="apple-display-lg text-[32px] text-foreground sm:text-[40px]">
               Encuentra cada pieza con precisión.
             </h2>
-            <p className="apple-tagline mt-2 max-w-[600px] text-[19px] text-[#7a7a7a] sm:text-[21px]">
+            <p className="apple-tagline mt-2 max-w-[600px] text-[19px] text-muted-foreground sm:text-[21px]">
               Busca por referencia de reloj, calibre mecánico o componente específico.
             </p>
           </div>
 
-          <div className="rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-[24px]">
+          <div className="border-y border-border bg-background py-5 sm:rounded-[18px] sm:border sm:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <span className="apple-caption font-semibold text-[#1d1d1f]">
+              <span className="apple-caption font-semibold text-foreground">
                 Búsqueda directa en catálogos verificados
               </span>
-              <button
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => setShowFiltersSheet(true)}
-                className="inline-flex min-h-[36px] items-center gap-2 rounded-full border border-[#e0e0e0] bg-[#f5f5f7] px-4 py-1.5 text-[14px] font-normal text-[#1d1d1f] transition hover:border-[#0071e3]"
+                className="inline-flex min-h-[36px] items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-[14px] font-normal text-foreground transition hover:border-ring"
               >
-                <SlidersHorizontal className="h-3.5 w-3.5 text-[#0066cc]" />
+                <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
                 <span>Filtros</span>
                 {activeFilterCount > 0 && (
-                  <span className="rounded-full bg-[#0066cc] px-2 py-0.5 text-[11px] font-semibold text-white">
+                  <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
                     {activeFilterCount}
                   </span>
                 )}
-              </button>
+              </Button>
             </div>
 
             {/* Campo principal Apple Search Input Pill */}
             <div className="relative">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="flex h-[48px] flex-1 items-center gap-3 rounded-full border border-[rgba(0,0,0,0.12)] bg-[#f5f5f7] px-[20px] transition focus-within:border-[#0071e3] focus-within:bg-[#ffffff] focus-within:ring-2 focus-within:ring-[#0071e3]/25">
-                  <Search className="h-4 w-4 shrink-0 text-[#7a7a7a]" />
+                <div className="flex h-[48px] flex-1 items-center gap-3 rounded-full border border-input bg-secondary px-[20px] transition focus-within:border-ring focus-within:bg-background focus-within:ring-2 focus-within:ring-ring/25">
+                  <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                   <input
                     ref={searchInputRef}
                     value={query}
@@ -815,74 +795,74 @@ function Index() {
                         void runExtendedSearch(query);
                       }
                     }}
-                    placeholder="Busca por modelo, calibre o pieza (ej. NH35, SKX007, cristal zafiro)"
+                    placeholder="Modelo, calibre o pieza"
                     aria-label="Busca por modelo, calibre o pieza"
-                    className="min-w-0 flex-1 bg-transparent text-[17px] text-[#1d1d1f] outline-none placeholder:text-[#7a7a7a]"
+                    className="min-w-0 flex-1 bg-transparent text-[17px] text-foreground outline-none placeholder:text-muted-foreground"
                   />
                   {query && (
-                    <button
+                    <Button variant="unstyled"
                       type="button"
                       onClick={() => setQuery("")}
-                      className="rounded-full bg-[#e0e0e0]/60 px-2.5 py-0.5 text-[12px] text-[#1d1d1f] hover:bg-[#e0e0e0]"
+                      className="rounded-full bg-border/60 px-2.5 py-0.5 text-[12px] text-foreground hover:bg-border"
                     >
                       Limpiar
-                    </button>
+                    </Button>
                   )}
                 </div>
 
-                <button
+                <Button variant="unstyled"
                   type="button"
                   onClick={() => {
                     setSearchFocused(false);
                     void runExtendedSearch(query);
                   }}
-                  className="inline-flex h-[48px] items-center justify-center gap-2 rounded-full bg-[#0066cc] px-[24px] text-[17px] font-normal text-white transition hover:bg-[#0071e3]"
+                  className="inline-flex h-[48px] items-center justify-center gap-2 rounded-full bg-primary px-[24px] text-[17px] font-normal text-primary-foreground transition hover:bg-ring"
                 >
                   <Search className="h-4 w-4" />
                   <span>Buscar</span>
-                </button>
+                </Button>
               </div>
 
               {/* Sugerencias en vivo y búsquedas recientes */}
               {searchFocused && (searchSuggestions.length > 0 || recentSearches.length > 0) && (
-                <div className="absolute left-0 right-0 top-full z-30 mt-2 rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-4">
+                <div className="absolute left-0 right-0 top-full z-30 mt-2 rounded-[18px] border border-border bg-background p-4">
                   {recentSearches.length > 0 && !query.trim() && (
                     <div className="mb-3">
-                      <p className="px-2 text-[12px] font-semibold text-[#7a7a7a]">
+                      <p className="px-2 text-[12px] font-semibold text-muted-foreground">
                         Búsquedas recientes
                       </p>
                       <div className="mt-1.5 flex flex-wrap gap-1.5 px-1">
                         {recentSearches.map((recent) => (
-                          <button
+                          <Button variant="unstyled"
                             key={recent}
                             type="button"
-                            onMouseDown={() => applyQuickSuggestion(recent)}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-[#e0e0e0] bg-[#f5f5f7] px-3 py-1 text-[12px] text-[#1d1d1f] hover:border-[#0071e3] hover:text-[#0066cc]"
+                            onClick={() => applyQuickSuggestion(recent)}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-[12px] text-foreground hover:border-ring hover:text-primary"
                           >
-                            <Clock className="h-3 w-3 text-[#7a7a7a]" />
+                            <Clock className="h-3 w-3 text-muted-foreground" />
                             <span>{recent}</span>
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     </div>
                   )}
-                  <p className="px-2 text-[12px] font-semibold text-[#7a7a7a]">
+                  <p className="px-2 text-[12px] font-semibold text-muted-foreground">
                     Sugerencias rápidas
                   </p>
                   <div className="mt-1 grid gap-1 sm:grid-cols-2">
                     {searchSuggestions.map((s) => (
-                      <button
+                      <Button variant="unstyled"
                         key={`${s.type}-${s.queryValue}`}
                         type="button"
-                        onMouseDown={() => applyQuickSuggestion(s.queryValue)}
-                        className="flex items-center justify-between rounded-[12px] px-3 py-2 text-left text-[14px] transition hover:bg-[#f5f5f7]"
+                        onClick={() => applyQuickSuggestion(s.queryValue)}
+                        className="flex items-center justify-between rounded-[12px] px-3 py-2 text-left text-[14px] transition hover:bg-secondary"
                       >
                         <div>
-                          <p className="font-semibold text-[#1d1d1f]">{s.label}</p>
-                          <p className="text-[12px] text-[#7a7a7a]">{s.type}</p>
+                          <p className="font-semibold text-foreground">{s.label}</p>
+                          <p className="text-[12px] text-muted-foreground">{s.type}</p>
                         </div>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-[#0066cc]" />
-                      </button>
+                        <ArrowUpRight className="h-3.5 w-3.5 text-primary" />
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -890,46 +870,46 @@ function Index() {
             </div>
 
             {/* Accesos rápidos */}
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#e0e0e0] pt-4">
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="apple-caption text-[#7a7a7a]">Empezar por:</span>
+                <span className="apple-caption text-muted-foreground">Empezar por:</span>
                 <a
                   href="#explorar"
                   onClick={() => setExploreTab("watches")}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#e0e0e0] bg-[#ffffff] px-4 py-1.5 text-[14px] text-[#1d1d1f] transition hover:border-[#0071e3] hover:text-[#0066cc]"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-[14px] text-foreground transition hover:border-ring hover:text-primary"
                 >
-                  <Watch className="h-3.5 w-3.5 text-[#0066cc]" />
+                  <Watch className="h-3.5 w-3.5 text-primary" />
                   <span>Elegir mi reloj</span>
                 </a>
                 <a
                   href="#explorar"
                   onClick={() => setExploreTab("parts")}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#e0e0e0] bg-[#ffffff] px-4 py-1.5 text-[14px] text-[#1d1d1f] transition hover:border-[#0071e3] hover:text-[#0066cc]"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-[14px] text-foreground transition hover:border-ring hover:text-primary"
                 >
-                  <Layers className="h-3.5 w-3.5 text-[#0066cc]" />
+                  <Layers className="h-3.5 w-3.5 text-primary" />
                   <span>Buscar una pieza</span>
                 </a>
                 <a
                   href="#chollos"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#e0e0e0] bg-[#ffffff] px-4 py-1.5 text-[14px] text-[#1d1d1f] transition hover:border-[#0071e3] hover:text-[#0066cc]"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-[14px] text-foreground transition hover:border-ring hover:text-primary"
                 >
-                  <Flame className="h-3.5 w-3.5 text-[#0066cc]" />
+                  <Flame className="h-3.5 w-3.5 text-primary" />
                   <span>Ver chollos</span>
                 </a>
               </div>
 
               {recentSearches.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[12px] text-[#7a7a7a]">Recientes:</span>
+                  <span className="text-[12px] text-muted-foreground">Recientes:</span>
                   {recentSearches.slice(0, 3).map((term) => (
-                    <button
+                    <Button variant="unstyled"
                       key={term}
                       type="button"
                       onClick={() => applyQuickSuggestion(term)}
-                      className="rounded-full bg-[#f5f5f7] px-3 py-1 text-[12px] text-[#1d1d1f] transition hover:text-[#0066cc]"
+                      className="rounded-full bg-secondary px-3 py-1 text-[12px] text-foreground transition hover:text-primary"
                     >
                       {term}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -937,70 +917,70 @@ function Index() {
 
             {/* Etiquetas de filtros activos */}
             {(activeFilterCount > 0 || query.trim().length > 0) && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#e0e0e0] pt-3">
-                <span className="text-[12px] font-semibold text-[#7a7a7a]">Activos:</span>
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+                <span className="text-[12px] font-semibold text-muted-foreground">Activos:</span>
                 {query.trim().length > 0 && (
-                  <button
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => setQuery("")}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#0071e3] bg-[#f5f5f7] px-3 py-1 text-[12px] font-semibold text-[#1d1d1f]"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-ring bg-secondary px-3 py-1 text-[12px] font-semibold text-foreground"
                   >
                     <span>"{query}"</span>
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 )}
                 {origin !== "all" && (
-                  <button
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => setOrigin("all")}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#0071e3] bg-[#f5f5f7] px-3 py-1 text-[12px] font-semibold text-[#1d1d1f]"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-ring bg-secondary px-3 py-1 text-[12px] font-semibold text-foreground"
                   >
                     <span>{origin === "oem" ? "OEM" : "Aftermarket"}</span>
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 )}
                 {categories.map((catId) => {
                   const catObj = CATEGORIES.find((c) => c.id === catId);
                   return (
-                    <button
+                    <Button variant="unstyled"
                       key={catId}
                       type="button"
                       onClick={() => toggleCat(catId)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-[#0071e3] bg-[#f5f5f7] px-3 py-1 text-[12px] font-semibold text-[#1d1d1f]"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-ring bg-secondary px-3 py-1 text-[12px] font-semibold text-foreground"
                     >
                       <span>{catObj?.labelEs ?? catId}</span>
                       <X className="h-3 w-3" />
-                    </button>
+                    </Button>
                   );
                 })}
                 {storeFilter !== "all" && (
-                  <button
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => setStoreFilter("all")}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#0071e3] bg-[#f5f5f7] px-3 py-1 text-[12px] font-semibold text-[#1d1d1f]"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-ring bg-secondary px-3 py-1 text-[12px] font-semibold text-foreground"
                   >
                     <span>{storeFilter === "niche-pro" ? "Especialistas" : storeFilter}</span>
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 )}
                 {maxPrice < MAX_PRICE && (
-                  <button
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => setMaxPrice(MAX_PRICE)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#0071e3] bg-[#f5f5f7] px-3 py-1 text-[12px] font-semibold text-[#1d1d1f]"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-ring bg-secondary px-3 py-1 text-[12px] font-semibold text-foreground"
                   >
                     <span>Máx. {fmt(maxPrice, currency)}</span>
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button variant="unstyled"
                   type="button"
                   onClick={clearAllFilters}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-[12px] text-[#0066cc] hover:underline"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-[12px] text-primary hover:underline"
                 >
                   <RotateCcw className="h-3 w-3" />
                   <span>Limpiar todo</span>
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -1010,41 +990,41 @@ function Index() {
       {/* 3. PRODUCT TILE DARK: EXPLORAR POR RELOJ O PIEZA (#272729) */}
       <section
         id="explorar"
-        className="w-full scroll-mt-14 bg-[#272729] px-[22px] py-[48px] text-[#ffffff] lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-apple-tile-1 px-[22px] py-[48px] text-primary-foreground lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
           <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:items-end sm:text-left">
             <div>
-              <p className="apple-caption font-semibold text-[#2997ff]">
-                Ingeniería interactiva
+              <p className="apple-caption font-semibold text-apple-primary-dark">
+                Relojes y componentes
               </p>
-              <h2 className="apple-display-lg mt-1 text-[32px] text-[#ffffff] sm:text-[40px]">
-                Explora por reloj o toca una pieza en el esquema.
+              <h2 className="apple-display-lg mt-1 text-[32px] text-primary-foreground sm:text-[40px]">
+                Encuentra piezas por reloj o categoría.
               </h2>
             </div>
-            <div className="inline-flex rounded-full border border-white/15 bg-[#2a2a2c] p-1">
-              <button
+            <div className="inline-flex rounded-full border border-primary-foreground/15 bg-apple-tile-2 p-1">
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => setExploreTab("watches")}
                 className={`rounded-full px-4 py-1.5 text-[14px] font-normal transition ${
                   exploreTab === "watches"
-                    ? "bg-[#0066cc] text-[#ffffff]"
-                    : "text-[#cccccc] hover:text-[#ffffff]"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-apple-body-muted hover:text-primary-foreground"
                 }`}
               >
                 Relojes populares
-              </button>
-              <button
+              </Button>
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => setExploreTab("parts")}
                 className={`rounded-full px-4 py-1.5 text-[14px] font-normal transition ${
                   exploreTab === "parts"
-                    ? "bg-[#0066cc] text-[#ffffff]"
-                    : "text-[#cccccc] hover:text-[#ffffff]"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-apple-body-muted hover:text-primary-foreground"
                 }`}
               >
                 Piezas comunes
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -1055,17 +1035,16 @@ function Index() {
                 const isSelected = selectedModelId === w.id;
                 const imgUrl = WATCH_PREVIEW_IMAGES[w.id] ?? WATCH_PREVIEW_IMAGES["rolex-op41"];
                 return (
-                  <button
+                  <Button variant="unstyled"
                     key={w.id}
                     type="button"
                     onClick={() => {
                       setSelectedModelId(w.id);
-                      setActiveWatchHotspotLabel(null);
-                    }}
+                                      }}
                     className={`group flex min-w-[240px] shrink-0 items-center gap-3.5 rounded-[18px] p-3.5 text-left transition ${
                       isSelected
-                        ? "border-2 border-[#0071e3] bg-[#2a2a2c]"
-                        : "border border-white/12 bg-[#2a2a2c]/70 hover:border-white/30 hover:bg-[#2a2a2c]"
+                        ? "border-2 border-ring bg-apple-tile-2"
+                        : "border border-primary-foreground/12 bg-apple-tile-2/70 hover:border-primary-foreground/30 hover:bg-apple-tile-2"
                     }`}
                   >
                     <img
@@ -1075,37 +1054,37 @@ function Index() {
                       loading="lazy"
                     />
                     <div className="min-w-0 flex-1">
-                      <span className="text-[12px] font-semibold text-[#2997ff]">
+                      <span className="text-[12px] font-semibold text-apple-primary-dark">
                         {w.brand} · {w.movement}
                       </span>
-                      <p className="truncate text-[17px] font-semibold text-[#ffffff]">
+                      <p className="truncate text-[17px] font-semibold text-primary-foreground">
                         {w.name}
                       </p>
-                      <p className="text-[12px] text-[#cccccc]">Ref. {w.ref} · {w.lugWidth}</p>
+                      <p className="text-[12px] text-apple-body-muted">Ref. {w.ref} · {w.lugWidth}</p>
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
           ) : (
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="mt-8 grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 sm:grid-cols-4">
               {COMMON_PARTS_SHORTCUTS.map((item) => {
                 const active = categories.includes(item.id);
                 return (
-                  <button
+                  <Button variant="unstyled"
                     key={item.id}
                     type="button"
                     onClick={() => {
                       setCategories([item.id]);
                       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
-                    className={`group overflow-hidden rounded-[18px] bg-[#2a2a2c] text-left transition ${
+                    className={`group overflow-hidden rounded-[18px] bg-apple-tile-2 text-left transition ${
                       active
-                        ? "border-2 border-[#0071e3]"
-                        : "border border-white/12 hover:border-white/30"
+                        ? "border-2 border-ring"
+                        : "border border-primary-foreground/12 hover:border-primary-foreground/30"
                     }`}
                   >
-                    <div className="aspect-[16/10] overflow-hidden bg-[#252527]">
+                    <div className="aspect-[16/10] overflow-hidden bg-apple-tile-3">
                       <img
                         src={item.image}
                         alt={item.title}
@@ -1114,26 +1093,17 @@ function Index() {
                       />
                     </div>
                     <div className="p-4">
-                      <p className="text-[14px] font-semibold text-[#ffffff]">{item.title}</p>
-                      <p className="mt-0.5 text-[12px] text-[#cccccc]">{item.subtitle}</p>
-                      <p className="mt-1.5 text-[12px] text-[#2997ff]">{item.savingsCue}</p>
+                      <p className="text-[14px] font-semibold text-primary-foreground">{item.title}</p>
+                      <p className="mt-0.5 text-[12px] text-apple-body-muted">{item.subtitle}</p>
+                      <p className="mt-1.5 text-[12px] text-apple-primary-dark">{item.savingsCue}</p>
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
           )}
 
-          {/* Esquema interactivo del reloj seleccionado */}
-          <div className="mt-6">
-            <ExplodedWatch
-              selected={categories}
-              model={activeModel}
-              onSelect={(cats, label) => {
-                selectFromWatch(cats, label);
-              }}
-            />
-          </div>
+
         </div>
       </section>
 
@@ -1141,40 +1111,34 @@ function Index() {
       <section
         id="resultados"
         ref={resultsRef}
-        className="w-full scroll-mt-14 bg-[#ffffff] px-[22px] py-[48px] lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-background px-[22px] py-[48px] lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#e0e0e0] pb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="apple-display-lg text-[28px] text-[#1d1d1f] sm:text-[34px]">
+              <h2 className="apple-display-lg text-[28px] text-foreground sm:text-[34px]">
                 {displayedParts.length}{" "}
                 {displayedParts.length === 1 ? "recambio compatible" : "recambios compatibles"}
               </h2>
-              {activeWatchHotspotLabel ? (
-                <span className="rounded-full bg-[#f5f5f7] px-3.5 py-1 text-[12px] font-semibold text-[#0066cc]">
-                  {activeWatchHotspotLabel}
-                </span>
-              ) : (
-                <span className="rounded-full bg-[#f5f5f7] px-3.5 py-1 text-[12px] font-semibold text-[#0066cc]">
-                  Esquema: {activeModel.brand} {activeModel.shortName}
-                </span>
-              )}
+              <span className="rounded-full bg-secondary px-3.5 py-1 text-[12px] font-semibold text-primary">
+                OEM y Aftermarket
+              </span>
               {isLoadingApi && (
-                <span className="rounded-full bg-[#f5f5f7] px-3 py-1 text-[12px] text-[#7a7a7a]">
+                <span className="rounded-full bg-secondary px-3 py-1 text-[12px] text-muted-foreground">
                   Buscando ofertas...
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-[14px]">
-              <label htmlFor="sort-parts-select" className="text-[#7a7a7a]">
+            <div className="flex w-full min-w-0 items-center gap-2 text-[14px] sm:w-auto">
+              <label htmlFor="sort-parts-select" className="text-muted-foreground">
                 Ordenar:
               </label>
               <select
                 id="sort-parts-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="rounded-full border border-[#e0e0e0] bg-[#ffffff] px-4 py-1.5 text-[14px] text-[#1d1d1f] outline-none focus:border-[#0071e3]"
+                className="min-h-11 min-w-0 flex-1 rounded-full border border-border bg-background px-4 py-1.5 text-[14px] text-foreground outline-none focus:border-ring"
               >
                 <option value="savings">Mayor ahorro y relevancia</option>
                 <option value="price-asc">Precio: menor a mayor</option>
@@ -1196,26 +1160,26 @@ function Index() {
                   isSelectedForCompare={Boolean(p.pairGroupId && p.pairGroupId === compareGroup && showStickyCompareBar)}
                   oemCounterpartEur={pairPrices?.oemMin}
                   onToggleSave={() => toggleSavePart(p)}
-                  onCompare={p.pairGroupId ? () => openComparatorFor(p.pairGroupId!) : undefined}
+                  onCompare={p.pairGroupId ? () => { if (p.pairGroupId) openComparatorFor(p.pairGroupId); } : undefined}
                   onCreateAlert={() => handleCreateAlert(p)}
                 />
               );
             })}
             {displayedParts.length === 0 && (
-              <div className="col-span-full rounded-[18px] border border-[#e0e0e0] bg-[#f5f5f7] p-12 text-center">
-                <p className="apple-lead text-[#1d1d1f]">
+              <div className="col-span-full rounded-[18px] border border-border bg-secondary p-12 text-center">
+                <p className="apple-lead text-foreground">
                   No hemos encontrado piezas con esos filtros.
                 </p>
-                <p className="apple-caption mt-2 text-[#7a7a7a]">
+                <p className="apple-caption mt-2 text-muted-foreground">
                   Prueba a limpiar los filtros o buscar otro modelo o calibre.
                 </p>
-                <button
+                <Button variant="unstyled"
                   type="button"
                   onClick={clearAllFilters}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[14px] text-white hover:bg-[#0071e3]"
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-[22px] py-[11px] text-[14px] text-primary-foreground hover:bg-ring"
                 >
                   <RotateCcw className="h-3.5 w-3.5" /> Mostrar todas las piezas
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -1224,70 +1188,70 @@ function Index() {
 
       {/* PANEL DE FILTROS AVANZADOS */}
       {showFiltersSheet && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-xs sm:items-center sm:justify-center sm:p-4">
-          <div className="max-h-[86vh] w-full overflow-y-auto rounded-t-[18px] border border-[#e0e0e0] bg-[#ffffff] p-6 sm:max-w-lg sm:rounded-[18px]">
-            <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-4">
+        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-apple-black/50 backdrop-blur-xs sm:items-center sm:justify-center sm:p-4">
+          <div className="max-h-[86vh] w-full overflow-y-auto rounded-t-[18px] border border-border bg-background p-6 sm:max-w-lg sm:rounded-[18px]">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
-                <h3 className="apple-lead text-[#1d1d1f]">Filtros</h3>
-                <p className="text-[12px] text-[#7a7a7a]">
+                <h3 className="apple-lead text-foreground">Filtros</h3>
+                <p className="text-[12px] text-muted-foreground">
                   {displayedParts.length} resultados disponibles
                 </p>
               </div>
-              <button
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => setShowFiltersSheet(false)}
                 aria-label="Cerrar filtros"
-                className="rounded-full bg-[#f5f5f7] p-2 text-[#1d1d1f] hover:bg-[#e0e0e0]"
+                className="rounded-full bg-secondary p-2 text-foreground hover:bg-border"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="mt-5 space-y-5">
               {/* Origin */}
               <div>
-                <p className="text-[12px] font-semibold text-[#7a7a7a]">
+                <p className="text-[12px] font-semibold text-muted-foreground">
                   Tipo de recambio
                 </p>
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {ORIGINS.map((o) => (
-                    <button
+                    <Button variant="unstyled"
                       key={o.id}
                       type="button"
                       onClick={() => setOrigin(o.id)}
                       className={`min-h-[42px] rounded-[12px] px-3 py-2 text-[14px] transition ${
                         origin === o.id
-                          ? "border-2 border-[#0071e3] bg-[#f5f5f7] font-semibold text-[#1d1d1f]"
-                          : "border border-[#e0e0e0] bg-[#ffffff] text-[#1d1d1f]"
+                          ? "border-2 border-ring bg-secondary font-semibold text-foreground"
+                          : "border border-border bg-background text-foreground"
                       }`}
                     >
                       {o.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
 
               {/* Categories */}
               <div>
-                <p className="text-[12px] font-semibold text-[#7a7a7a]">
+                <p className="text-[12px] font-semibold text-muted-foreground">
                   Categoría de pieza
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {CATEGORIES.map((c) => {
                     const active = categories.includes(c.id);
                     return (
-                      <button
+                      <Button variant="unstyled"
                         key={c.id}
                         type="button"
                         onClick={() => toggleCat(c.id)}
                         className={`min-h-[40px] rounded-[12px] px-3.5 py-1.5 text-[14px] transition ${
                           active
-                            ? "border-2 border-[#0071e3] bg-[#f5f5f7] font-semibold text-[#1d1d1f]"
-                            : "border border-[#e0e0e0] bg-[#ffffff] text-[#1d1d1f]"
+                            ? "border-2 border-ring bg-secondary font-semibold text-foreground"
+                            : "border border-border bg-background text-foreground"
                         }`}
                       >
                         {c.labelEs}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -1295,34 +1259,34 @@ function Index() {
 
               {/* Store */}
               <div>
-                <p className="text-[12px] font-semibold text-[#7a7a7a]">
+                <p className="text-[12px] font-semibold text-muted-foreground">
                   Tienda
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <button
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => setStoreFilter("all")}
                     className={`min-h-[38px] rounded-[12px] px-3.5 py-1.5 text-[14px] ${
                       storeFilter === "all"
-                        ? "border-2 border-[#0071e3] bg-[#f5f5f7] font-semibold text-[#1d1d1f]"
-                        : "border border-[#e0e0e0] bg-[#ffffff] text-[#1d1d1f]"
+                        ? "border-2 border-ring bg-secondary font-semibold text-foreground"
+                        : "border border-border bg-background text-foreground"
                     }`}
                   >
                     Todas
-                  </button>
+                  </Button>
                   {(["eBay", "AliExpress", "Chrono24", ...NICHE_PRO_STORES] as const).map((st) => (
-                    <button
+                    <Button variant="unstyled"
                       key={st}
                       type="button"
                       onClick={() => setStoreFilter(storeFilter === st ? "all" : st)}
                       className={`min-h-[38px] rounded-[12px] px-3.5 py-1.5 text-[14px] ${
                         storeFilter === st
-                          ? "border-2 border-[#0071e3] bg-[#f5f5f7] font-semibold text-[#1d1d1f]"
-                          : "border border-[#e0e0e0] bg-[#ffffff] text-[#1d1d1f]"
+                          ? "border-2 border-ring bg-secondary font-semibold text-foreground"
+                          : "border border-border bg-background text-foreground"
                       }`}
                     >
                       {st}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -1330,21 +1294,21 @@ function Index() {
               {/* Max Price & Currency */}
               <div>
                 <div className="flex items-center justify-between text-[12px] font-semibold">
-                  <span className="text-[#7a7a7a]">Precio máximo</span>
+                  <span className="text-muted-foreground">Precio máximo</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-semibold text-[#1d1d1f]">{fmt(maxPrice, currency)}</span>
-                    <div className="flex rounded-full border border-[#e0e0e0] bg-[#f5f5f7] p-0.5 text-[11px]">
+                    <span className="text-[14px] font-semibold text-foreground">{fmt(maxPrice, currency)}</span>
+                    <div className="flex rounded-full border border-border bg-secondary p-0.5 text-[11px]">
                       {(["EUR", "USD"] as const).map((c) => (
-                        <button
+                        <Button variant="unstyled"
                           key={c}
                           type="button"
                           onClick={() => setCurrency(c)}
                           className={`rounded-full px-2.5 py-0.5 ${
-                            currency === c ? "bg-[#0066cc] text-white" : "text-[#1d1d1f]"
+                            currency === c ? "bg-primary text-primary-foreground" : "text-foreground"
                           }`}
                         >
                           {c}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -1355,26 +1319,26 @@ function Index() {
                   max={MAX_PRICE}
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(+e.target.value)}
-                  className="mt-2 w-full accent-[#0066cc]"
+                  className="mt-2 w-full accent-primary"
                 />
               </div>
             </div>
 
-            <div className="mt-6 flex items-center gap-3 border-t border-[#e0e0e0] pt-4">
-              <button
+            <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
+              <Button variant="unstyled"
                 type="button"
                 onClick={clearAllFilters}
-                className="min-h-[44px] flex-1 rounded-full border border-[#0066cc] bg-transparent py-2.5 text-[14px] text-[#0066cc]"
+                className="min-h-[44px] flex-1 rounded-full border border-primary bg-transparent py-2.5 text-[14px] text-primary"
               >
                 Limpiar
-              </button>
-              <button
+              </Button>
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => setShowFiltersSheet(false)}
-                className="min-h-[44px] flex-1 rounded-full bg-[#0066cc] py-2.5 text-[14px] text-white"
+                className="min-h-[44px] flex-1 rounded-full bg-primary py-2.5 text-[14px] text-primary-foreground"
               >
                 Ver {displayedParts.length} resultados
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1384,18 +1348,18 @@ function Index() {
       <section
         id="comparator"
         ref={comparatorRef}
-        className="w-full scroll-mt-14 bg-[#f5f5f7] px-[22px] py-[48px] lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-secondary px-[22px] py-[48px] lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
-          <div className="flex flex-col justify-between gap-4 border-b border-[#e0e0e0] pb-6 lg:flex-row lg:items-end">
+          <div className="flex flex-col justify-between gap-4 border-b border-border pb-6 lg:flex-row lg:items-end">
             <div>
-              <p className="apple-caption font-semibold text-[#0066cc]">
+              <p className="apple-caption font-semibold text-primary">
                 Comparativa Equivalente · OEM vs Aftermarket
               </p>
-              <h2 className="apple-display-lg mt-1 text-[32px] text-[#1d1d1f] sm:text-[40px]">
+              <h2 className="apple-display-lg mt-1 text-[32px] text-foreground sm:text-[40px]">
                 Compara OEM y Aftermarket con los mismos criterios.
               </h2>
-              <p className="apple-caption mt-1 text-[#7a7a7a]">
+              <p className="apple-caption mt-1 text-muted-foreground">
                 Especificaciones técnicas, tolerancia de encaje e impacto en el valor del reloj cara a cara.
               </p>
             </div>
@@ -1403,18 +1367,18 @@ function Index() {
             {/* Component Group Selector */}
             <div className="flex flex-wrap gap-2">
               {PAIR_GROUPS.map((pg) => (
-                <button
+                <Button variant="unstyled"
                   key={pg.id}
                   type="button"
                   onClick={() => setCompareGroup(pg.id)}
                   className={`rounded-full px-4 py-1.5 text-[14px] transition ${
                     compareGroup === pg.id
-                      ? "bg-[#0066cc] text-white"
-                      : "border border-[#e0e0e0] bg-[#ffffff] text-[#1d1d1f] hover:border-[#0071e3]"
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border bg-background text-foreground hover:border-ring"
                   }`}
                 >
                   {pg.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -1435,16 +1399,16 @@ function Index() {
               return (
                 <div
                   key={cp.id}
-                  className="flex flex-col justify-between rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-[24px]"
+                  className="flex flex-col justify-between rounded-[18px] border border-border bg-background p-[24px]"
                 >
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e0e0e0] pb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-4">
                       <div className="flex items-center gap-2">
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold ${
                             isOem
-                              ? "bg-[#1d1d1f] text-white"
-                              : "bg-[#f5f5f7] text-[#0066cc]"
+                              ? "bg-foreground text-primary-foreground"
+                              : "bg-secondary text-primary"
                           }`}
                         >
                           {isOem ? (
@@ -1457,13 +1421,13 @@ function Index() {
                             </>
                           )}
                         </span>
-                        <span className="text-[12px] text-[#7a7a7a]">
+                        <span className="text-[12px] text-muted-foreground">
                           {isOem ? "Recambio original de marca" : "Alternativa compatible 1:1"}
                         </span>
                       </div>
 
                       {savingsPct !== null && savingsEur !== null && (
-                        <span className="rounded-full bg-[#0066cc]/10 px-3 py-1 text-[12px] font-semibold text-[#0066cc]">
+                        <span className="rounded-full bg-primary/10 px-3 py-1 text-[12px] font-semibold text-primary">
                           Ahorro del {savingsPct}% (-{fmt(savingsEur, currency)})
                         </span>
                       )}
@@ -1471,48 +1435,48 @@ function Index() {
 
                     <div className="mt-5 flex items-center gap-4">
                       <img
-                        src={cp.image}
+                        src={cp.image.startsWith("/parts/") ? ({ crystals: crystalImage, movements: movementImage, straps: strapImage }[cp.category as "crystals" | "movements" | "straps"] ?? braceletImage) : cp.image}
                         alt={cp.title}
-                        className="h-20 w-20 shrink-0 rounded-[8px] border border-[#e0e0e0] object-cover"
+                        className="h-20 w-20 shrink-0 rounded-[8px] border border-border object-cover"
                       />
                       <div className="min-w-0 flex-1">
-                        <h3 className="apple-body-strong text-[#1d1d1f]">
+                        <h3 className="apple-body-strong text-foreground">
                           {cp.title}
                         </h3>
-                        <p className="mt-1 text-[24px] font-semibold tracking-[-0.015em] text-[#1d1d1f]">
+                        <p className="mt-1 text-[24px] font-semibold text-foreground">
                           {fmt(cp.priceEur, currency)}
                         </p>
                       </div>
                     </div>
 
-                    <dl className="mt-5 divide-y divide-[#e0e0e0] rounded-[12px] border border-[#e0e0e0] bg-[#fafafc] p-4 text-[14px]">
+                    <dl className="mt-5 divide-y divide-border rounded-[12px] border border-border bg-apple-pearl p-4 text-[14px]">
                       <div className="flex justify-between gap-4 pb-2.5">
-                        <dt className="text-[#7a7a7a]">Tienda y entrega</dt>
-                        <dd className="text-right font-semibold text-[#1d1d1f]">
+                        <dt className="text-muted-foreground">Tienda y entrega</dt>
+                        <dd className="text-right font-semibold text-foreground">
                           {cp.store} · {cp.delivery}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-4 py-2.5">
-                        <dt className="text-[#7a7a7a]">Compatibilidad</dt>
-                        <dd className="text-right font-semibold text-[#1d1d1f]">
+                        <dt className="text-muted-foreground">Compatibilidad</dt>
+                        <dd className="text-right font-semibold text-foreground">
                           {cp.compatibleWith.slice(0, 2).join(", ")}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-4 py-2.5">
-                        <dt className="text-[#7a7a7a]">Material y acabado</dt>
-                        <dd className="text-right text-[#1d1d1f]">
+                        <dt className="text-muted-foreground">Material y acabado</dt>
+                        <dd className="text-right text-foreground">
                           {cp.materialSpec ?? cp.spec}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-4 py-2.5">
-                        <dt className="text-[#7a7a7a]">Tolerancia y encaje</dt>
-                        <dd className="text-right text-[#1d1d1f]">
+                        <dt className="text-muted-foreground">Tolerancia y encaje</dt>
+                        <dd className="text-right text-foreground">
                           {cp.toleranceSpec ?? "Ajuste estándar verificado"}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-4 pt-2.5">
-                        <dt className="text-[#7a7a7a]">Impacto en el reloj</dt>
-                        <dd className="text-right font-semibold text-[#1d1d1f]">
+                        <dt className="text-muted-foreground">Impacto en el reloj</dt>
+                        <dd className="text-right font-semibold text-foreground">
                           {cp.resaleImpact ?? (isOem ? "Conserva originalidad de fábrica" : "Uso diario / Modificación")}
                         </dd>
                       </div>
@@ -1520,24 +1484,24 @@ function Index() {
                   </div>
 
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-2 pt-2">
-                    <button
+                    <Button variant="unstyled"
                       type="button"
                       onClick={() => toggleSavePart(cp)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-[#0066cc] bg-transparent px-[18px] py-[9px] text-[14px] text-[#0066cc] transition hover:bg-[#0066cc]/5"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-primary bg-transparent px-[18px] py-[9px] text-[14px] text-primary transition hover:bg-primary/5"
                     >
                       <Heart
                         className={`h-3.5 w-3.5 ${
-                          savedIds.includes(cp.id) ? "fill-[#0066cc] text-[#0066cc]" : ""
+                          savedIds.includes(cp.id) ? "fill-primary text-primary" : ""
                         }`}
                       />
                       <span>{savedIds.includes(cp.id) ? "Guardada" : "Guardar pieza"}</span>
-                    </button>
+                    </Button>
 
                     <a
                       href={cp.customUrl ?? getStoreSearchUrl(cp.store, `${cp.brand} ${cp.title}`)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full bg-[#0066cc] px-[22px] py-[9px] text-[14px] text-white transition hover:bg-[#0071e3]"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-primary px-[22px] py-[9px] text-[14px] text-primary-foreground transition hover:bg-ring"
                     >
                       <span>Ver oferta en {cp.store}</span>
                       <ArrowUpRight className="h-3.5 w-3.5" />
@@ -1552,12 +1516,12 @@ function Index() {
 
       {/* STICKY BOTTOM COMPARISON BAR */}
       {showStickyCompareBar && comparedParts.length > 0 && (
-        <div className="apple-frosted fixed bottom-4 left-1/2 z-40 flex w-[94vw] max-w-xl -translate-x-1/2 items-center justify-between gap-3 rounded-full border border-[#e0e0e0] bg-[#f5f5f7]/90 px-5 py-2.5">
+        <div className="apple-frosted fixed bottom-4 left-1/2 z-40 flex w-[94vw] max-w-xl -translate-x-1/2 items-center justify-between gap-3 rounded-full border border-border bg-secondary/90 px-5 py-2.5">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold text-[#0066cc]">
+            <p className="text-[11px] font-semibold text-primary">
               Comparativa OEM vs Aftermarket
             </p>
-            <p className="truncate text-[14px] font-semibold text-[#1d1d1f]">
+            <p className="truncate text-[14px] font-semibold text-foreground">
               {PAIR_GROUPS.find((pg) => pg.id === compareGroup)?.label} ({comparedParts.slice(0, 2).length} piezas)
             </p>
           </div>
@@ -1565,19 +1529,19 @@ function Index() {
             <a
               href="#comparator"
               onClick={() => setShowStickyCompareBar(false)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#0066cc] px-4 py-1.5 text-[14px] text-white"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[14px] text-primary-foreground"
             >
               <Scale className="h-3.5 w-3.5" />
               <span>Comparar</span>
             </a>
-            <button
+            <Button variant="unstyled"
               type="button"
               onClick={() => setShowStickyCompareBar(false)}
               aria-label="Cerrar barra de comparación"
-              className="rounded-full bg-[#e0e0e0]/70 p-1.5 text-[#1d1d1f]"
+              className="rounded-full bg-border/70 p-1.5 text-foreground"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1586,25 +1550,25 @@ function Index() {
       <section
         id="chollos"
         ref={chollosRef}
-        className="w-full scroll-mt-14 bg-[#272729] px-[22px] py-[48px] text-[#ffffff] lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-apple-tile-1 px-[22px] py-[48px] text-primary-foreground lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="apple-caption font-semibold text-[#2997ff]">
+              <p className="apple-caption font-semibold text-apple-primary-dark">
                 Chollos de hoy
               </p>
-              <h2 className="apple-display-lg mt-1 text-[32px] text-[#ffffff] sm:text-[40px]">
+              <h2 className="apple-display-lg mt-1 text-[32px] text-primary-foreground sm:text-[40px]">
                 Oportunidades verificadas del día.
               </h2>
-              <p className="apple-caption mt-1 max-w-xl text-[#cccccc]">
+              <p className="apple-caption mt-1 max-w-xl text-apple-body-muted">
                 Selección de piezas, lotes de relojero y relojes por debajo de su precio habitual en Wallapop, eBay, Chrono24 y Todocolección.
               </p>
             </div>
 
             <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#cccccc]" />
+              <div className="relative w-full min-w-0 sm:w-64 sm:flex-1">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-apple-body-muted" />
                 <input
                   value={cholloQuery}
                   onChange={(e) => setCholloQuery(e.target.value)}
@@ -1612,18 +1576,18 @@ function Index() {
                     if (e.key === "Enter") void runLiveCholloScan();
                   }}
                   placeholder="Filtrar chollos (ej. Seiko, Omega...)"
-                  className="h-[40px] w-full rounded-full border border-white/15 bg-[#2a2a2c] pl-10 pr-4 text-[14px] text-[#ffffff] outline-none placeholder:text-[#cccccc]/70 focus:border-[#0071e3]"
+                  className="h-[40px] w-full rounded-full border border-primary-foreground/15 bg-apple-tile-2 pl-10 pr-4 text-[14px] text-primary-foreground outline-none placeholder:text-apple-body-muted/70 focus:border-ring"
                 />
               </div>
-              <button
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => void runLiveCholloScan()}
                 disabled={isScanningChollos}
-                className="inline-flex h-[40px] items-center gap-1.5 rounded-full bg-[#0066cc] px-5 text-[14px] text-white transition hover:bg-[#0071e3] disabled:opacity-50"
+                className="inline-flex h-[40px] items-center gap-1.5 rounded-full bg-primary px-5 text-[14px] text-primary-foreground transition hover:bg-ring disabled:opacity-50"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>{isScanningChollos ? "Actualizando..." : "Actualizar chollos"}</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -1637,18 +1601,18 @@ function Index() {
             ).map((plat) => {
               const active = cholloPlatform === plat.id;
               return (
-                <button
+                <Button variant="unstyled"
                   key={plat.id}
                   type="button"
                   onClick={() => setCholloPlatform(plat.id)}
                   className={`rounded-full px-4 py-1.5 text-[14px] transition ${
                     active
-                      ? "bg-[#0066cc] text-white"
-                      : "border border-white/15 bg-[#2a2a2c] text-[#cccccc] hover:text-white"
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-primary-foreground/15 bg-apple-tile-2 text-apple-body-muted hover:text-primary-foreground"
                   }`}
                 >
                   {plat.label}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -1658,10 +1622,10 @@ function Index() {
             {displayedChollos.slice(0, 4).map((deal, idx) => (
               <article
                 key={deal.id}
-                className="group flex flex-col justify-between rounded-[18px] border border-white/12 bg-[#2a2a2c] p-[20px] transition hover:border-white/25"
+                className="group flex flex-col justify-between rounded-[18px] border border-primary-foreground/12 bg-apple-tile-2 p-[20px] transition hover:border-primary-foreground/25"
               >
                 <div>
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-[8px] bg-[#252527]">
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-[8px] bg-apple-tile-3">
                     <img
                       src={deal.image || resolveCholloFallbackImage(deal.brand, idx)}
                       alt={deal.title}
@@ -1676,33 +1640,33 @@ function Index() {
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                     <div className="absolute left-2.5 top-2.5">
-                      <span className="rounded-full bg-black/75 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                      <span className="rounded-full bg-apple-black/75 px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
                         {deal.platform}
                       </span>
                     </div>
                     <div className="absolute right-2.5 top-2.5">
-                      <span className="rounded-full bg-[#0066cc] px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                      <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
                         -{deal.savingsPct}%
                       </span>
                     </div>
                   </div>
 
                   <div className="mt-4">
-                    <p className="text-[12px] text-[#cccccc]">
+                    <p className="text-[12px] text-apple-body-muted">
                       {deal.brand} · {deal.condition}
                     </p>
-                    <h3 className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-[#ffffff]">
+                    <h3 className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-primary-foreground">
                       {deal.title}
                     </h3>
 
-                    <div className="mt-3 flex items-baseline justify-between border-t border-white/10 pt-2.5">
+                    <div className="mt-3 flex items-baseline justify-between border-t border-primary-foreground/10 pt-2.5">
                       <div>
-                        <span className="text-[19px] font-semibold text-[#ffffff]">{fmt(deal.priceEur, currency)}</span>
-                        <span className="ml-1.5 text-[12px] text-[#cccccc] line-through">
+                        <span className="text-[19px] font-semibold text-primary-foreground">{fmt(deal.priceEur, currency)}</span>
+                        <span className="ml-1.5 text-[12px] text-apple-body-muted line-through">
                           {fmt(deal.marketValueEur, currency)}
                         </span>
                       </div>
-                      <span className="text-[12px] font-semibold text-[#2997ff]">
+                      <span className="text-[12px] font-semibold text-apple-primary-dark">
                         -{fmt(deal.profitMarginEur, currency)}
                       </span>
                     </div>
@@ -1714,7 +1678,7 @@ function Index() {
                     href={deal.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#0066cc] px-4 py-2 text-[14px] text-white transition hover:bg-[#0071e3]"
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[14px] text-primary-foreground transition hover:bg-ring"
                   >
                     <span>Ver en {deal.platform}</span>
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -1729,21 +1693,21 @@ function Index() {
       {/* 7. PRODUCT TILE LIGHT: GUÍAS ÚTILES & MI CAJA (#ffffff) */}
       <section
         id="blog"
-        className="w-full scroll-mt-14 bg-[#ffffff] px-[22px] py-[48px] lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-background px-[22px] py-[48px] lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="apple-caption font-semibold text-[#0066cc]">
+              <p className="apple-caption font-semibold text-primary">
                 Guías de taller
               </p>
-              <h2 className="apple-display-lg mt-1 text-[32px] text-[#1d1d1f] sm:text-[40px]">
+              <h2 className="apple-display-lg mt-1 text-[32px] text-foreground sm:text-[40px]">
                 Guías breves de compatibilidad y relojería.
               </h2>
             </div>
             <Link
               to="/blog"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#0066cc] px-5 py-2 text-[14px] text-[#0066cc] transition hover:bg-[#0066cc]/5"
+              className="inline-flex items-center gap-1.5 rounded-full border border-primary px-5 py-2 text-[14px] text-primary transition hover:bg-primary/5"
             >
               <span>Ver todas las guías</span>
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -1754,10 +1718,10 @@ function Index() {
             {SEO_BLOG_ARTICLES.slice(0, 4).map((art, idx) => (
               <article
                 key={art.slug}
-                className="group flex flex-col justify-between rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-[20px]"
+                className="group flex flex-col justify-between rounded-[18px] border border-border bg-background p-[20px]"
               >
                 <div>
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-[8px] bg-[#f5f5f7]">
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-[8px] bg-secondary">
                     <img
                       src={art.heroImage || resolveBlogFallbackImage(idx)}
                       alt={art.title}
@@ -1772,77 +1736,77 @@ function Index() {
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                     <div className="absolute left-2.5 top-2.5">
-                      <span className="rounded-full bg-[#ffffff]/90 px-2.5 py-0.5 text-[11px] font-semibold text-[#1d1d1f]">
+                      <span className="rounded-full bg-background/90 px-2.5 py-0.5 text-[11px] font-semibold text-foreground">
                         {art.category}
                       </span>
                     </div>
                   </div>
 
                   <div className="mt-4">
-                    <h3 className="apple-body-strong text-[#1d1d1f]">
+                    <h3 className="apple-body-strong text-foreground">
                       {art.title}
                     </h3>
-                    <p className="mt-1.5 line-clamp-2 text-[14px] leading-[1.42] text-[#7a7a7a]">
+                    <p className="mt-1.5 line-clamp-2 text-[14px] leading-[1.42] text-muted-foreground">
                       {art.summary}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-[#e0e0e0] pt-3">
-                  <button
+                <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => setActiveBlogArticle(art)}
-                    className="inline-flex items-center gap-1 text-[14px] text-[#0066cc] hover:underline"
+                    className="inline-flex items-center gap-1 text-[14px] text-primary hover:underline"
                   >
                     Leer guía <ArrowUpRight className="h-3.5 w-3.5" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="unstyled"
                     type="button"
                     onClick={() => applyQuickSuggestion(art.relatedSearchQuery)}
-                    className="rounded-full bg-[#f5f5f7] px-3 py-1 text-[12px] text-[#1d1d1f] transition hover:text-[#0066cc]"
+                    className="rounded-full bg-secondary px-3 py-1 text-[12px] text-foreground transition hover:text-primary"
                   >
                     Ver piezas
-                  </button>
+                  </Button>
                 </div>
               </article>
             ))}
           </div>
 
           {/* Bloque de regreso: Mi Caja */}
-          <div className="mt-10 flex flex-col justify-between gap-4 rounded-[18px] border border-[#e0e0e0] bg-[#f5f5f7] p-[24px] sm:flex-row sm:items-center">
+          <div className="mt-10 flex flex-col justify-between gap-4 rounded-[18px] border border-border bg-secondary p-[24px] sm:flex-row sm:items-center">
             <div>
-              <h3 className="apple-lead text-[#1d1d1f]">
+              <h3 className="apple-lead text-foreground">
                 Continúa donde lo dejaste.
               </h3>
-              <p className="apple-caption mt-1 text-[#7a7a7a]">
+              <p className="apple-caption mt-1 text-muted-foreground">
                 Tus piezas guardadas en Mi Caja y tus búsquedas recientes se conservan en este navegador sin necesidad de registro.
               </p>
               {recentSearches.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[12px] text-[#7a7a7a]">Retomar búsqueda:</span>
+                  <span className="text-[12px] text-muted-foreground">Retomar búsqueda:</span>
                   {recentSearches.map((term) => (
-                    <button
+                    <Button variant="unstyled"
                       key={term}
                       type="button"
                       onClick={() => applyQuickSuggestion(term)}
-                      className="inline-flex items-center gap-1 rounded-full border border-[#e0e0e0] bg-[#ffffff] px-3 py-1 text-[12px] text-[#1d1d1f] hover:border-[#0071e3] hover:text-[#0066cc]"
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-[12px] text-foreground hover:border-ring hover:text-primary"
                     >
-                      <Clock className="h-3 w-3 text-[#7a7a7a]" />
+                      <Clock className="h-3 w-3 text-muted-foreground" />
                       <span>{term}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
             </div>
             <div className="flex shrink-0 items-center gap-2.5">
-              <button
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => setShowWatchbox(true)}
-                className="inline-flex items-center gap-2 rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[14px] text-white transition hover:bg-[#0071e3]"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-[22px] py-[11px] text-[14px] text-primary-foreground transition hover:bg-ring"
               >
                 <Heart className="h-3.5 w-3.5" />
                 <span>Abrir Mi Caja ({savedParts.length})</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1850,60 +1814,60 @@ function Index() {
 
       {/* SEO BLOG ARTICLE READER MODAL */}
       {activeBlogArticle && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-8">
-            <button
+        <div className="fixed inset-0 z-50 grid place-items-center bg-apple-black/50 p-4 backdrop-blur-xs">
+          <div className="relative max-h-[88dvh] w-full max-w-2xl overflow-y-auto rounded-[18px] border border-border bg-background p-5 sm:p-8">
+            <Button variant="unstyled"
               type="button"
               onClick={() => setActiveBlogArticle(null)}
-              className="sticky right-0 top-0 float-right rounded-full bg-[#f5f5f7] p-2 text-[#1d1d1f]"
+              className="sticky right-0 top-0 float-right rounded-full bg-secondary p-2 text-foreground"
             >
               <X className="h-4 w-4" />
-            </button>
-            <span className="rounded-full bg-[#f5f5f7] px-3 py-1 text-[12px] font-semibold text-[#0066cc]">
+            </Button>
+            <span className="rounded-full bg-secondary px-3 py-1 text-[12px] font-semibold text-primary">
               {activeBlogArticle.category} · {activeBlogArticle.readTime}
             </span>
-            <h3 className="apple-display-lg mt-3 text-[28px] text-[#1d1d1f]">{activeBlogArticle.title}</h3>
-            <p className="apple-body mt-2 text-[#7a7a7a]">{activeBlogArticle.summary}</p>
+            <h3 className="apple-display-lg mt-3 text-[28px] text-foreground">{activeBlogArticle.title}</h3>
+            <p className="apple-body mt-2 text-muted-foreground">{activeBlogArticle.summary}</p>
 
-            <div className="mt-6 space-y-5 border-t border-[#e0e0e0] pt-5">
+            <div className="mt-6 space-y-5 border-t border-border pt-5">
               {activeBlogArticle.sections.map((sec) => (
                 <div key={sec.heading}>
-                  <h4 className="apple-lead text-[#1d1d1f]">{sec.heading}</h4>
-                  <p className="apple-body mt-1.5 text-[#333333]">{sec.body}</p>
+                  <h4 className="apple-lead text-foreground">{sec.heading}</h4>
+                  <p className="apple-body mt-1.5 text-apple-ink-80">{sec.body}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 rounded-[18px] border border-[#e0e0e0] bg-[#f5f5f7] p-5">
-              <p className="text-[12px] font-semibold text-[#1d1d1f]">
+            <div className="mt-6 rounded-[18px] border border-border bg-secondary p-5">
+              <p className="text-[12px] font-semibold text-foreground">
                 Preguntas frecuentes de taller
               </p>
               <div className="mt-3 space-y-3">
                 {(activeBlogArticle.faqs ?? []).map((item) => (
                   <div key={item.q} className="text-[14px]">
-                    <p className="font-semibold text-[#1d1d1f]">¿{item.q.replace(/^¿/, "")}</p>
-                    <p className="mt-0.5 text-[#7a7a7a]">{item.a}</p>
+                    <p className="font-semibold text-foreground">¿{item.q.replace(/^¿/, "")}</p>
+                    <p className="mt-0.5 text-muted-foreground">{item.a}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-              <button
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => {
                   const q = activeBlogArticle.relatedSearchQuery;
                   setActiveBlogArticle(null);
                   applyQuickSuggestion(q);
                 }}
-                className="rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[14px] text-white"
+                className="rounded-full bg-primary px-[22px] py-[11px] text-[14px] text-primary-foreground"
               >
                 Buscar "{activeBlogArticle.relatedSearchQuery}" en el buscador
-              </button>
+              </Button>
               <Link
                 to="/blog"
                 onClick={() => setActiveBlogArticle(null)}
-                className="text-[14px] text-[#0066cc] hover:underline"
+                className="text-[14px] text-primary hover:underline"
               >
                 Ver todas las guías en /blog →
               </Link>
@@ -1914,80 +1878,80 @@ function Index() {
 
       {/* MI CAJA / GUARDADOS DRAWER MODAL */}
       {showWatchbox && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs">
-          <div className="flex h-full w-full max-w-lg flex-col border-l border-[#e0e0e0] bg-[#ffffff] p-6">
-            <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-4">
+        <div className="fixed inset-0 z-50 flex justify-end bg-apple-black/50 backdrop-blur-xs">
+          <div className="flex h-full w-full max-w-lg flex-col border-l border-border bg-background p-6">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div className="flex items-center gap-2.5">
-                <Heart className="h-5 w-5 fill-[#0066cc] text-[#0066cc]" />
+                <Heart className="h-5 w-5 fill-primary text-primary" />
                 <div>
-                  <h3 className="apple-lead text-[#1d1d1f]">Mi Caja</h3>
-                  <p className="text-[12px] text-[#7a7a7a]">
+                  <h3 className="apple-lead text-foreground">Mi Caja</h3>
+                  <p className="text-[12px] text-muted-foreground">
                     {savedParts.length}{" "}
                     {savedParts.length === 1 ? "pieza guardada" : "piezas guardadas"}
                   </p>
                 </div>
               </div>
-              <button
+              <Button variant="unstyled"
                 type="button"
                 onClick={() => setShowWatchbox(false)}
                 aria-label="Cerrar Mi Caja"
-                className="rounded-full bg-[#f5f5f7] p-2 text-[#1d1d1f]"
+                className="rounded-full bg-secondary p-2 text-foreground"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
               {savedParts.length === 0 ? (
-                <div className="py-16 text-center text-[#7a7a7a]">
-                  <p className="apple-lead text-[#1d1d1f]">Tu caja está vacía</p>
+                <div className="py-16 text-center text-muted-foreground">
+                  <p className="apple-lead text-foreground">Tu caja está vacía</p>
                   <p className="mt-2 text-[14px]">
                     Pulsa el icono del corazón en cualquier pieza para guardarla aquí y calcular el presupuesto de tu reloj.
                   </p>
                 </div>
               ) : (
                 savedParts.map((sp) => (
-                  <div key={sp.id} className="flex items-center justify-between gap-3 rounded-[18px] border border-[#e0e0e0] p-3.5">
+                  <div key={sp.id} className="flex items-center justify-between gap-3 rounded-[18px] border border-border p-3.5">
                     <img src={sp.image} alt={sp.title} className="h-14 w-14 rounded-[8px] object-cover" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-semibold text-[#7a7a7a]">
+                      <p className="text-[11px] font-semibold text-muted-foreground">
                         {sp.store} · {sp.origin === "oem" ? "OEM" : "Aftermarket"}
                       </p>
-                      <h4 className="truncate text-[14px] font-semibold text-[#1d1d1f]">{sp.title}</h4>
-                      <p className="text-[15px] font-semibold text-[#1d1d1f]">{fmt(sp.priceEur, currency)}</p>
+                      <h4 className="truncate text-[14px] font-semibold text-foreground">{sp.title}</h4>
+                      <p className="text-[15px] font-semibold text-foreground">{fmt(sp.priceEur, currency)}</p>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <a
                         href={sp.customUrl ?? getStoreSearchUrl(sp.store, `${sp.brand} ${sp.title}`)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-full bg-[#0066cc] px-3.5 py-1.5 text-[12px] text-white"
+                        className="rounded-full bg-primary px-3.5 py-1.5 text-[12px] text-primary-foreground"
                       >
                         Ver oferta
                       </a>
-                      <button
+                      <Button variant="unstyled"
                         type="button"
                         onClick={() => toggleSavePart(sp)}
                         aria-label="Quitar de Mi Caja"
-                        className="rounded-full bg-[#f5f5f7] p-2 text-[#7a7a7a] hover:text-[#1d1d1f]"
+                        className="rounded-full bg-secondary p-2 text-muted-foreground hover:text-foreground"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))
               )}
 
               {alerts.length > 0 && (
-                <div className="mt-6 rounded-[18px] border border-[#e0e0e0] bg-[#f5f5f7] p-4">
-                  <p className="flex items-center gap-1.5 text-[12px] font-semibold text-[#1d1d1f]">
-                    <Bell className="h-3.5 w-3.5 text-[#0066cc]" /> Alertas de precio ({alerts.length})
+                <div className="mt-6 rounded-[18px] border border-border bg-secondary p-4">
+                  <p className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground">
+                    <Bell className="h-3.5 w-3.5 text-primary" /> Alertas de precio ({alerts.length})
                   </p>
                   <ul className="mt-2 space-y-1.5 text-[12px]">
                     {alerts.map((al) => (
                       <li key={al.partId} className="flex justify-between">
-                        <span className="truncate pr-2 text-[#1d1d1f]">{al.title}</span>
-                        <span className="font-semibold text-[#0066cc]">Aviso &lt; {fmt(al.targetEur, currency)}</span>
+                        <span className="truncate pr-2 text-foreground">{al.title}</span>
+                        <span className="font-semibold text-primary">Aviso &lt; {fmt(al.targetEur, currency)}</span>
                       </li>
                     ))}
                   </ul>
@@ -1996,13 +1960,13 @@ function Index() {
             </div>
 
             {savedParts.length > 0 && (
-              <div className="mt-4 border-t border-[#e0e0e0] pt-4">
+              <div className="mt-4 border-t border-border pt-4">
                 <div className="flex items-center justify-between text-[14px]">
-                  <span className="text-[#7a7a7a]">Presupuesto total:</span>
-                  <span className="text-[24px] font-semibold text-[#1d1d1f]">{fmt(totalSavedEur, currency)}</span>
+                  <span className="text-muted-foreground">Presupuesto total:</span>
+                  <span className="text-[24px] font-semibold text-foreground">{fmt(totalSavedEur, currency)}</span>
                 </div>
                 {totalSavedOemEquivEur > totalSavedEur && (
-                  <p className="mt-1 text-[12px] font-semibold text-[#0066cc]">
+                  <p className="mt-1 text-[12px] font-semibold text-primary">
                     Ahorras {fmt(totalSavedOemEquivEur - totalSavedEur, currency)} frente a comprar todo en OEM ({fmt(totalSavedOemEquivEur, currency)})
                   </p>
                 )}
@@ -2013,21 +1977,21 @@ function Index() {
       )}
 
       {/* APPLE FOOTER (#f5f5f7, py-[64px], 12px fine print & dense links) */}
-      <footer className="w-full border-t border-[#e0e0e0] bg-[#f5f5f7] px-[22px] py-[64px] text-[#333333]">
+      <footer className="w-full border-t border-border bg-secondary px-[22px] py-[64px] text-apple-ink-80">
         <div className="mx-auto max-w-[980px]">
-          <p className="apple-fine-print border-b border-[#e0e0e0] pb-4 text-[#7a7a7a]">
+          <p className="apple-fine-print border-b border-border pb-4 text-muted-foreground">
             1. Los precios y plazos de envío se consultan en tiempo real o mediante catálogos verificados de eBay, AliExpress, Chrono24, Cousins UK, NamokiMods y B&R Bands. Las marcas citadas pertenecen a sus respectivos propietarios.
           </p>
           <div className="mt-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <p className="apple-fine-print text-[#7a7a7a]">
+            <p className="apple-fine-print text-muted-foreground">
               Copyright © 2026 ChronoParts España. Todos los derechos reservados.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <a href="#search" className="apple-dense-link text-[#333333] hover:text-[#0066cc]">Buscador</a>
-              <a href="#explorar" className="apple-dense-link text-[#333333] hover:text-[#0066cc]">Esquema 3D</a>
-              <a href="#chollos" className="apple-dense-link text-[#333333] hover:text-[#0066cc]">Chollos</a>
-              <Link to="/blog" className="apple-dense-link text-[#333333] hover:text-[#0066cc]">Guías</Link>
-              <Link to="/marketplace" className="apple-dense-link text-[#333333] hover:text-[#0066cc]">Marketplace</Link>
+              <a href="#search" className="apple-dense-link text-apple-ink-80 hover:text-primary">Buscador</a>
+              <a href="#explorar" className="apple-dense-link text-apple-ink-80 hover:text-primary">Explorar relojes</a>
+              <a href="#chollos" className="apple-dense-link text-apple-ink-80 hover:text-primary">Chollos</a>
+              <Link to="/blog" className="apple-dense-link text-apple-ink-80 hover:text-primary">Blog</Link>
+              <Link to="/marketplace" className="apple-dense-link text-apple-ink-80 hover:text-primary">Marketplace</Link>
             </div>
           </div>
         </div>
@@ -2084,17 +2048,17 @@ function PartCard({
 
   return (
     <article
-      className={`group flex flex-col justify-between rounded-[18px] bg-[#ffffff] p-[24px] transition ${
+      className={`group flex flex-col justify-between rounded-[18px] bg-background p-[24px] transition ${
         isSelectedForCompare
-          ? "border-2 border-[#0071e3]"
-          : "border border-[#e0e0e0] hover:border-[#0071e3]/60"
+          ? "border-2 border-ring"
+          : "border border-border hover:border-ring/60"
       }`}
     >
       <div>
         {/* 1. Imagen de la pieza (rounded-[8px] inner radius) + Etiqueta OEM/Aftermarket */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-[8px] bg-[#f5f5f7]">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[8px] bg-secondary">
           <img
-            src={p.image}
+            src={p.image.startsWith("/parts/") ? ({ crystals: crystalImage, movements: movementImage, straps: strapImage }[p.category as "crystals" | "movements" | "straps"] ?? braceletImage) : p.image}
             alt={p.title}
             loading="lazy"
             width={640}
@@ -2113,14 +2077,14 @@ function PartCard({
             <span
               className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                 p.origin === "oem"
-                  ? "bg-[#1d1d1f] text-white"
-                  : "border border-[#e0e0e0] bg-[#ffffff]/95 text-[#1d1d1f]"
+                  ? "bg-foreground text-primary-foreground"
+                  : "border border-border bg-background/95 text-foreground"
               }`}
             >
               {p.origin === "oem" ? "OEM" : "Aftermarket"}
             </span>
             {savingsPct !== null && savingsEur !== null && (
-              <span className="rounded-full bg-[#0066cc] px-2.5 py-0.5 text-[11px] font-semibold text-white">
+              <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
                 -{savingsPct}% ({fmt(savingsEur, currency)})
               </span>
             )}
@@ -2128,46 +2092,46 @@ function PartCard({
 
           <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5">
             {onCreateAlert && (
-              <button
+              <Button variant="unstyled"
                 type="button"
                 onClick={onCreateAlert}
                 aria-label="Crear alerta de bajada de precio"
                 title="Avisarme si baja de precio"
-                className="grid h-8 w-8 place-items-center rounded-full bg-[#ffffff]/90 text-[#1d1d1f] transition hover:bg-[#ffffff]"
+                className="grid h-8 w-8 place-items-center rounded-full bg-background/90 text-foreground transition hover:bg-background"
               >
                 <Bell className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             )}
-            <button
+            <Button variant="unstyled"
               type="button"
               onClick={onToggleSave}
               aria-label={isSaved ? "Quitar de Mi Caja" : "Guardar pieza en Mi Caja"}
               title={isSaved ? "Quitar de Mi Caja" : "Guardar pieza en Mi Caja"}
               className={`grid h-8 w-8 place-items-center rounded-full transition ${
                 isSaved
-                  ? "bg-[#0066cc] text-white"
-                  : "bg-[#ffffff]/90 text-[#1d1d1f] hover:bg-[#ffffff]"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background/90 text-foreground hover:bg-background"
               }`}
             >
               <Heart className={`h-3.5 w-3.5 ${isSaved ? "fill-current" : ""}`} />
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* 2. Nombre breve y marca */}
-        <div className="mt-4 flex items-center justify-between gap-2 text-[12px] text-[#7a7a7a]">
-          <span className="font-semibold text-[#1d1d1f]">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[12px] text-muted-foreground">
+          <span className="font-semibold text-foreground">
             {p.brand === "Generic" ? "Recambio compatible" : p.brand}
           </span>
           <span className="inline-flex items-center gap-1 text-[12px]">
-            <span className="font-semibold text-[#1d1d1f]">{p.store}</span>
+            <span className="font-semibold text-foreground">{p.store}</span>
             <span>·</span>
             <Truck className="h-3 w-3" />
             <span>{p.delivery}</span>
           </span>
         </div>
 
-        <h3 className="apple-body-strong mt-1.5 line-clamp-2 text-[#1d1d1f]">
+        <h3 className="apple-body-strong mt-1.5 line-clamp-2 text-foreground">
           {p.title}
         </h3>
 
@@ -2176,36 +2140,36 @@ function PartCard({
           {p.compatibleWith.slice(0, 2).map((compat) => (
             <span
               key={compat}
-              className="rounded-full bg-[#f5f5f7] px-2.5 py-0.5 text-[12px] text-[#333333]"
+              className="rounded-full bg-secondary px-2.5 py-0.5 text-[12px] text-apple-ink-80"
             >
               {compat}
             </span>
           ))}
           {p.compatibleWith.length > 2 && (
-            <span className="text-[12px] text-[#7a7a7a]">
+            <span className="text-[12px] text-muted-foreground">
               +{p.compatibleWith.length - 2} más
             </span>
           )}
         </div>
 
         {/* 4. Precio y detalles técnicos */}
-        <div className="mt-4 flex items-baseline justify-between gap-2 border-t border-[#e0e0e0] pt-3">
+        <div className="mt-4 flex items-baseline justify-between gap-2 border-t border-border pt-3">
           <div>
-            <p className="text-[24px] font-semibold tracking-[-0.015em] text-[#1d1d1f]">
+            <p className="text-[24px] font-semibold text-foreground">
               {fmt(p.priceEur, currency)}
             </p>
             {p.origin === "generic" && refOemPrice && refOemPrice > p.priceEur && (
-              <p className="text-[12px] text-[#7a7a7a]">
+              <p className="text-[12px] text-muted-foreground">
                 Ref. OEM: <span className="line-through">{fmt(refOemPrice, currency)}</span>
               </p>
             )}
           </div>
 
           {hasTechDetails && (
-            <button
+            <Button variant="unstyled"
               type="button"
               onClick={() => setShowTechDetails((v) => !v)}
-              className="inline-flex items-center gap-1 text-[12px] text-[#0066cc] hover:underline"
+              className="inline-flex items-center gap-1 text-[12px] text-primary hover:underline"
             >
               <span>Detalles técnicos</span>
               <ChevronDown
@@ -2213,40 +2177,40 @@ function PartCard({
                   showTechDetails ? "rotate-180" : ""
                 }`}
               />
-            </button>
+            </Button>
           )}
         </div>
 
         {showTechDetails && (
-          <dl className="mt-3 space-y-1.5 rounded-[12px] border border-[#e0e0e0] bg-[#fafafc] p-3 text-[12px]">
+          <dl className="mt-3 space-y-1.5 rounded-[12px] border border-border bg-apple-pearl p-3 text-[12px]">
             {p.spec && (
               <div className="flex justify-between gap-2">
-                <dt className="text-[#7a7a7a]">Especificación</dt>
-                <dd className="text-right text-[#1d1d1f]">{p.spec}</dd>
+                <dt className="text-muted-foreground">Especificación</dt>
+                <dd className="text-right text-foreground">{p.spec}</dd>
               </div>
             )}
             {p.materialSpec && (
               <div className="flex justify-between gap-2">
-                <dt className="text-[#7a7a7a]">Material</dt>
-                <dd className="text-right text-[#1d1d1f]">{p.materialSpec}</dd>
+                <dt className="text-muted-foreground">Material</dt>
+                <dd className="text-right text-foreground">{p.materialSpec}</dd>
               </div>
             )}
             {p.toleranceSpec && (
               <div className="flex justify-between gap-2">
-                <dt className="text-[#7a7a7a]">Tolerancia / ajuste</dt>
-                <dd className="text-right text-[#1d1d1f]">{p.toleranceSpec}</dd>
+                <dt className="text-muted-foreground">Tolerancia / ajuste</dt>
+                <dd className="text-right text-foreground">{p.toleranceSpec}</dd>
               </div>
             )}
             {p.oemRef && (
               <div className="flex justify-between gap-2">
-                <dt className="text-[#7a7a7a]">Referencia técnica</dt>
-                <dd className="text-right font-mono font-semibold text-[#1d1d1f]">{p.oemRef}</dd>
+                <dt className="text-muted-foreground">Referencia técnica</dt>
+                <dd className="text-right font-mono font-semibold text-foreground">{p.oemRef}</dd>
               </div>
             )}
             {p.resaleImpact && (
               <div className="flex justify-between gap-2">
-                <dt className="text-[#7a7a7a]">Nota</dt>
-                <dd className="text-right text-[#1d1d1f]">{p.resaleImpact}</dd>
+                <dt className="text-muted-foreground">Nota</dt>
+                <dd className="text-right text-foreground">{p.resaleImpact}</dd>
               </div>
             )}
           </dl>
@@ -2254,26 +2218,26 @@ function PartCard({
       </div>
 
       {/* Acciones Apple Pill: Primaria (#0066cc) y Secundaria (1px solid #0066cc) */}
-      <div className="mt-5 flex items-center gap-2.5 pt-2">
+      <div className="mt-5 grid grid-cols-2 gap-2 pt-2">
         {onCompare && (
-          <button
+          <Button variant="unstyled"
             type="button"
             onClick={onCompare}
             className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border px-[18px] py-[9px] text-[14px] font-normal transition ${
               isSelectedForCompare
-                ? "border-2 border-[#0071e3] bg-[#0066cc]/10 font-semibold text-[#0066cc]"
-                : "border-[#0066cc] bg-transparent text-[#0066cc] hover:bg-[#0066cc]/5"
+                ? "border-2 border-ring bg-primary/10 font-semibold text-primary"
+                : "border-primary bg-transparent text-primary hover:bg-primary/5"
             }`}
           >
             <Scale className="h-3.5 w-3.5" />
             <span>Comparar</span>
-          </button>
+          </Button>
         )}
         <a
           href={storeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex flex-[1.3] items-center justify-center gap-1.5 rounded-full bg-[#0066cc] px-[22px] py-[9px] text-[14px] font-normal text-white transition hover:bg-[#0071e3]"
+          className="inline-flex flex-[1.3] items-center justify-center gap-1.5 rounded-full bg-primary px-[22px] py-[9px] text-[14px] font-normal text-primary-foreground transition hover:bg-ring"
         >
           <span>Ver oferta</span>
           <ArrowUpRight className="h-3.5 w-3.5" />
