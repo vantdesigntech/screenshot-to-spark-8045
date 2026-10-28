@@ -1,4 +1,5 @@
 # Requested improvements
+- [ ] Adapt the Apple presentation for mobile and remove the 3D watch diagram and references.
 - [x] Move and emphasize search immediately after the watch and specifications.
 - [x] Add Supabase account/profile modal and gate all personal actions; synchronize personal data.
 - [x] Separate mobile watch pins from hotspot cards and contain the exploded layers.
