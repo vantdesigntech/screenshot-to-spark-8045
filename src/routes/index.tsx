@@ -1,3 +1,5 @@
+import { LoopHero } from "@/components/LoopHero";
+import { interpretSearch } from "@/lib/interpret-search.functions";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -195,6 +197,27 @@ function Index() {
   const comparatorRef = useRef<HTMLElement>(null);
   const chollosRef = useRef<HTMLElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [nlLoading, setNlLoading] = useState(false);
+  const [nlNotice, setNlNotice] = useState<string | null>(null);
+  const runNaturalSearch = async (phrase: string) => {
+    setNlLoading(true);
+    setNlNotice(null);
+    try {
+      const r = await interpretSearch({ data: { phrase } });
+      const f = r.filters;
+      setQuery([f.brand, f.model].filter(Boolean).join(" "));
+      setCategories(f.category ? [f.category] : []);
+      setOrigin(f.origin === "OEM" ? "oem" : f.origin === "Generic" ? "generic" : "all");
+      setMaxPrice(f.maxPrice && f.maxPrice > 0 ? Math.min(f.maxPrice, MAX_PRICE) : MAX_PRICE);
+      const parts = [f.category && CATEGORIES.find((c) => c.id === f.category)?.labelEs, f.brand, f.model, f.calibre, f.lugWidthMm && `${f.lugWidthMm} mm`, f.material, f.maxPrice && `≤ ${f.maxPrice} €`].filter(Boolean);
+      setNlNotice(`${r.mode === "ai" ? "Interpretado con IA" : r.notice ?? "Búsqueda por palabras clave"}${parts.length ? ": " + parts.join(" · ") : ""}`);
+      setTimeout(() => document.getElementById("resultados")?.scrollIntoView({ behavior: "smooth" }), 50);
+    } catch {
+      setNlNotice("No se pudo completar la búsqueda. Inténtalo de nuevo o usa los filtros.");
+    } finally {
+      setNlLoading(false);
+    }
+  };
 
   const activeModel = useMemo(
     () => WATCH_MODELS.find((m) => m.id === selectedModelId) ?? WATCH_MODELS.find((m) => m.id === "rolex-op41"),
@@ -689,58 +712,12 @@ function Index() {
         </div>
       </div>
 
-      {/* 3. HERO — PRODUCT TILE LIGHT (DESIGN_apple.md: Pure White #ffffff, NO gradients, rounded-none, 80px desktop / 48px mobile padding) */}
-      <header className="w-full rounded-none bg-background py-8 lg:py-16">
-        <div className="mx-auto grid max-w-[1068px] items-center gap-6 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-          <div>
-            <p className="apple-caption font-semibold text-primary">
-              ChronoParts · OEM y Aftermarket
-            </p>
-
-            <h1 className="apple-hero-display mt-2 text-[34px] text-foreground sm:text-[44px] lg:text-[56px]">
-              Cada pieza exacta. Al mejor precio.
-            </h1>
-
-            <p className="apple-body mt-4 max-w-lg text-muted-foreground sm:text-[21px]">
-              Compara piezas originales y alternativas compatibles por modelo, referencia o calibre.
-            </p>
-
-            {/* Two Apple Pill CTAs: button-primary (#0066cc) & button-secondary-pill (1px solid #0066cc) */}
-            <div className="mt-6 flex flex-wrap items-center gap-2">
-              <a
-                href="#search"
-                onClick={(e) => {
-                  e.preventDefault();
-                  searchSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-                  setTimeout(() => searchInputRef.current?.focus(), 250);
-                }}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-primary px-[22px] py-[11px] text-[17px] font-normal text-primary-foreground transition-transform active:scale-95 focus:outline-2 focus:outline-ring"
-              >
-                <span>Buscar recambios</span>
-                <ArrowDown className="h-4 w-4" />
-              </a>
-              <a
-                href="#explorar"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-primary bg-background px-[22px] py-[11px] text-[17px] font-normal text-primary transition-transform active:scale-95 focus:outline-2 focus:outline-ring"
-              >
-                Elegir mi reloj
-              </a>
-            </div>
-          </div>
-
-          {/* Product Render resting on Pure White surface with the ONLY allowed system drop-shadow */}
-          <div className="mx-auto flex w-full max-w-[340px] flex-col items-center sm:max-w-[420px] lg:max-w-[460px]">
-            <img
-              src="/blog/blog-2.jpg"
-              alt="Fotografía de un reloj Rolex con brazalete de acero"
-              className="aspect-[16/9] w-full rounded-lg object-cover sm:aspect-[4/3]"
-            />
-            <a href="#explorar" className="mt-3 inline-flex min-h-11 items-center gap-2 text-[14px] text-primary">
-              <Watch className="h-4 w-4" /> Explorar relojes <ArrowUpRight className="h-4 w-4" />
-            </a>
-          </div>
+      <LoopHero onSearch={runNaturalSearch} loading={nlLoading} />
+      {nlNotice && (
+        <div role="status" className="mx-auto mt-4 max-w-[980px] px-4 text-center text-[14px] text-muted-foreground">
+          {nlNotice}
         </div>
-      </header>
+      )}
 
       {/* 2. PRODUCT TILE PARCHMENT: BUSCADOR DE RECAMBIOS (#f5f5f7) */}
       <section
