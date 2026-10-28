@@ -588,7 +588,7 @@ function Index() {
               onClick={() => setShowAccountMenu((v) => !v)}
               aria-expanded={showAccountMenu}
               aria-label="Abrir Mi Caja y menú de perfil"
-              className="relative flex h-[32px] items-center gap-1.5 rounded-[8px] bg-foreground px-3 text-[12px] font-normal text-primary-foreground transition-transform active:scale-95"
+              className="relative flex h-[32px] items-center gap-1.5 rounded-[8px] border border-border bg-card px-3 text-[12px] font-normal text-foreground transition-transform active:scale-95"
             >
               <User className="h-3.5 w-3.5 text-foreground" />
               <span className="hidden sm:inline">Mi Caja</span>
