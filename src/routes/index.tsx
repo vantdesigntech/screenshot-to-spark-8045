@@ -523,12 +523,12 @@ function Index() {
       <nav
         id="top"
         aria-label="Navegación global"
-        className="sticky top-0 z-50 h-[44px] w-full bg-apple-black text-primary-foreground"
+        className="sticky top-0 z-50 h-[44px] w-full bg-apple-black text-foreground"
       >
         <div className="mx-auto flex h-full max-w-[1024px] items-center justify-between px-4 sm:px-6">
           <a
             href="#top"
-            className="apple-nav-link text-[14px] font-semibold text-primary-foreground transition-opacity hover:opacity-85"
+            className="apple-nav-link text-[14px] font-semibold text-foreground transition-opacity hover:opacity-85"
           >
             ChronoParts
           </a>
@@ -536,19 +536,19 @@ function Index() {
           <div className="flex items-center gap-4 sm:gap-8">
             <a
               href="#search"
-              className="apple-nav-link text-primary-foreground/90 transition-opacity hover:text-primary-foreground"
+              className="apple-nav-link text-foreground/90 transition-opacity hover:text-foreground"
             >
               Buscar
             </a>
             <a
               href="#chollos"
-              className="apple-nav-link text-primary-foreground/90 transition-opacity hover:text-primary-foreground"
+              className="apple-nav-link text-foreground/90 transition-opacity hover:text-foreground"
             >
               Chollos
             </a>
             <Link
               to="/marketplace"
-              className="apple-nav-link hidden items-center gap-1.5 sm:inline-flex text-primary-foreground/90 transition-opacity hover:text-primary-foreground"
+              className="apple-nav-link hidden items-center gap-1.5 sm:inline-flex text-foreground/90 transition-opacity hover:text-foreground"
               title="Marketplace de relojes completos"
             >
               <span>Marketplace</span>
@@ -567,7 +567,7 @@ function Index() {
               aria-label="Abrir Mi Caja y menú de perfil"
               className="relative flex h-[32px] items-center gap-1.5 rounded-[8px] bg-foreground px-3 text-[12px] font-normal text-primary-foreground transition-transform active:scale-95"
             >
-              <User className="h-3.5 w-3.5 text-primary-foreground" />
+              <User className="h-3.5 w-3.5 text-foreground" />
               <span className="hidden sm:inline">Mi Caja</span>
               {savedIds.length > 0 && (
                 <span className="grid h-4 min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
@@ -990,7 +990,7 @@ function Index() {
       {/* 3. PRODUCT TILE DARK: EXPLORAR POR RELOJ O PIEZA (#272729) */}
       <section
         id="explorar"
-        className="w-full scroll-mt-14 bg-apple-tile-1 px-[22px] py-[48px] text-primary-foreground lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-apple-tile-1 px-[22px] py-[48px] text-foreground lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
           <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:items-end sm:text-left">
@@ -998,7 +998,7 @@ function Index() {
               <p className="apple-caption font-semibold text-apple-primary-dark">
                 Relojes y componentes
               </p>
-              <h2 className="apple-display-lg mt-1 text-[32px] text-primary-foreground sm:text-[40px]">
+              <h2 className="apple-display-lg mt-1 text-[32px] text-foreground sm:text-[40px]">
                 Encuentra piezas por reloj o categoría.
               </h2>
             </div>
@@ -1057,7 +1057,7 @@ function Index() {
                       <span className="text-[12px] font-semibold text-apple-primary-dark">
                         {w.brand} · {w.movement}
                       </span>
-                      <p className="truncate text-[17px] font-semibold text-primary-foreground">
+                      <p className="truncate text-[17px] font-semibold text-foreground">
                         {w.name}
                       </p>
                       <p className="text-[12px] text-apple-body-muted">Ref. {w.ref} · {w.lugWidth}</p>
@@ -1093,7 +1093,7 @@ function Index() {
                       />
                     </div>
                     <div className="p-4">
-                      <p className="text-[14px] font-semibold text-primary-foreground">{item.title}</p>
+                      <p className="text-[14px] font-semibold text-foreground">{item.title}</p>
                       <p className="mt-0.5 text-[12px] text-apple-body-muted">{item.subtitle}</p>
                       <p className="mt-1.5 text-[12px] text-apple-primary-dark">{item.savingsCue}</p>
                     </div>
@@ -1550,7 +1550,7 @@ function Index() {
       <section
         id="chollos"
         ref={chollosRef}
-        className="w-full scroll-mt-14 bg-apple-tile-1 px-[22px] py-[48px] text-primary-foreground lg:py-[80px]"
+        className="w-full scroll-mt-14 bg-apple-tile-1 px-[22px] py-[48px] text-foreground lg:py-[80px]"
       >
         <div className="mx-auto max-w-[980px]">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -1558,7 +1558,7 @@ function Index() {
               <p className="apple-caption font-semibold text-apple-primary-dark">
                 Chollos de hoy
               </p>
-              <h2 className="apple-display-lg mt-1 text-[32px] text-primary-foreground sm:text-[40px]">
+              <h2 className="apple-display-lg mt-1 text-[32px] text-foreground sm:text-[40px]">
                 Oportunidades verificadas del día.
               </h2>
               <p className="apple-caption mt-1 max-w-xl text-apple-body-muted">
@@ -1576,7 +1576,7 @@ function Index() {
                     if (e.key === "Enter") void runLiveCholloScan();
                   }}
                   placeholder="Filtrar chollos (ej. Seiko, Omega...)"
-                  className="h-[40px] w-full rounded-full border border-primary-foreground/15 bg-apple-tile-2 pl-10 pr-4 text-[14px] text-primary-foreground outline-none placeholder:text-apple-body-muted/70 focus:border-ring"
+                  className="h-[40px] w-full rounded-full border border-primary-foreground/15 bg-apple-tile-2 pl-10 pr-4 text-[14px] text-foreground outline-none placeholder:text-apple-body-muted/70 focus:border-ring"
                 />
               </div>
               <Button variant="unstyled"
@@ -1640,7 +1640,7 @@ function Index() {
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                     <div className="absolute left-2.5 top-2.5">
-                      <span className="rounded-full bg-apple-black/75 px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                      <span className="rounded-full bg-apple-black/75 px-2.5 py-0.5 text-[11px] font-semibold text-foreground">
                         {deal.platform}
                       </span>
                     </div>
@@ -1655,13 +1655,13 @@ function Index() {
                     <p className="text-[12px] text-apple-body-muted">
                       {deal.brand} · {deal.condition}
                     </p>
-                    <h3 className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-primary-foreground">
+                    <h3 className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-foreground">
                       {deal.title}
                     </h3>
 
                     <div className="mt-3 flex items-baseline justify-between border-t border-primary-foreground/10 pt-2.5">
                       <div>
-                        <span className="text-[19px] font-semibold text-primary-foreground">{fmt(deal.priceEur, currency)}</span>
+                        <span className="text-[19px] font-semibold text-foreground">{fmt(deal.priceEur, currency)}</span>
                         <span className="ml-1.5 text-[12px] text-apple-body-muted line-through">
                           {fmt(deal.marketValueEur, currency)}
                         </span>

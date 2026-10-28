@@ -53,19 +53,19 @@ function BlogPage() {
       />
 
       {/* Apple Level 1 Global Nav (#000000, 44px) */}
-      <nav className="sticky top-0 z-50 h-[44px] w-full bg-apple-black text-primary-foreground">
+      <nav className="sticky top-0 z-50 h-[44px] w-full bg-apple-black text-foreground">
         <div className="mx-auto flex h-full max-w-[1024px] items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="text-[14px] font-semibold text-primary-foreground">
+          <Link to="/" className="text-[14px] font-semibold text-foreground">
             ChronoParts
           </Link>
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link to="/" className="apple-nav-link hidden text-primary-foreground/80 hover:text-primary-foreground sm:inline">
+            <Link to="/" className="apple-nav-link hidden text-foreground/80 hover:text-foreground sm:inline">
               Buscador
             </Link>
-            <Link to="/marketplace" className="apple-nav-link text-primary-foreground/80 hover:text-primary-foreground">
+            <Link to="/marketplace" className="apple-nav-link text-foreground/80 hover:text-foreground">
               Marketplace
             </Link>
-            <span className="apple-nav-link text-primary-foreground">Blog</span>
+            <span className="apple-nav-link text-foreground">Blog</span>
           </div>
         </div>
       </nav>
@@ -97,7 +97,7 @@ function BlogPage() {
             </a>
             <Button variant="unstyled"
               onClick={() => setShowJsonLd((s) => !s)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-ring px-3.5 py-1.5 text-[12px] font-normal text-primary-foreground transition-transform active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-full bg-ring px-3.5 py-1.5 text-[12px] font-normal text-foreground transition-transform active:scale-95"
             >
               <Code2 className="h-3.5 w-3.5" />
               {showJsonLd ? "Ocultar Schema.org" : "Schema.org JSON-LD"}
@@ -108,7 +108,7 @@ function BlogPage() {
 
       <main className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 sm:py-14">
         {showJsonLd && (
-          <div className="mb-8 rounded-[18px] bg-apple-tile-1 p-6 text-primary-foreground">
+          <div className="mb-8 rounded-[18px] bg-apple-tile-1 p-6 text-foreground">
             <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
               <span className="text-[12px] font-semibold uppercase text-apple-primary-dark">
                 Datos Estructurados · TechArticle + FAQPage + WebSite
@@ -207,7 +207,7 @@ function BlogPage() {
               </div>
               <Link
                 to="/"
-                className="inline-flex max-w-full items-center gap-2 rounded-full bg-ring px-5 py-2.5 text-[14px] font-normal text-primary-foreground transition-transform active:scale-95"
+                className="inline-flex max-w-full items-center gap-2 rounded-full bg-ring px-5 py-2.5 text-[14px] font-normal text-foreground transition-transform active:scale-95"
               >
                 <Search className="h-4 w-4" />
                 Buscar recambios "{activeArticle.relatedSearchQuery}"
