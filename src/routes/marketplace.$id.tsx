@@ -301,7 +301,7 @@ export function ListingDetailPage() {
       </div>
 
       {actionFeedback && (
-        <div className="mb-6 p-3.5 rounded-xl bg-success/10 border border-success/30 text-emerald-800 text-xs font-medium flex items-center justify-between">
+        <div className="mb-6 p-3.5 rounded-xl bg-success/10 border border-success/30 text-success text-xs font-medium flex items-center justify-between">
           <span>{actionFeedback}</span>
           <button
             type="button"
@@ -425,7 +425,7 @@ export function ListingDetailPage() {
                 </span>
               </div>
               {listing.authenticityConfirmed && (
-                <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold shrink-0">
+                <span className="inline-flex items-center gap-1 text-success font-semibold shrink-0">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Declaración firmada por vendedor
                 </span>
@@ -590,7 +590,7 @@ export function ListingDetailPage() {
                   onClick={handleToggleFavorite}
                   className={`py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     listing.isFavorited
-                      ? 'bg-destructive/12 border-destructive/30 text-red-700'
+                      ? 'bg-destructive/12 border-destructive/30 text-destructive'
                       : 'bg-background border-border text-foreground hover:bg-secondary'
                   }`}
                 >
@@ -657,11 +657,11 @@ export function ListingDetailPage() {
                 onSubmit={handleReportSubmit}
                 className="p-4 rounded-xl bg-destructive/5 border border-destructive/25 space-y-3"
               >
-                <h3 className="text-xs font-bold uppercase tracking-wider text-red-700">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-destructive">
                   Denunciar irregularidad o sospecha de réplica
                 </h3>
                 {reportSuccess ? (
-                  <p className="text-xs text-emerald-700 font-medium">
+                  <p className="text-xs text-success font-medium">
                     {reportSuccess}
                   </p>
                 ) : (
@@ -743,7 +743,7 @@ export function ListingDetailPage() {
                   <button
                     type="button"
                     onClick={() => void handleOwnerStatusChange('paused')}
-                    className="px-3 py-1.5 rounded-xl bg-primary/15 text-amber-800 border border-primary/30 text-xs font-semibold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-primary/15 text-primary border border-primary/30 text-xs font-semibold cursor-pointer"
                   >
                     Pausar anuncio
                   </button>
@@ -761,7 +761,7 @@ export function ListingDetailPage() {
                   <button
                     type="button"
                     onClick={() => void handleOwnerStatusChange('withdrawn')}
-                    className="px-3 py-1.5 rounded-xl bg-destructive/15 text-red-700 border border-destructive/30 text-xs font-semibold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-destructive/15 text-destructive border border-destructive/30 text-xs font-semibold cursor-pointer"
                   >
                     Retirar anuncio
                   </button>

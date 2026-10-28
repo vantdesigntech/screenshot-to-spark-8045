@@ -168,7 +168,7 @@ export function MyListingsPage() {
       </div>
 
       {feedback && (
-        <div className="mb-6 p-3.5 rounded-xl bg-success/12 border border-success/30 text-emerald-800 text-xs font-semibold flex items-center justify-between">
+        <div className="mb-6 p-3.5 rounded-xl bg-success/12 border border-success/30 text-success text-xs font-semibold flex items-center justify-between">
           <span>{feedback}</span>
           <button
             type="button"
@@ -317,7 +317,7 @@ export function MyListingsPage() {
                           onClick={() =>
                             void handleStatusChange(item.id, 'paused')
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/15 text-amber-800 border border-primary/30 text-xs font-semibold cursor-pointer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/15 text-primary border border-primary/30 text-xs font-semibold cursor-pointer"
                         >
                           <PauseCircle className="w-3.5 h-3.5" />
                           Pausar
@@ -343,7 +343,7 @@ export function MyListingsPage() {
                           onClick={() =>
                             void handleStatusChange(item.id, 'withdrawn')
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-destructive/12 text-red-700 border border-destructive/25 text-xs font-semibold cursor-pointer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-destructive/12 text-destructive border border-destructive/25 text-xs font-semibold cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Retirar
@@ -465,7 +465,7 @@ export function MyListingsPage() {
                     className="p-4 rounded-xl bg-destructive/5 border border-destructive/20 space-y-1 text-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-red-700">
+                      <span className="font-bold text-destructive">
                         {rep.reason}
                       </span>
                       <span className="text-muted-foreground">

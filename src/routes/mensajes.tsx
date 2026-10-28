@@ -161,7 +161,7 @@ export function PrivateMessagesPage() {
       </div>
 
       {errorMessage && (
-        <div className="mb-6 p-4 rounded-2xl bg-destructive/10 border border-destructive/30 text-red-700 text-xs font-medium flex items-center gap-2">
+        <div className="mb-6 p-4 rounded-2xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>

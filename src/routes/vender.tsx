@@ -329,14 +329,14 @@ export function PublishListingPage() {
     >
       <div className="max-w-4xl mx-auto space-y-8">
         {errorMessage && (
-          <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/30 text-red-700 text-xs sm:text-sm font-medium flex items-start gap-2.5">
+          <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/30 text-destructive text-xs sm:text-sm font-medium flex items-start gap-2.5">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-4 rounded-2xl bg-success/12 border border-success/30 text-emerald-800 text-xs sm:text-sm font-medium flex items-start gap-2.5">
+          <div className="p-4 rounded-2xl bg-success/12 border border-success/30 text-success text-xs sm:text-sm font-medium flex items-start gap-2.5">
             <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
             <span>{successMessage}</span>
           </div>

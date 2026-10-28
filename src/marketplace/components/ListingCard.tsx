@@ -157,7 +157,7 @@ export function ListingCard({ listing, onToggleFavorite }: ListingCardProps) {
               {listing.boxIncluded && listing.papersIncluded ? (
                 <>
                   <FileCheck2 className="w-3.5 h-3.5 text-success shrink-0" />
-                  <span className="text-emerald-700 font-medium">
+                  <span className="text-success font-medium">
                     Full Set (Caja+Doc)
                   </span>
                 </>
