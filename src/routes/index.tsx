@@ -31,8 +31,10 @@ import {
   User,
   RotateCcw,
   Watch,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AccountControls } from "@/components/AccountProvider";
 import braceletImage from "@/assets/bracelet.jpg";
 import crystalImage from "@/assets/crystal.jpg";
 import movementImage from "@/assets/movement.jpg";
@@ -542,63 +544,33 @@ function Index() {
         </div>
       )}
 
-      {/* 1. GLOBAL NAV (DESIGN_apple.md: background #000000, height 44px, text #ffffff in 12px/400/-0.12px) */}
-      <nav
-        id="top"
-        aria-label="Navegación global"
-        className="sticky top-0 z-50 h-[44px] w-full bg-apple-black text-foreground"
-      >
-        <div className="mx-auto flex h-full max-w-[1024px] items-center justify-between px-4 sm:px-6">
-          <a
-            href="#top"
-            className="apple-nav-link text-[14px] font-semibold text-foreground transition-opacity hover:opacity-85"
-          >
-            ChronoParts
-          </a>
+      {/* Single global bar: logo · Buscar/Chollos/Marketplace · cuenta + Mi Caja */}
+      <nav id="top" aria-label="Navegación global" className="sticky top-0 z-50 h-[44px] w-full border-b border-border bg-background text-foreground">
+        <div className="mx-auto grid h-full max-w-[1100px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 sm:grid-cols-[1fr_auto_1fr] sm:px-6">
+          <a href="#top" className="truncate text-[14px] font-semibold text-foreground transition-opacity hover:opacity-85">ChronoParts</a>
 
-          <div className="flex items-center gap-4 sm:gap-8">
-            <a
-              href="#search"
-              className="apple-nav-link text-foreground/90 transition-opacity hover:text-foreground"
-            >
-              Buscar
-            </a>
-            <a
-              href="#chollos"
-              className="apple-nav-link text-foreground/90 transition-opacity hover:text-foreground"
-            >
-              Chollos
-            </a>
-            <Link
-              to="/marketplace"
-              className="apple-nav-link hidden items-center gap-1.5 sm:inline-flex text-foreground/90 transition-opacity hover:text-foreground"
-              title="Marketplace de relojes completos"
-            >
+          <div className="hidden items-center gap-8 sm:flex">
+            <a href="#search" className="apple-nav-link text-foreground/90 transition-opacity hover:text-foreground">Buscar</a>
+            <a href="#chollos" className="apple-nav-link text-foreground/90 transition-opacity hover:text-foreground">Chollos</a>
+            <Link to="/marketplace" className="apple-nav-link text-foreground/90 transition-opacity hover:text-foreground inline-flex items-center gap-1.5" title="Marketplace de relojes completos">
               <span>Marketplace</span>
-              <span className="rounded-full bg-apple-tile-1 px-2 py-0.5 text-[10px] font-normal text-apple-primary-dark">
-                Próximamente
-              </span>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-normal text-primary">Próximamente</span>
             </Link>
           </div>
 
-          {/* Icono único de Perfil (Mi Caja + Cuenta) */}
-          <div className="relative">
-            <Button variant="unstyled"
-              type="button"
-              onClick={() => setShowAccountMenu((v) => !v)}
-              aria-expanded={showAccountMenu}
-              aria-label="Abrir Mi Caja y menú de perfil"
-              className="relative flex h-[32px] items-center gap-1.5 rounded-[8px] border border-border bg-card px-3 text-[12px] font-normal text-foreground transition-transform active:scale-95"
-            >
-              <User className="h-3.5 w-3.5 text-foreground" />
+          <div className="relative flex items-center justify-end gap-2">
+            <div className="hidden items-center gap-2 sm:flex"><AccountControls /></div>
+            <a href="#search" aria-label="Buscar" className="grid h-10 w-10 place-items-center rounded-md text-foreground sm:hidden"><Search className="h-4 w-4" /></a>
+            <Button variant="unstyled" type="button" onClick={() => setShowAccountMenu((v) => !v)} aria-expanded={showAccountMenu}
+              aria-label="Abrir menú, cuenta y Mi Caja"
+              className="relative flex h-10 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-[12px] font-normal text-foreground transition-transform active:scale-95 sm:h-[32px]">
+              <Menu className="h-4 w-4 sm:hidden" />
+              <User className="hidden h-3.5 w-3.5 sm:block" />
               <span className="hidden sm:inline">Mi Caja</span>
               {savedIds.length > 0 && (
-                <span className="grid h-4 min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-                  {savedIds.length}
-                </span>
+                <span className="grid h-4 min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{savedIds.length}</span>
               )}
             </Button>
-
             {showAccountMenu && (
               <div className="absolute right-0 top-10 z-50 w-64 rounded-[18px] border border-border bg-background p-3 text-foreground">
                 <div className="border-b border-apple-divider pb-2.5 px-2">
@@ -610,6 +582,9 @@ function Index() {
                   </p>
                 </div>
                 <div className="mt-2 space-y-1 text-[14px]">
+                  <div className="flex flex-wrap items-center gap-2 border-b border-border px-2 pb-3 sm:hidden"><AccountControls /></div>
+                  <a href="#search" onClick={() => setShowAccountMenu(false)} className="block rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary sm:hidden">Buscar</a>
+                  <a href="#chollos" onClick={() => setShowAccountMenu(false)} className="block rounded-[11px] px-3 py-2 text-foreground transition hover:bg-secondary sm:hidden">Chollos</a>
                   <Button variant="unstyled"
                     type="button"
                     onClick={() => {
@@ -677,40 +652,6 @@ function Index() {
           </div>
         </div>
       </nav>
-
-      {/* 2. SUB-NAV FROSTED (DESIGN_apple.md: #f5f5f7 at 80% + backdrop-filter blur, height 52px, 1px rgba(0,0,0,0.08)) */}
-      <div className="sticky top-[44px] z-40 h-[52px] w-full border-b border-border apple-frosted">
-        <div className="mx-auto flex h-full max-w-[1024px] items-center justify-between px-4 sm:px-6">
-          <span className="apple-tagline text-[15px] sm:text-[21px] text-foreground">
-            Recambios y Calibres
-          </span>
-          <div className="flex items-center gap-4">
-            <a
-              href="#explorar"
-              className="hidden text-[14px] font-normal text-foreground/80 hover:text-primary sm:inline"
-            >
-              Explorar relojes
-            </a>
-            <a
-              href="#comparator"
-              className="hidden text-[14px] font-normal text-foreground/80 hover:text-primary sm:inline"
-            >
-              OEM vs Aftermarket
-            </a>
-            <a
-              href="#search"
-              onClick={(e) => {
-                e.preventDefault();
-                searchSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-                setTimeout(() => searchInputRef.current?.focus(), 200);
-              }}
-              className="inline-flex items-center justify-center rounded-full bg-primary px-[16px] py-[6px] text-[12px] font-normal text-primary-foreground transition-transform active:scale-95 focus:outline-2 focus:outline-ring"
-            >
-              Buscar recambios
-            </a>
-          </div>
-        </div>
-      </div>
 
       <LoopHero onSearch={runNaturalSearch} loading={nlLoading} />
       {nlNotice && (
