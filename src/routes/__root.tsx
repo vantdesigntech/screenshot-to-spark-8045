@@ -17,17 +17,17 @@ import { AccountProvider } from "@/components/AccountProvider";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#ffffff] px-4 text-[#1d1d1f]">
+    <div className="flex min-h-screen items-center justify-center bg-card px-4 text-foreground">
       <div className="max-w-md text-center">
-        <h1 className="apple-hero-display text-[56px] text-[#1d1d1f]">404</h1>
-        <h2 className="apple-tagline mt-3 text-[21px] text-[#1d1d1f]">Página no encontrada</h2>
-        <p className="apple-body mt-2 text-[#7a7a7a]">
+        <h1 className="apple-hero-display text-[56px] text-foreground">404</h1>
+        <h2 className="apple-tagline mt-3 text-[21px] text-foreground">Página no encontrada</h2>
+        <p className="apple-body mt-2 text-muted-foreground">
           La página o referencia que buscas no existe o se ha movido dentro de ChronoParts.
         </p>
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[17px] font-normal text-white transition-transform active:scale-95 focus:outline-2 focus:outline-[#0071e3]"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-[22px] py-[11px] text-[17px] font-normal text-primary-foreground transition-transform active:scale-95 focus:outline-2 focus:outline-primary"
           >
             Volver al inicio
           </Link>
@@ -45,12 +45,12 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#ffffff] px-4 text-[#1d1d1f]">
+    <div className="flex min-h-screen items-center justify-center bg-card px-4 text-foreground">
       <div className="max-w-md text-center">
-        <h1 className="apple-tagline text-[21px] text-[#1d1d1f]">
+        <h1 className="apple-tagline text-[21px] text-foreground">
           No se ha podido cargar esta página
         </h1>
-        <p className="apple-body mt-2 text-[#7a7a7a]">
+        <p className="apple-body mt-2 text-muted-foreground">
           Ha ocurrido un problema puntual al cargar la vista. Puedes reintentar o volver al buscador.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -59,13 +59,13 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[17px] font-normal text-white transition-transform active:scale-95 focus:outline-2 focus:outline-[#0071e3]"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-[22px] py-[11px] text-[17px] font-normal text-primary-foreground transition-transform active:scale-95 focus:outline-2 focus:outline-primary"
           >
             Reintentar
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-full border border-[#0066cc] bg-white px-[22px] py-[11px] text-[17px] font-normal text-[#0066cc] transition-transform active:scale-95"
+            className="inline-flex items-center justify-center rounded-full border border-primary bg-card px-[22px] py-[11px] text-[17px] font-normal text-primary transition-transform active:scale-95"
           >
             Ir al buscador
           </a>
@@ -87,7 +87,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Manrope:wght@400;500;600;700&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],

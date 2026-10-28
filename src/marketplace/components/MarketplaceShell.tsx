@@ -113,18 +113,18 @@ export function MarketplaceShell({
   ]
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary selection:text-primary-foreground">
+    <div className="min-h-screen bg-background text-primary-foreground flex flex-col selection:bg-primary selection:text-primary-foreground">
       {/* 1. GLOBAL NAV (#000000, 44px height) */}
       <nav aria-label="Navegación global" className="w-full bg-apple-black text-background">
         <div className="mx-auto flex h-[44px] max-w-[980px] items-center justify-between px-[22px]">
           <div className="flex items-center gap-6">
             <Link
               to="/"
-              className="flex items-center gap-2 text-primary-foreground/80 transition hover:text-primary-foreground"
+              className="flex items-center gap-2 text-foreground/80 transition hover:text-foreground"
               title="Volver al ChronoParts y recambios"
             >
-              <Watch className="h-4 w-4 text-primary-foreground" />
-              <span className="text-[12px] font-semibold text-primary-foreground">
+              <Watch className="h-4 w-4 text-foreground" />
+              <span className="text-[12px] font-semibold text-foreground">
                 ChronoParts
               </span>
             </Link>
@@ -147,7 +147,7 @@ export function MarketplaceShell({
                 aria-label="Cambiar usuario activo del marketplace"
                 value={currentUser.id}
                 onChange={(e) => handleSwitchUser(e.target.value)}
-                className="max-w-[145px] bg-transparent text-[12px] text-primary-foreground focus:outline-none cursor-pointer pr-1"
+                className="max-w-[145px] bg-transparent text-[12px] text-foreground focus:outline-none cursor-pointer pr-1"
               >
                 {accounts.map((acc) => (
                   <option
