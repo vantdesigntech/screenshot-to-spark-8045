@@ -11,6 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as MensajesRouteImport } from './routes/mensajes'
+import { Route as MisAnunciosRouteImport } from './routes/mis-anuncios'
+import { Route as VenderRouteImport } from './routes/vender'
+import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
+import { Route as MarketplaceIdRouteImport } from './routes/marketplace.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +28,110 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MensajesRoute = MensajesRouteImport.update({
+  id: '/mensajes',
+  path: '/mensajes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MisAnunciosRoute = MisAnunciosRouteImport.update({
+  id: '/mis-anuncios',
+  path: '/mis-anuncios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VenderRoute = VenderRouteImport.update({
+  id: '/vender',
+  path: '/vender',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
+  id: '/marketplace/',
+  path: '/marketplace/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceIdRoute = MarketplaceIdRouteImport.update({
+  id: '/marketplace/$id',
+  path: '/marketplace/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/favoritos': typeof FavoritosRoute
+  '/mensajes': typeof MensajesRoute
+  '/mis-anuncios': typeof MisAnunciosRoute
+  '/vender': typeof VenderRoute
+  '/marketplace/$id': typeof MarketplaceIdRoute
+  '/marketplace/': typeof MarketplaceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/favoritos': typeof FavoritosRoute
+  '/mensajes': typeof MensajesRoute
+  '/mis-anuncios': typeof MisAnunciosRoute
+  '/vender': typeof VenderRoute
+  '/marketplace/$id': typeof MarketplaceIdRoute
+  '/marketplace': typeof MarketplaceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/favoritos': typeof FavoritosRoute
+  '/mensajes': typeof MensajesRoute
+  '/mis-anuncios': typeof MisAnunciosRoute
+  '/vender': typeof VenderRoute
+  '/marketplace/$id': typeof MarketplaceIdRoute
+  '/marketplace/': typeof MarketplaceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/blog'
+  fullPaths:
+    | '/'
+    | '/blog'
+    | '/favoritos'
+    | '/mensajes'
+    | '/mis-anuncios'
+    | '/vender'
+    | '/marketplace/$id'
+    | '/marketplace/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/blog'
-  id: '__root__' | '/' | '/blog'
+  to:
+    | '/'
+    | '/blog'
+    | '/favoritos'
+    | '/mensajes'
+    | '/mis-anuncios'
+    | '/vender'
+    | '/marketplace/$id'
+    | '/marketplace'
+  id:
+    | '__root__'
+    | '/'
+    | '/blog'
+    | '/favoritos'
+    | '/mensajes'
+    | '/mis-anuncios'
+    | '/vender'
+    | '/marketplace/$id'
+    | '/marketplace/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogRoute: typeof BlogRoute
+  FavoritosRoute: typeof FavoritosRoute
+  MensajesRoute: typeof MensajesRoute
+  MisAnunciosRoute: typeof MisAnunciosRoute
+  VenderRoute: typeof VenderRoute
+  MarketplaceIdRoute: typeof MarketplaceIdRoute
+  MarketplaceIndexRoute: typeof MarketplaceIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +150,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mensajes': {
+      id: '/mensajes'
+      path: '/mensajes'
+      fullPath: '/mensajes'
+      preLoaderRoute: typeof MensajesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mis-anuncios': {
+      id: '/mis-anuncios'
+      path: '/mis-anuncios'
+      fullPath: '/mis-anuncios'
+      preLoaderRoute: typeof MisAnunciosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vender': {
+      id: '/vender'
+      path: '/vender'
+      fullPath: '/vender'
+      preLoaderRoute: typeof VenderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace/': {
+      id: '/marketplace/'
+      path: '/marketplace'
+      fullPath: '/marketplace/'
+      preLoaderRoute: typeof MarketplaceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketplace/$id': {
+      id: '/marketplace/$id'
+      path: '/marketplace/$id'
+      fullPath: '/marketplace/$id'
+      preLoaderRoute: typeof MarketplaceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogRoute: BlogRoute,
+  FavoritosRoute: FavoritosRoute,
+  MensajesRoute: MensajesRoute,
+  MisAnunciosRoute: MisAnunciosRoute,
+  VenderRoute: VenderRoute,
+  MarketplaceIdRoute: MarketplaceIdRoute,
+  MarketplaceIndexRoute: MarketplaceIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

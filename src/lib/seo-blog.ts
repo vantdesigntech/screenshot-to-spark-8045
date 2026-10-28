@@ -238,7 +238,61 @@ const LOCAL_BLOG_IMAGES = [
 ];
 
 export function resolveBlogFallbackImage(index = 0): string {
-  return LOCAL_BLOG_IMAGES[Math.abs(index) % LOCAL_BLOG_IMAGES.length] ?? "/blog/blog-1.jpg";
+  return LOCAL_BLOG_IMAGES[Math.abs(index) % LOCAL_BLOG_IMAGES.length];
+}
+
+/**
+ * Primary Spanish SEO positioning keywords for ChronoParts (Marketplace & Parts Search Engine)
+ */
+export const CHRONOPARTS_SEO_KEYWORDS = [
+  "marketplace de relojes España",
+  "buscador de componentes de relojería",
+  "componentes reloj",
+  "recambios de relojes OEM y aftermarket",
+  "fornituras de relojería España",
+  "cristal de zafiro reloj",
+  "calibres automáticos Seiko NH35 ETA 2824 Miyota 9015",
+  "bisel cerámico SKX007",
+  "comparador de piezas de relojes",
+  "compra venta relojes España",
+] as const;
+
+/**
+ * Generates HTML `<head>` metadata array following `seo-repos/html-head-seo` (joshbuchea/HEAD)
+ * for positioning in Spain (`es-ES`) as a Watch Marketplace & Watch Parts Search Engine.
+ */
+export function buildChronoPartsHeadMeta() {
+  const title =
+    "ChronoParts España | Buscador de Componentes de Reloj, Recambios OEM/Aftermarket y Marketplace";
+  const description =
+    "Buscador de componentes de reloj y comparador de recambios OEM y aftermarket en España. Encuentra cristales de zafiro, calibres (NH35, ETA 2824, Miyota), biseles, agujas, correas y marketplace de relojes.";
+
+  return [
+    { charSet: "utf-8" },
+    { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+    { title },
+    { name: "description", content: description },
+    { name: "keywords", content: CHRONOPARTS_SEO_KEYWORDS.join(", ") },
+    { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+    { name: "author", content: "ChronoParts España" },
+    { name: "geo.region", content: "ES" },
+    { name: "geo.country", content: "ES" },
+    { name: "language", content: "Spanish" },
+    { name: "theme-color", content: "#ffffff" },
+    // Open Graph (`seo-repos/html-head-seo`)
+    { property: "og:type", content: "website" },
+    { property: "og:locale", content: "es_ES" },
+    { property: "og:site_name", content: "ChronoParts España" },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:url", content: "https://chronoparts.watch/" },
+    { property: "og:image", content: "https://chronoparts.watch/images/hero-rolex-op-pistachio.jpg" },
+    // Twitter Card (`seo-repos/html-head-seo`)
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+    { name: "twitter:image", content: "https://chronoparts.watch/images/hero-rolex-op-pistachio.jpg" },
+  ];
 }
 
 /**
@@ -252,14 +306,73 @@ export function buildBlogJsonLd(articles: BlogArticle[] = SEO_BLOG_ARTICLES) {
       {
         "@type": "WebSite",
         "@id": "https://chronoparts.watch/#website",
-        name: "ChronoParts — Buscador y Comparador de Componentes de Relojería",
+        name: "ChronoParts España — Buscador de Componentes de Reloj y Marketplace de Relojes",
+        alternateName: ["ChronoParts", "Buscador de Componentes Reloj España"],
         url: "https://chronoparts.watch/",
         inLanguage: "es-ES",
+        description:
+          "Buscador de componentes de relojería, comparador técnico OEM vs Aftermarket y marketplace de relojes en España.",
+        keywords: CHRONOPARTS_SEO_KEYWORDS.join(", "),
         potentialAction: {
           "@type": "SearchAction",
           target: "https://chronoparts.watch/?q={search_term_string}",
           "query-input": "required name=search_term_string",
         },
+      },
+      {
+        "@type": ["Organization", "OnlineStore"],
+        "@id": "https://chronoparts.watch/#organization",
+        name: "ChronoParts España",
+        url: "https://chronoparts.watch/",
+        logo: "https://chronoparts.watch/favicon.ico",
+        areaServed: {
+          "@type": "Country",
+          name: "ES",
+        },
+        knowsAbout: [
+          "Componentes de reloj",
+          "Recambios de relojes OEM y aftermarket",
+          "Marketplace de relojes en España",
+          "Calibres automáticos Seiko NH35, ETA 2824-2 y Miyota 9015",
+          "Cristales de zafiro y biseles cerámicos",
+        ],
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://chronoparts.watch/#catalog-categories",
+        name: "Categorías del Buscador de Componentes de Reloj",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Cristales de Zafiro y Plexiglás para Reloj",
+            url: "https://chronoparts.watch/#search",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Calibres y Movimientos Automáticos (NH35, ETA 2824, Miyota 9015)",
+            url: "https://chronoparts.watch/#search",
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Biseles Cerámicos e Insertos OEM / Aftermarket",
+            url: "https://chronoparts.watch/#search",
+          },
+          {
+            "@type": "ListItem",
+            position: 4,
+            name: "Correas, Brazaletes de Acero y Agujas de Reloj",
+            url: "https://chronoparts.watch/#search",
+          },
+          {
+            "@type": "ListItem",
+            position: 5,
+            name: "Marketplace de Relojes en España",
+            url: "https://chronoparts.watch/marketplace",
+          },
+        ],
       },
       {
         "@type": "BreadcrumbList",
@@ -268,13 +381,19 @@ export function buildBlogJsonLd(articles: BlogArticle[] = SEO_BLOG_ARTICLES) {
           {
             "@type": "ListItem",
             position: 1,
-            name: "ChronoParts",
+            name: "ChronoParts España",
             item: "https://chronoparts.watch/",
           },
           {
             "@type": "ListItem",
             position: 2,
-            name: "Blog",
+            name: "Marketplace de Relojes",
+            item: "https://chronoparts.watch/marketplace",
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Guías de Componentes y Relojería",
             item: "https://chronoparts.watch/blog",
           },
         ],
