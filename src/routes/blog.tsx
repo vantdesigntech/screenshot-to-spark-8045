@@ -76,7 +76,7 @@ function BlogPage() {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#d2d2d7] bg-background px-3.5 py-1.5 text-[12px] font-normal text-foreground transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3.5 py-1.5 text-[12px] font-normal text-foreground transition-colors hover:border-primary hover:text-primary"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Volver al Buscador
             </Link>
@@ -91,7 +91,7 @@ function BlogPage() {
               href="/sitemap.xml"
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-[#d2d2d7] bg-background px-3 py-1.5 text-[12px] font-normal text-foreground hover:text-primary"
+              className="rounded-full border border-border bg-background px-3 py-1.5 text-[12px] font-normal text-foreground hover:text-primary"
             >
               Sitemap.xml ↗
             </a>
@@ -113,7 +113,7 @@ function BlogPage() {
               <span className="text-[12px] font-semibold uppercase text-apple-primary-dark">
                 Datos Estructurados · TechArticle + FAQPage + WebSite
               </span>
-              <span className="text-[12px] text-[#a1a1a6]">Indexación activa en &lt;head&gt;</span>
+              <span className="text-[12px] text-muted-foreground">Indexación activa en &lt;head&gt;</span>
             </div>
             <pre className="max-h-60 overflow-auto rounded-[12px] bg-foreground p-4 font-mono text-[11px] text-secondary">
               {JSON.stringify(jsonLdObj, null, 2)}

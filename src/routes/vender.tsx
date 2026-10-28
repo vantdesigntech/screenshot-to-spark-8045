@@ -329,14 +329,14 @@ export function PublishListingPage() {
     >
       <div className="max-w-4xl mx-auto space-y-8">
         {errorMessage && (
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-700 text-xs sm:text-sm font-medium flex items-start gap-2.5">
+          <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/30 text-red-700 text-xs sm:text-sm font-medium flex items-start gap-2.5">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-4 rounded-2xl bg-emerald-500/12 border border-emerald-500/30 text-emerald-800 text-xs sm:text-sm font-medium flex items-start gap-2.5">
+          <div className="p-4 rounded-2xl bg-success/12 border border-success/30 text-emerald-800 text-xs sm:text-sm font-medium flex items-start gap-2.5">
             <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
             <span>{successMessage}</span>
           </div>
@@ -650,7 +650,7 @@ export function PublishListingPage() {
                     <button
                       type="button"
                       onClick={() => handleRemoveImageSlot(idx)}
-                      className="text-xs text-red-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                      className="text-xs text-destructive hover:underline inline-flex items-center gap-1 cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       Quitar

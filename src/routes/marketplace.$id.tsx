@@ -229,7 +229,7 @@ export function ListingDetailPage() {
     return (
       <MarketplaceShell>
         <div className="py-16 px-6 text-center bg-card rounded-2xl border border-border max-w-xl mx-auto space-y-4">
-          <AlertTriangle className="w-10 h-10 text-amber-600 mx-auto" />
+          <AlertTriangle className="w-10 h-10 text-primary mx-auto" />
           <h2 className="font-serif text-2xl text-foreground">
             Anuncio no disponible
           </h2>
@@ -301,7 +301,7 @@ export function ListingDetailPage() {
       </div>
 
       {actionFeedback && (
-        <div className="mb-6 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-xs font-medium flex items-center justify-between">
+        <div className="mb-6 p-3.5 rounded-xl bg-success/10 border border-success/30 text-emerald-800 text-xs font-medium flex items-center justify-between">
           <span>{actionFeedback}</span>
           <button
             type="button"
@@ -590,7 +590,7 @@ export function ListingDetailPage() {
                   onClick={handleToggleFavorite}
                   className={`py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     listing.isFavorited
-                      ? 'bg-red-500/12 border-red-500/30 text-red-700'
+                      ? 'bg-destructive/12 border-destructive/30 text-red-700'
                       : 'bg-background border-border text-foreground hover:bg-secondary'
                   }`}
                 >
@@ -655,7 +655,7 @@ export function ListingDetailPage() {
             {showReportForm && (
               <form
                 onSubmit={handleReportSubmit}
-                className="p-4 rounded-xl bg-red-500/5 border border-red-500/25 space-y-3"
+                className="p-4 rounded-xl bg-destructive/5 border border-destructive/25 space-y-3"
               >
                 <h3 className="text-xs font-bold uppercase tracking-wider text-red-700">
                   Denunciar irregularidad o sospecha de réplica
@@ -712,7 +712,7 @@ export function ListingDetailPage() {
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-bold cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-destructive text-primary-foreground text-xs font-bold cursor-pointer"
                       >
                         Enviar denuncia a moderación
                       </button>
@@ -734,7 +734,7 @@ export function ListingDetailPage() {
                   <button
                     type="button"
                     onClick={() => void handleOwnerStatusChange('published')}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-success text-primary-foreground text-xs font-semibold cursor-pointer"
                   >
                     Publicar / Reactivar
                   </button>
@@ -743,7 +743,7 @@ export function ListingDetailPage() {
                   <button
                     type="button"
                     onClick={() => void handleOwnerStatusChange('paused')}
-                    className="px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 border border-amber-500/30 text-xs font-semibold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-primary/15 text-amber-800 border border-primary/30 text-xs font-semibold cursor-pointer"
                   >
                     Pausar anuncio
                   </button>
@@ -761,7 +761,7 @@ export function ListingDetailPage() {
                   <button
                     type="button"
                     onClick={() => void handleOwnerStatusChange('withdrawn')}
-                    className="px-3 py-1.5 rounded-xl bg-red-500/15 text-red-700 border border-red-500/30 text-xs font-semibold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-destructive/15 text-red-700 border border-destructive/30 text-xs font-semibold cursor-pointer"
                   >
                     Retirar anuncio
                   </button>
@@ -797,28 +797,28 @@ export function ListingDetailPage() {
                   onClick={() =>
                     void handleModeratorDecision('passed_photo_review')
                   }
-                  className="py-2 px-3 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-success text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Aprobar revisión fotográfica
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleModeratorDecision('manual_review')}
-                  className="py-2 px-3 rounded-xl bg-sky-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-success text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Solicitar revisión manual
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleModeratorDecision('pending')}
-                  className="py-2 px-3 rounded-xl bg-amber-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Marcar pendiente
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleModeratorDecision('rejected')}
-                  className="py-2 px-3 rounded-xl bg-red-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-destructive text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Rechazar por moderación
                 </button>

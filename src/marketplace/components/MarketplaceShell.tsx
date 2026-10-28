@@ -113,7 +113,7 @@ export function MarketplaceShell({
   ]
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary selection:text-primary-foreground">
+    <div className="min-h-screen bg-background text-primary-foreground flex flex-col selection:bg-primary selection:text-primary-foreground">
       {/* 1. GLOBAL NAV (#000000, 44px height) */}
       <nav aria-label="Navegación global" className="w-full bg-apple-black text-background">
         <div className="mx-auto flex h-[44px] max-w-[980px] items-center justify-between px-[22px]">
