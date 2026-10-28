@@ -46,6 +46,11 @@ import {
 export const Route = createFileRoute('/marketplace/$id')({
   head: () => ({
     meta: [
+      { property: 'og:title', content: 'Ficha de reloj — ChronoParts Marketplace' },
+      { property: 'og:description', content: 'Consulta fotos, estado, precio y detalles del reloj.' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'description', content: 'Consulta fotos, estado, precio y detalles del reloj.' },
       {
         title: 'Ficha de Reloj | ChronoParts Marketplace',
       },

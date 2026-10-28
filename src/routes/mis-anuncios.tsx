@@ -34,6 +34,11 @@ import {
 export const Route = createFileRoute('/mis-anuncios')({
   head: () => ({
     meta: [
+      { property: 'og:title', content: 'Mis anuncios — ChronoParts Marketplace' },
+      { property: 'og:description', content: 'Consulta y gestiona tus anuncios de relojes.' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'description', content: 'Consulta y gestiona tus anuncios de relojes.' },
       {
         title: 'Mis Anuncios y Moderación | ChronoParts Marketplace',
       },

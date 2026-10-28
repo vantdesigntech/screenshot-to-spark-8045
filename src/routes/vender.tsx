@@ -34,15 +34,20 @@ import {
 } from '../marketplace/types'
 
 interface VenderSearch {
-  edit?: string
+  edit?: string | undefined
 }
 
 export const Route = createFileRoute('/vender')({
   validateSearch: (search: Record<string, unknown>): VenderSearch => ({
-    edit: typeof search.edit === 'string' ? search.edit : undefined,
+    edit: typeof search['edit'] === 'string' ? search['edit'] : undefined,
   }),
   head: () => ({
     meta: [
+      { property: 'og:title', content: 'Publicar reloj — ChronoParts Marketplace' },
+      { property: 'og:description', content: 'Prepara tu anuncio con fotografías y detalles del reloj.' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'description', content: 'Prepara tu anuncio con fotografías y detalles del reloj.' },
       {
         title:
           'Publicar o Editar Reloj | ChronoParts Marketplace — Revisión Fotográfica',

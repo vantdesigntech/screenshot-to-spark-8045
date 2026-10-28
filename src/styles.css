@@ -225,7 +225,6 @@
 @utility apple-frosted {
   background-color: rgba(245, 245, 247, 0.8);
   backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
 @utility ease-spring {
@@ -242,4 +241,41 @@
 }
 @utility animate-ping-soft {
   animation: ping-soft 1.8s ease-out infinite;
+}
+
+/* Keep page content within its grid track; intentionally scrolling lists stay local. */
+@layer base {
+  html, body { min-width: 320px; letter-spacing: 0; }
+  h1, h2, h3, h4, p, a, button, span, input { letter-spacing: 0; }
+  img { max-width: 100%; }
+  :where(main, section, article, aside) { min-width: 0; }
+}
+
+.chrono-home section { scroll-margin-top: 112px; }
+.chrono-home :where(h1, h2, h3, dd) { overflow-wrap: anywhere; }
+.chrono-home :where(button, select, a) { touch-action: manipulation; }
+.chrono-home #explorar > div > div:nth-child(2) { max-width: 100%; }
+.chrono-home #explorar button { min-width: 0; }
+.chrono-home #explorar .shrink-0 { flex-shrink: 0; }
+.chrono-home #explorar button.group { flex-basis: 260px; }
+
+@media (max-width: 639px) {
+  .chrono-home nav .apple-nav-link { flex-shrink: 0; }
+  .chrono-home section { padding: 40px 16px; }
+  .chrono-home #search { padding-top: 32px; }
+  .chrono-home #search h2 { font-size: 28px; }
+  .chrono-home #search .apple-tagline { font-size: 17px; font-weight: 400; }
+  .chrono-home :where(button, select) { min-height: 44px; }
+  .chrono-home #top button { min-width: 44px; }
+  .chrono-home #resultados article { padding: 18px; }
+  .chrono-home #resultados article svg { flex-shrink: 0; }
+  .chrono-home #comparator dl > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; }
+  .chrono-home #comparator dd { min-width: 0; }
+  .chrono-home #chollos input { height: 48px; font-size: 16px; }
+  .chrono-home #chollos button { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

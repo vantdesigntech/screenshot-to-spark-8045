@@ -11,4 +11,4 @@
 
 - AccountProvider owns the single Auth lifecycle subscription and modal on public pages; browsing remains public and personal actions request inline sign-in.
 - Private account state is read and mutated through authenticated TanStack server functions with owner-only RLS; persisted PRO mode remains the existing interactive demo, not a paid entitlement.
-- The watch uses CSS layered photography with responsive camera transforms; mobile hotspot details live below the stage while desktop retains floating labels.
+- Watch discovery uses ordinary photographs and model/category selectors, not a layered 3D stage, to keep mobile browsing direct and lightweight.

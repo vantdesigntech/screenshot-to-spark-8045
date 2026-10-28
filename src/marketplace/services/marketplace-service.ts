@@ -32,7 +32,7 @@ const STORAGE_KEY_STATE = 'chronoparts_marketplace_state_v1'
 const STORAGE_KEY_ACTIVE_USER = 'chronoparts_marketplace_user_v1'
 const API_BASE = 'http://127.0.0.1:8765/api/marketplace'
 
-export const MARKETPLACE_ACCOUNTS: MarketplaceUser[] = [
+export const MARKETPLACE_ACCOUNTS: [MarketplaceUser, ...MarketplaceUser[]] = [
   {
     id: 'user-collector-local',
     displayName: 'Alejandro V. (Tu Cuenta)',
@@ -64,7 +64,7 @@ export const MARKETPLACE_ACCOUNTS: MarketplaceUser[] = [
 ]
 
 interface InternalListingRecord extends WatchListing {
-  serialNumberRaw?: string
+  serialNumberRaw?: string | undefined
 }
 
 interface PersistedMarketplaceState {
@@ -880,7 +880,7 @@ async function syncWithLocalPythonApi(
         'X-User-Id': user.id,
         'X-User-Role': user.role,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     })
   } catch {
     // Non-blocking fallback when running purely in browser/test environment
@@ -1112,6 +1112,7 @@ export async function createOrUpdateListing(
       throw new Error('El anuncio que intentas editar no existe.')
     }
     const existing = state.listings[existingIndex]
+    if (!existing) throw new Error("El anuncio que intentas editar no existe.")
     if (existing.ownerId !== viewer.id) {
       throw new Error(
         'Permiso denegado: Solo el propietario puede modificar este anuncio.',
@@ -1288,6 +1289,7 @@ export async function updateListingCommercialStatus(
   }
 
   const record = state.listings[index]
+  if (!record) throw new Error("Anuncio no encontrado.")
   if (record.ownerId !== viewer.id) {
     throw new Error(
       'Permiso denegado: Solo el propietario puede cambiar el estado comercial de su anuncio.',

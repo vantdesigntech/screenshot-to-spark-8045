@@ -238,7 +238,7 @@ const LOCAL_BLOG_IMAGES = [
 ];
 
 export function resolveBlogFallbackImage(index = 0): string {
-  return LOCAL_BLOG_IMAGES[Math.abs(index) % LOCAL_BLOG_IMAGES.length];
+  return LOCAL_BLOG_IMAGES[Math.abs(index) % LOCAL_BLOG_IMAGES.length] ?? "/blog/blog-1.jpg";
 }
 
 /**
@@ -286,12 +286,10 @@ export function buildChronoPartsHeadMeta() {
     { property: "og:title", content: title },
     { property: "og:description", content: description },
     { property: "og:url", content: "https://chronoparts.watch/" },
-    { property: "og:image", content: "https://chronoparts.watch/images/hero-rolex-op-pistachio.jpg" },
     // Twitter Card (`seo-repos/html-head-seo`)
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
-    { name: "twitter:image", content: "https://chronoparts.watch/images/hero-rolex-op-pistachio.jpg" },
   ];
 }
 
