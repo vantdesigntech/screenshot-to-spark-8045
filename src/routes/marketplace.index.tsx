@@ -34,10 +34,6 @@ import {
 export const Route = createFileRoute('/marketplace/')({
   head: () => ({
     meta: [
-      { property: 'og:title', content: 'Marketplace de relojes — ChronoParts' },
-      { property: 'og:description', content: 'Relojes de coleccionistas, filtros por marca y revisión fotográfica.' },
-      { property: 'og:type', content: 'website' },
-      { name: 'twitter:card', content: 'summary_large_image' },
       {
         title:
           'Marketplace de Relojes Completos | ChronoParts — Compraventa con Revisión Fotográfica',
@@ -489,8 +485,8 @@ export function MarketplaceCatalogPage() {
 
       {/* Error State */}
       {!isLoading && errorMessage && (
-        <div className="py-12 px-6 text-center bg-destructive/10 border border-destructive/30 rounded-2xl space-y-3">
-          <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
+        <div className="py-12 px-6 text-center bg-red-500/10 border border-red-500/30 rounded-2xl space-y-3">
+          <AlertCircle className="w-8 h-8 text-red-600 mx-auto" />
           <h3 className="font-serif text-xl text-foreground">
             Error al cargar el catálogo
           </h3>

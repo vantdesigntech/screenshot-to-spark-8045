@@ -23,10 +23,10 @@ export function PhotoReviewBadge({
 
   const toneClasses: Record<ReviewStatus, string> = {
     passed_photo_review:
-      'bg-success/12 text-success border-success/25',
-    pending: 'bg-primary/12 text-primary border-primary/25',
-    manual_review: 'bg-success/12 text-success border-success/25',
-    rejected: 'bg-destructive/12 text-destructive border-destructive/25',
+      'bg-emerald-500/12 text-emerald-700 border-emerald-500/25',
+    pending: 'bg-amber-500/12 text-amber-800 border-amber-500/25',
+    manual_review: 'bg-sky-500/12 text-sky-800 border-sky-500/25',
+    rejected: 'bg-red-500/12 text-red-700 border-red-500/25',
   }
 
   const renderIcon = () => {

@@ -113,23 +113,23 @@ export function MarketplaceShell({
   ]
 
   return (
-    <div className="min-h-screen bg-background text-primary-foreground flex flex-col selection:bg-primary selection:text-primary-foreground">
+    <div className="min-h-screen bg-[#ffffff] text-[#1d1d1f] flex flex-col selection:bg-[#0066cc] selection:text-white">
       {/* 1. GLOBAL NAV (#000000, 44px height) */}
-      <nav aria-label="Navegación global" className="w-full bg-apple-black text-background">
+      <nav aria-label="Navegación global" className="w-full bg-[#000000] text-[#ffffff]">
         <div className="mx-auto flex h-[44px] max-w-[980px] items-center justify-between px-[22px]">
           <div className="flex items-center gap-6">
             <Link
               to="/"
-              className="flex items-center gap-2 text-foreground/80 transition hover:text-foreground"
-              title="Volver al ChronoParts y recambios"
+              className="flex items-center gap-2 text-white/80 transition hover:text-white"
+              title="Volver al Ecosistema ChronoParts 3D y Piezas"
             >
-              <Watch className="h-4 w-4 text-foreground" />
-              <span className="text-[12px] font-semibold text-foreground">
+              <Watch className="h-4 w-4 text-white" />
+              <span className="text-[12px] font-semibold tracking-[-0.01em] text-white">
                 ChronoParts
               </span>
             </Link>
             <Link to="/" className="apple-nav-link hidden sm:inline-block">
-              Buscador de piezas
+              Buscador de Piezas & 3D
             </Link>
             <Link to="/blog" className="apple-nav-link hidden md:inline-block">
               Guías
@@ -137,8 +137,8 @@ export function MarketplaceShell({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-full bg-background/10 px-2.5 py-1">
-              <UserCheck className="w-3.5 h-3.5 text-apple-primary-dark shrink-0" />
+            <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
+              <UserCheck className="w-3.5 h-3.5 text-[#2997ff] shrink-0" />
               <label htmlFor="marketplace-user-select" className="sr-only">
                 Sesión activa
               </label>
@@ -147,13 +147,13 @@ export function MarketplaceShell({
                 aria-label="Cambiar usuario activo del marketplace"
                 value={currentUser.id}
                 onChange={(e) => handleSwitchUser(e.target.value)}
-                className="max-w-[145px] bg-transparent text-[12px] text-foreground focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-[12px] text-white focus:outline-none cursor-pointer pr-1"
               >
                 {accounts.map((acc) => (
                   <option
                     key={acc.id}
                     value={acc.id}
-                    className="bg-foreground text-primary-foreground"
+                    className="bg-[#1d1d1f] text-white"
                   >
                     {acc.displayName}
                     {acc.role === 'moderator' ? ' (Moderador)' : ''}
@@ -166,7 +166,7 @@ export function MarketplaceShell({
       </nav>
 
       {/* 2. SUB-NAV FROSTED (52px height, #f5f5f7/80) */}
-      <header className="apple-frosted sticky top-0 z-40 border-b border-border bg-secondary/80">
+      <header className="apple-frosted sticky top-0 z-40 border-b border-[#e0e0e0] bg-[#f5f5f7]/80">
         <div className="mx-auto flex h-[52px] max-w-[980px] items-center justify-between gap-2 overflow-x-auto px-[22px] no-scrollbar">
           <nav
             aria-label="Navegación del Marketplace"
@@ -180,8 +180,8 @@ export function MarketplaceShell({
                   to={item.to}
                   className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] whitespace-nowrap transition-all ${
                     item.active
-                      ? 'bg-primary text-primary-foreground font-semibold'
-                      : 'text-foreground/75 hover:text-foreground'
+                      ? 'bg-[#0066cc] text-white font-semibold'
+                      : 'text-[#1d1d1f]/75 hover:text-[#1d1d1f]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -190,8 +190,8 @@ export function MarketplaceShell({
                     <span
                       className={`ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-semibold ${
                         item.active
-                          ? 'bg-background text-primary'
-                          : 'bg-primary/15 text-primary'
+                          ? 'bg-white text-[#0066cc]'
+                          : 'bg-[#0066cc]/15 text-[#0066cc]'
                       }`}
                     >
                       {item.badge}
@@ -202,10 +202,10 @@ export function MarketplaceShell({
             })}
           </nav>
 
-          <div className="hidden xl:flex items-center gap-2 text-[12px] text-muted-foreground">
+          <div className="hidden xl:flex items-center gap-2 text-[12px] text-[#7a7a7a]">
             <span>
               Sesión:{' '}
-              <strong className="text-foreground">
+              <strong className="text-[#1d1d1f]">
                 {currentUser.displayName}
               </strong>{' '}
               ({currentUser.location})
@@ -216,16 +216,16 @@ export function MarketplaceShell({
 
       {/* Optional Hero Banner (Product Tile Light #ffffff, no gradients) */}
       {title && (
-        <section className="w-full border-b border-border bg-background py-[48px] px-[22px]">
+        <section className="w-full border-b border-[#e0e0e0] bg-[#ffffff] py-[48px] px-[22px]">
           <div className="max-w-[980px] mx-auto text-center">
-            <p className="apple-caption font-semibold text-primary mb-2">
+            <p className="apple-caption font-semibold text-[#0066cc] mb-2">
               {badgeText}
             </p>
-            <h1 className="apple-display-lg text-[34px] sm:text-[44px] text-foreground">
+            <h1 className="apple-display-lg text-[34px] sm:text-[44px] text-[#1d1d1f]">
               {title}
             </h1>
             {subtitle && (
-              <p className="apple-tagline mt-2.5 text-[19px] text-muted-foreground max-w-2xl mx-auto">
+              <p className="apple-tagline mt-2.5 text-[19px] text-[#7a7a7a] max-w-2xl mx-auto">
                 {subtitle}
               </p>
             )}
@@ -234,16 +234,16 @@ export function MarketplaceShell({
       )}
 
       {/* Main Content */}
-      <main className="min-w-0 flex-1 max-w-[980px] w-full mx-auto px-[22px] py-10">
+      <main className="flex-1 max-w-[980px] w-full mx-auto px-[22px] py-10">
         {children}
       </main>
 
       {/* Footer consistent with Apple design system */}
-      <footer className="border-t border-border bg-secondary py-[48px] px-[22px] mt-16">
-        <div className="max-w-[980px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 apple-fine-print text-muted-foreground">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Watch className="w-3.5 h-3.5 text-primary" />
-            <span className="font-semibold text-apple-ink-80">
+      <footer className="border-t border-[#e0e0e0] bg-[#f5f5f7] py-[48px] px-[22px] mt-16">
+        <div className="max-w-[980px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 apple-fine-print text-[#7a7a7a]">
+          <div className="flex items-center gap-2">
+            <Watch className="w-3.5 h-3.5 text-[#0066cc]" />
+            <span className="font-semibold text-[#333333]">
               ChronoParts Marketplace
             </span>
             <span>

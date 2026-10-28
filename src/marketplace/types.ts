@@ -53,23 +53,23 @@ export interface ListingImage {
   listingId: string
   url: string
   slot: PhotoSlotType
-  caption?: string | undefined
+  caption?: string
   sortOrder: number
   mimeType: string
   sizeBytes: number
   reviewStatus: 'pending' | 'approved' | 'flagged'
   /** If true, image contains a visible serial number and is only shown to owner/moderators */
-  isSensitiveSerial?: boolean | undefined
+  isSensitiveSerial?: boolean
 }
 
 export interface ListingImageInput {
-  id?: string | undefined
+  id?: string
   url: string
   slot: PhotoSlotType
-  caption?: string | undefined
-  mimeType?: string | undefined
-  sizeBytes?: number | undefined
-  isSensitiveSerial?: boolean | undefined
+  caption?: string
+  mimeType?: string
+  sizeBytes?: number
+  isSensitiveSerial?: boolean
 }
 
 export interface WatchListing {
@@ -79,11 +79,11 @@ export interface WatchListing {
   ownerJoinedLabel: string
   brand: string
   model: string
-  reference?: string | undefined
+  reference?: string
   priceEur: number
   condition: WatchCondition
   movement: MovementType
-  approxYear?: number | undefined
+  approxYear?: number
   description: string
   boxIncluded: boolean
   papersIncluded: boolean
@@ -94,14 +94,14 @@ export interface WatchListing {
   authenticityConfirmed: boolean
   knownModificationsNotes: string
   /** Masked serial shown publicly (e.g. "68****14"), never the raw serial */
-  serialNumberMasked?: string | undefined
+  serialNumberMasked?: string
   /** True only for pre-loaded demonstration listings; false for user-created listings */
   isDemo: boolean
   createdAt: string
   updatedAt: string
-  publishedAt?: string | undefined
+  publishedAt?: string
   images: ListingImage[]
-  isFavorited?: boolean | undefined
+  isFavorited?: boolean
 }
 
 export interface AuthenticityReviewRecord {
@@ -150,17 +150,17 @@ export interface MarketplaceConversation {
 }
 
 export interface ListingFilterParams {
-  query?: string | undefined
-  brand?: string | undefined
-  reference?: string | undefined
-  minPrice?: number | undefined
-  maxPrice?: number | undefined
-  condition?: WatchCondition | 'all' | undefined
-  movement?: MovementType | 'all' | undefined
-  location?: string | undefined
-  sortBy?: 'newest' | 'oldest' | 'price_asc' | 'price_desc' | undefined
-  page?: number | undefined
-  pageSize?: number | undefined
+  query?: string
+  brand?: string
+  reference?: string
+  minPrice?: number
+  maxPrice?: number
+  condition?: WatchCondition | 'all'
+  movement?: MovementType | 'all'
+  location?: string
+  sortBy?: 'newest' | 'oldest' | 'price_asc' | 'price_desc'
+  page?: number
+  pageSize?: number
 }
 
 export interface PaginatedListingsResult {
@@ -172,26 +172,26 @@ export interface PaginatedListingsResult {
 }
 
 export interface CreateOrUpdateListingPayload {
-  id?: string | undefined
+  id?: string
   brand: string
   model: string
-  reference?: string | undefined
+  reference?: string
   priceEur: number
   condition: WatchCondition
   movement: MovementType
-  approxYear?: number | undefined
+  approxYear?: number
   description: string
   boxIncluded: boolean
   papersIncluded: boolean
-  accessoriesNotes?: string | undefined
+  accessoriesNotes?: string
   location: string
-  serialNumberRaw?: string | undefined
+  serialNumberRaw?: string
   authenticityConfirmed: boolean
-  knownModificationsNotes?: string | undefined
+  knownModificationsNotes?: string
   images: ListingImageInput[]
   intent: 'draft' | 'publish'
   /** Security test field: client-supplied reviewStatus must always be rejected/ignored */
-  reviewStatus?: unknown | undefined
+  reviewStatus?: unknown
 }
 
 /**

@@ -886,33 +886,44 @@ export async function fetchLivePartsFromApi(query: string): Promise<Part[]> {
   const q = query.trim();
   if (!q) return [];
 
-  const isLocal =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-
-  if (!isLocal) {
-    return generateLiveComparisonCards(q);
-  }
-
+  // 1. Try same-origin Cloud Server endpoint (/api/search handled by src/server.ts in Lovable / Cloudflare)
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 1800);
-    const res = await fetch(`http://127.0.0.1:8765/api/search?q=${encodeURIComponent(q)}`, {
+    const timer = setTimeout(() => controller.abort(), 3200);
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
       signal: controller.signal,
+      headers: { Accept: "application/json" },
     });
     clearTimeout(timer);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (!Array.isArray(data.items) || data.items.length === 0) {
-      return generateLiveComparisonCards(q);
+    const contentType = res.headers.get("content-type") || "";
+    if (res.ok && contentType.includes("application/json")) {
+      const data = await res.json();
+      if (Array.isArray(data.items) && data.items.length > 0) {
+        return data.items.map((item: Part) => ({
+          ...item,
+          image:
+            item.image && item.image.startsWith("http")
+              ? item.image
+              : resolveCategoryImage(item.category, item.origin),
+        }));
+      }
     }
-    return data.items.map((item: Part) => ({
-      ...item,
-      image: item.image && item.image.startsWith("http") ? item.image : resolveCategoryImage(item.category, item.origin),
-    }));
   } catch {
-    return generateLiveComparisonCards(q);
+    // Proceed to direct Cloud Engine below
   }
+
+  // 2. Direct Cloud Live Engine (queries WatchPlaza JSON, NamokiMods JSON, eBay PicClick & AliExpress via HTTPS CORS gateways)
+  try {
+    const { searchLiveWatchPartsCloud } = await import("./live-watch-engine");
+    const cloudItems = await searchLiveWatchPartsCloud(q);
+    if (cloudItems.length > 0) {
+      return cloudItems;
+    }
+  } catch {
+    // Fallback to instant comparison cards below
+  }
+
+  return generateLiveComparisonCards(q);
 }
 
 export function generateLiveComparisonCards(query: string): Part[] {

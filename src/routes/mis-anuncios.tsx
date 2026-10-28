@@ -34,11 +34,6 @@ import {
 export const Route = createFileRoute('/mis-anuncios')({
   head: () => ({
     meta: [
-      { property: 'og:title', content: 'Mis anuncios — ChronoParts Marketplace' },
-      { property: 'og:description', content: 'Consulta y gestiona tus anuncios de relojes.' },
-      { property: 'og:type', content: 'website' },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'description', content: 'Consulta y gestiona tus anuncios de relojes.' },
       {
         title: 'Mis Anuncios y Moderación | ChronoParts Marketplace',
       },
@@ -168,7 +163,7 @@ export function MyListingsPage() {
       </div>
 
       {feedback && (
-        <div className="mb-6 p-3.5 rounded-xl bg-success/12 border border-success/30 text-success text-xs font-semibold flex items-center justify-between">
+        <div className="mb-6 p-3.5 rounded-xl bg-emerald-500/12 border border-emerald-500/30 text-emerald-800 text-xs font-semibold flex items-center justify-between">
           <span>{feedback}</span>
           <button
             type="button"
@@ -304,7 +299,7 @@ export function MyListingsPage() {
                           onClick={() =>
                             void handleStatusChange(item.id, 'published')
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-success text-primary-foreground text-xs font-semibold cursor-pointer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold cursor-pointer"
                         >
                           <PlayCircle className="w-3.5 h-3.5" />
                           Publicar
@@ -317,7 +312,7 @@ export function MyListingsPage() {
                           onClick={() =>
                             void handleStatusChange(item.id, 'paused')
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/15 text-primary border border-primary/30 text-xs font-semibold cursor-pointer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-800 border border-amber-500/30 text-xs font-semibold cursor-pointer"
                         >
                           <PauseCircle className="w-3.5 h-3.5" />
                           Pausar
@@ -343,7 +338,7 @@ export function MyListingsPage() {
                           onClick={() =>
                             void handleStatusChange(item.id, 'withdrawn')
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-destructive/12 text-destructive border border-destructive/25 text-xs font-semibold cursor-pointer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-red-500/12 text-red-700 border border-red-500/25 text-xs font-semibold cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Retirar
@@ -411,7 +406,7 @@ export function MyListingsPage() {
                           'Revisión fotográfica superada tras validación de moderador.',
                         )
                       }
-                      className="px-3 py-1.5 rounded-lg bg-success text-primary-foreground text-xs font-bold cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer"
                     >
                       Superar Revisión Foto
                     </button>
@@ -424,7 +419,7 @@ export function MyListingsPage() {
                           'Marcado para revisión manual adicional.',
                         )
                       }
-                      className="px-3 py-1.5 rounded-lg bg-success text-primary-foreground text-xs font-bold cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-bold cursor-pointer"
                     >
                       Revisión Manual
                     </button>
@@ -437,7 +432,7 @@ export function MyListingsPage() {
                           'Rechazado por moderación por incoherencia visual o documental.',
                         )
                       }
-                      className="px-3 py-1.5 rounded-lg bg-destructive text-primary-foreground text-xs font-bold cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold cursor-pointer"
                     >
                       Rechazar
                     </button>
@@ -450,7 +445,7 @@ export function MyListingsPage() {
           {/* Reports Received */}
           <div className="bg-card rounded-2xl border border-border p-6 shadow-soft space-y-4">
             <h2 className="font-serif text-2xl text-foreground flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-destructive" />
+              <ShieldAlert className="w-5 h-5 text-red-600" />
               Denuncias de Usuarios ({modReports.length})
             </h2>
             {modReports.length === 0 ? (
@@ -462,10 +457,10 @@ export function MyListingsPage() {
                 {modReports.map((rep) => (
                   <div
                     key={rep.id}
-                    className="p-4 rounded-xl bg-destructive/5 border border-destructive/20 space-y-1 text-xs"
+                    className="p-4 rounded-xl bg-red-500/5 border border-red-500/20 space-y-1 text-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-destructive">
+                      <span className="font-bold text-red-700">
                         {rep.reason}
                       </span>
                       <span className="text-muted-foreground">

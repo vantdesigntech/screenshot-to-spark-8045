@@ -19,7 +19,7 @@ import {
 } from '../marketplace/services/marketplace-service'
 import { PHOTO_REVIEW_COPY, type ListingImageInput } from '../marketplace/types'
 
-const VALID_FOUR_PHOTOS: [ListingImageInput, ...ListingImageInput[]] = [
+const VALID_FOUR_PHOTOS: ListingImageInput[] = [
   {
     slot: 'dial',
     url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800',
@@ -62,12 +62,12 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
     // Filter by Brand = Omega
     const omegaOnly = await queryCatalogListings({ brand: 'Omega' })
     expect(omegaOnly.items.length).toBe(1)
-    expect(omegaOnly.items[0]?.reference).toBe('310.30.42.50.01.001')
+    expect(omegaOnly.items[0].reference).toBe('310.30.42.50.01.001')
 
     // Filter by Reference substring
     const skxRef = await queryCatalogListings({ reference: 'SKX007' })
     expect(skxRef.items.length).toBe(1)
-    expect(skxRef.items[0]?.brand).toBe('Seiko')
+    expect(skxRef.items[0].brand).toBe('Seiko')
 
     // Filter by Price Range (400€ - 600€)
     const midPrice = await queryCatalogListings({
@@ -76,8 +76,8 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
       sortBy: 'price_asc',
     })
     expect(midPrice.items.length).toBeGreaterThanOrEqual(2)
-    expect(midPrice.items[0]?.priceEur).toBeLessThanOrEqual(
-      midPrice.items[midPrice.items.length - 1]?.priceEur ?? 0,
+    expect(midPrice.items[0].priceEur).toBeLessThanOrEqual(
+      midPrice.items[midPrice.items.length - 1].priceEur,
     )
 
     // Filter by Movement = quartz
@@ -122,7 +122,7 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
     expect(created.reviewStatus).toBe('passed_photo_review')
     // Ensure raw serial number is never exposed in public object
     expect(
-      (created as unknown as Record<string, unknown>)['serialNumberRaw'],
+      (created as unknown as Record<string, unknown>).serialNumberRaw,
     ).toBeUndefined()
 
     const reloaded = await getListingById(created.id)

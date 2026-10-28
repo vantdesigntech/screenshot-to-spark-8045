@@ -30,9 +30,9 @@ import {
 
 const STORAGE_KEY_STATE = 'chronoparts_marketplace_state_v1'
 const STORAGE_KEY_ACTIVE_USER = 'chronoparts_marketplace_user_v1'
-const API_BASE = 'http://127.0.0.1:8765/api/marketplace'
+const API_BASE = '/api/marketplace'
 
-export const MARKETPLACE_ACCOUNTS: [MarketplaceUser, ...MarketplaceUser[]] = [
+export const MARKETPLACE_ACCOUNTS: MarketplaceUser[] = [
   {
     id: 'user-collector-local',
     displayName: 'Alejandro V. (Tu Cuenta)',
@@ -64,7 +64,7 @@ export const MARKETPLACE_ACCOUNTS: [MarketplaceUser, ...MarketplaceUser[]] = [
 ]
 
 interface InternalListingRecord extends WatchListing {
-  serialNumberRaw?: string | undefined
+  serialNumberRaw?: string
 }
 
 interface PersistedMarketplaceState {
@@ -862,7 +862,7 @@ export function validateListingImages(
 }
 
 /**
- * Best-effort background sync to local Python backend (`api_buscador_relojes.py` / `marketplace_backend.py`)
+ * Best-effort background sync to Cloud API (`/api/marketplace` handled by `src/server.ts`)
  */
 async function syncWithLocalPythonApi(
   path: string,
@@ -870,7 +870,6 @@ async function syncWithLocalPythonApi(
   body?: unknown,
 ): Promise<void> {
   if (typeof fetch === 'undefined' || typeof window === 'undefined') return
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') return
   try {
     const user = getCurrentUser()
     await fetch(`${API_BASE}${path}`, {
@@ -880,7 +879,7 @@ async function syncWithLocalPythonApi(
         'X-User-Id': user.id,
         'X-User-Role': user.role,
       },
-      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      body: body ? JSON.stringify(body) : undefined,
     })
   } catch {
     // Non-blocking fallback when running purely in browser/test environment
@@ -1112,7 +1111,6 @@ export async function createOrUpdateListing(
       throw new Error('El anuncio que intentas editar no existe.')
     }
     const existing = state.listings[existingIndex]
-    if (!existing) throw new Error("El anuncio que intentas editar no existe.")
     if (existing.ownerId !== viewer.id) {
       throw new Error(
         'Permiso denegado: Solo el propietario puede modificar este anuncio.',
@@ -1289,7 +1287,6 @@ export async function updateListingCommercialStatus(
   }
 
   const record = state.listings[index]
-  if (!record) throw new Error("Anuncio no encontrado.")
   if (record.ownerId !== viewer.id) {
     throw new Error(
       'Permiso denegado: Solo el propietario puede cambiar el estado comercial de su anuncio.',

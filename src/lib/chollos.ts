@@ -213,29 +213,40 @@ export function resolveCholloFallbackImage(brand: string, idx = 0): string {
 
 export async function fetchLiveChollosFromApi(query = ""): Promise<CholloDeal[]> {
   const q = query.trim();
-  const isLocal =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
-  if (!isLocal) {
-    return generateFallbackChollos(q);
-  }
-
+  // 1. Try same-origin Cloud Server endpoint (/api/chollos handled by src/server.ts in Lovable / Cloudflare)
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 1800);
-    const url = `http://127.0.0.1:8765/api/chollos?q=${encodeURIComponent(q)}`;
-    const res = await fetch(url, { signal: controller.signal });
+    const timer = setTimeout(() => controller.abort(), 3200);
+    const url = `/api/chollos?q=${encodeURIComponent(q)}`;
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
     clearTimeout(timer);
-    if (!res.ok) return generateFallbackChollos(q);
-    const data = await res.json();
-    if (Array.isArray(data.items) && data.items.length > 0) {
-      return data.items as CholloDeal[];
+    const contentType = res.headers.get("content-type") || "";
+    if (res.ok && contentType.includes("application/json")) {
+      const data = await res.json();
+      if (Array.isArray(data.items) && data.items.length > 0) {
+        return data.items as CholloDeal[];
+      }
     }
-    return generateFallbackChollos(q);
   } catch {
-    return generateFallbackChollos(q);
+    // Proceed to direct Cloud Engine below
   }
+
+  // 2. Direct Cloud Live Scanner (queries PicClick live watch index via HTTPS CORS gateways)
+  try {
+    const { searchLiveChollosCloud } = await import("./live-watch-engine");
+    const cloudDeals = await searchLiveChollosCloud(q);
+    if (cloudDeals.length > 0) {
+      return cloudDeals;
+    }
+  } catch {
+    // Fallback to instant curated deals below
+  }
+
+  return generateFallbackChollos(q);
 }
 
 function generateFallbackChollos(query: string): CholloDeal[] {
@@ -248,7 +259,7 @@ function generateFallbackChollos(query: string): CholloDeal[] {
       title: `${cap} — Reloj / Lote de Recambios Verificado`,
       brand: cap.split(" ")[0] || "Seiko",
       platform: "Wallapop",
-      dealType: "Rebaja Directa",
+      dealType: "complete-watch",
       priceEur: 145,
       marketValueEur: 260,
       savingsPct: 44,
@@ -268,7 +279,7 @@ function generateFallbackChollos(query: string): CholloDeal[] {
       title: `${cap} — Piezas Originales NOS / Movimiento Completo`,
       brand: cap.split(" ")[0] || "Omega",
       platform: "eBay",
-      dealType: "Lote Relojero",
+      dealType: "watchmaker-lot",
       priceEur: 89,
       marketValueEur: 175,
       savingsPct: 49,

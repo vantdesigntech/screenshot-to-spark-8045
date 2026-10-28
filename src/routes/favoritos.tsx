@@ -14,11 +14,6 @@ import type { WatchListing } from '../marketplace/types'
 export const Route = createFileRoute('/favoritos')({
   head: () => ({
     meta: [
-      { property: 'og:title', content: 'Relojes favoritos — ChronoParts Marketplace' },
-      { property: 'og:description', content: 'Consulta tus relojes guardados en ChronoParts.' },
-      { property: 'og:type', content: 'website' },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'description', content: 'Consulta tus relojes guardados en ChronoParts.' },
       {
         title: 'Mis Relojes Favoritos | ChronoParts Marketplace',
       },

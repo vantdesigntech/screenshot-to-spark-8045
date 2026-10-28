@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-display: "Cormorant Garamond", "Times New Roman", serif;
-  --font-sans: "Manrope", system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", "Times New Roman", serif;
+  /* Apple Design System Typography Stack (SF Pro Display / SF Pro Text / Inter fallback) */
+  --font-display: "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  --font-sans: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  --font-serif: "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 
   /* Apple Border Radius Scale: none (0), xs (5px), sm (8px), md (11px), lg (18px), pill/full (9999px) */
   --radius-none: 0px;
@@ -36,60 +37,65 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-surface-elevated: var(--surface-elevated);
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Legacy names kept so older classes follow the dark ChronoParts palette */
-  --color-apple-primary: var(--primary);
-  --color-apple-primary-focus: var(--primary);
-  --color-apple-primary-dark: var(--primary);
-  --color-apple-ink: var(--foreground);
-  --color-apple-ink-80: var(--foreground);
-  --color-apple-ink-48: var(--muted-foreground);
-  --color-apple-body-muted: var(--muted-foreground);
-  --color-apple-divider: var(--border);
-  --color-apple-hairline: var(--border);
-  --color-apple-canvas: var(--background);
-  --color-apple-parchment: var(--card);
-  --color-apple-pearl: var(--card);
-  --color-apple-tile-1: var(--card);
-  --color-apple-tile-2: var(--surface-elevated);
-  --color-apple-tile-3: var(--card);
-  --color-apple-black: var(--background);
-  --color-apple-chip: var(--surface-elevated);
+  /* Explicit Apple Design System Tokens from DESIGN_apple.md */
+  --color-apple-primary: #0066cc;
+  --color-apple-primary-focus: #0071e3;
+  --color-apple-primary-dark: #2997ff;
+  --color-apple-ink: #1d1d1f;
+  --color-apple-ink-80: #333333;
+  --color-apple-ink-48: #7a7a7a;
+  --color-apple-body-muted: #cccccc;
+  --color-apple-divider: #f0f0f0;
+  --color-apple-hairline: #e0e0e0;
+  --color-apple-canvas: #ffffff;
+  --color-apple-parchment: #f5f5f7;
+  --color-apple-pearl: #fafafc;
+  --color-apple-tile-1: #272729;
+  --color-apple-tile-2: #2a2a2c;
+  --color-apple-tile-3: #252527;
+  --color-apple-black: #000000;
+  --color-apple-chip: #d2d2d7;
 }
 
 :root {
-  --radius: 8px;
-  /* ChronoParts dark system: #0B0B0A / #141413 / #1C1C1A, ivory text, single amber accent */
-  --background: oklch(0.145 0.003 106);
-  --foreground: oklch(0.97 0.008 95);
-  --card: oklch(0.19 0.003 106);
-  --card-foreground: oklch(0.97 0.008 95);
-  --surface-elevated: oklch(0.225 0.004 106);
-  --popover: oklch(0.225 0.004 106);
-  --popover-foreground: oklch(0.97 0.008 95);
-  --primary: oklch(0.76 0.14 72);
-  --primary-foreground: oklch(0.145 0.003 106);
-  --secondary: oklch(0.19 0.003 106);
-  --secondary-foreground: oklch(0.97 0.008 95);
-  --muted: oklch(0.225 0.004 106);
-  --muted-foreground: oklch(0.72 0.013 95);
-  --disabled-foreground: oklch(0.52 0.01 95);
-  --accent: oklch(0.225 0.004 106);
-  --accent-foreground: oklch(0.97 0.008 95);
-  --destructive: oklch(0.67 0.12 30);
-  --destructive-foreground: oklch(0.145 0.003 106);
-  --success: oklch(0.76 0.07 155);
-  --success-foreground: oklch(0.145 0.003 106);
-  --border: oklch(0.97 0.008 95 / 0.12);
-  --input: oklch(0.97 0.008 95 / 0.16);
-  --ring: oklch(0.76 0.14 72);
-  --shadow-product: 0 12px 40px -18px oklch(0 0 0 / 0.7);
-  --ease-spring: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --radius: 18px;
+
+  /* Apple Design System Surfaces & Text (NO decorative gradients) */
+  --background: #ffffff;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+  --popover: #ffffff;
+  --popover-foreground: #1d1d1f;
+
+  /* Single Brand Interactive Color: Action Blue #0066cc */
+  --primary: #0066cc;
+  --primary-foreground: #ffffff;
+
+  /* Parchment #f5f5f7 & Pearl #fafafc */
+  --secondary: #f5f5f7;
+  --secondary-foreground: #1d1d1f;
+  --muted: #f5f5f7;
+  --muted-foreground: #7a7a7a;
+
+  /* No second accent color — Action Blue carries every interactive signal */
+  --accent: #0066cc;
+  --accent-foreground: #ffffff;
+
+  --destructive: #ff3b30;
+  --destructive-foreground: #ffffff;
+
+  /* 1px Hairline #e0e0e0 & Focus Blue #0071e3 */
+  --border: #e0e0e0;
+  --input: #e0e0e0;
+  --ring: #0071e3;
+
+  /* The ONLY drop-shadow in the Apple Design System — reserved for product imagery */
+  --shadow-product: 3px 5px 30px 0 rgba(0, 0, 0, 0.22);
+  --ease-spring: cubic-bezier(0.34, 1.45, 0.5, 1);
 }
 
 @layer base {
@@ -97,24 +103,23 @@
     border-color: var(--color-border);
   }
   html {
-    background-color: var(--background);
-    color-scheme: dark;
+    background-color: #ffffff;
     scroll-behavior: smooth;
   }
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    background-color: #ffffff;
+    color: #1d1d1f;
     font-family: var(--font-sans);
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 400;
-    line-height: 1.55;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 600;
-    font-style: italic;
     letter-spacing: -0.28px;
   }
 }
@@ -218,8 +223,9 @@
 
 /* Frosted glass sub-nav & sticky bar */
 @utility apple-frosted {
-  background-color: color-mix(in oklab, var(--background) 82%, transparent);
+  background-color: rgba(245, 245, 247, 0.8);
   backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
 @utility ease-spring {
@@ -236,63 +242,4 @@
 }
 @utility animate-ping-soft {
   animation: ping-soft 1.8s ease-out infinite;
-}
-
-/* Keep page content within its grid track; intentionally scrolling lists stay local. */
-@layer base {
-  html, body { min-width: 320px; letter-spacing: 0; }
-  h1, h2, h3, h4, p, a, button, span, input { letter-spacing: 0; }
-  img { max-width: 100%; }
-  :where(main, section, article, aside) { min-width: 0; }
-}
-
-.chrono-home section { scroll-margin-top: 112px; }
-.chrono-home :where(h1, h2, h3, dd) { overflow-wrap: anywhere; }
-.chrono-home :where(button, select, a) { touch-action: manipulation; }
-.chrono-home #explorar > div > div:nth-child(2) { max-width: 100%; }
-.chrono-home #explorar button { min-width: 0; }
-.chrono-home #explorar .shrink-0 { flex-shrink: 0; }
-.chrono-home #explorar button.group { flex-basis: 260px; }
-
-@media (max-width: 639px) {
-  .chrono-home nav .apple-nav-link { flex-shrink: 0; }
-  .chrono-home section { padding: 40px 16px; }
-  .chrono-home #search { padding-top: 32px; }
-  .chrono-home #search h2 { font-size: 28px; }
-  .chrono-home #search .apple-tagline { font-size: 17px; font-weight: 400; }
-  .chrono-home :where(button, select) { min-height: 44px; }
-  .chrono-home #top button { min-width: 44px; }
-  .chrono-home #resultados article { padding: 18px; }
-  .chrono-home #resultados article svg { flex-shrink: 0; }
-  .chrono-home #comparator dl > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; }
-  .chrono-home #comparator dd { min-width: 0; }
-  .chrono-home #chollos input { height: 48px; font-size: 16px; }
-  .chrono-home #chollos button { min-height: 44px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-}
-
-/* Hero: continuous looping photo columns */
-@keyframes hero-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-@keyframes hero-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
-@utility hero-col-up { animation: hero-up var(--hero-speed, 60s) linear infinite; will-change: transform; }
-@utility hero-col-down { animation: hero-down var(--hero-speed, 60s) linear infinite; will-change: transform; }
-/* Dim only behind headline + search; parts stay crisp toward the edges. */
-@utility hero-vignette {
-  background: radial-gradient(ellipse 46% 34% at 50% 50%, color-mix(in oklab, var(--background) 94%, transparent) 0%, color-mix(in oklab, var(--background) 80%, transparent) 45%, transparent 100%);
-}
-@media (max-width: 639px) {
-  .hero-vignette { background: radial-gradient(ellipse 80% 30% at 50% 50%, color-mix(in oklab, var(--background) 94%, transparent) 0%, color-mix(in oklab, var(--background) 78%, transparent) 50%, transparent 100%); }
-}
-/* Soft edge mask: no visible rectangles even if a cut-out has stray pixels. */
-@utility hero-tile {
-  -webkit-mask-image: radial-gradient(circle at center, #000 58%, transparent 72%);
-  mask-image: radial-gradient(circle at center, #000 58%, transparent 72%);
-}
-@utility eyebrow { font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
-@media (prefers-reduced-motion: reduce) {
-  .hero-col-up, .hero-col-down { animation: none !important; transform: none !important; }
 }

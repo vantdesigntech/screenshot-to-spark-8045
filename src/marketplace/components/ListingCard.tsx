@@ -84,7 +84,7 @@ export function ListingCard({ listing, onToggleFavorite }: ListingCardProps) {
             }
             className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md border transition-all cursor-pointer ${
               listing.isFavorited
-                ? 'bg-destructive text-foreground border-destructive shadow-sm'
+                ? 'bg-red-500 text-white border-red-500 shadow-sm'
                 : 'bg-background/85 text-foreground border-border hover:bg-background'
             }`}
           >
@@ -156,8 +156,8 @@ export function ListingCard({ listing, onToggleFavorite }: ListingCardProps) {
             <div className="flex items-center gap-1.5 truncate">
               {listing.boxIncluded && listing.papersIncluded ? (
                 <>
-                  <FileCheck2 className="w-3.5 h-3.5 text-success shrink-0" />
-                  <span className="text-success font-medium">
+                  <FileCheck2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span className="text-emerald-700 font-medium">
                     Full Set (Caja+Doc)
                   </span>
                 </>

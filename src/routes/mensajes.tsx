@@ -23,23 +23,18 @@ import type {
 } from '../marketplace/types'
 
 interface MensajesSearch {
-  conversationId?: string | undefined
+  conversationId?: string
 }
 
 export const Route = createFileRoute('/mensajes')({
   validateSearch: (search: Record<string, unknown>): MensajesSearch => ({
     conversationId:
-      typeof search['conversationId'] === 'string'
-        ? search['conversationId']
+      typeof search.conversationId === 'string'
+        ? search.conversationId
         : undefined,
   }),
   head: () => ({
     meta: [
-      { property: 'og:title', content: 'Mensajes — ChronoParts Marketplace' },
-      { property: 'og:description', content: 'Consulta las conversaciones sobre tus relojes.' },
-      { property: 'og:type', content: 'website' },
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'description', content: 'Consulta las conversaciones sobre tus relojes.' },
       {
         title: 'Mensajes Privados | ChronoParts Marketplace',
       },
@@ -161,7 +156,7 @@ export function PrivateMessagesPage() {
       </div>
 
       {errorMessage && (
-        <div className="mb-6 p-4 rounded-2xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium flex items-center gap-2">
+        <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-700 text-xs font-medium flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
