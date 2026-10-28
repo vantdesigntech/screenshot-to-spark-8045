@@ -1,22 +1,23 @@
 import { useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
-import strap from "@/assets/strap.jpg";
-import bracelet from "@/assets/bracelet.jpg";
-import crystal from "@/assets/crystal.jpg";
-import movement from "@/assets/movement.jpg";
+import bracelet from "@/assets/hero/bracelet.png";
+import movement from "@/assets/hero/movement.png";
 import { CATEGORIES, PARTS } from "@/lib/parts";
 
-// Unbranded component photos only (no dials with visible logos).
+// Transparent cut-outs only, so parts float on the black background (no dials with logos).
 const IMAGES = [
-  strap, bracelet, crystal, movement,
+  bracelet, movement,
   "/models/seiko-skx/bezel.png", "/models/tissot-prx/movement.png", "/models/omega-speedy/bracelet-top.png",
   "/models/rolex-op41/movement.png", "/models/seiko-skx/caseback.png", "/models/tissot-prx/bracelet-top.png",
   "/models/omega-speedy/bezel.png", "/models/seiko-skx/movement.png", "/models/tissot-prx/midcase.png",
   "/models/rolex-op41/bracelet-top.png", "/models/omega-speedy/movement.png",
 ];
 
-function buildColumns(n: number) {
-  return Array.from({ length: n }, (_, c) => IMAGES.filter((_, i) => i % n === c).concat(IMAGES.filter((_, i) => (i + c) % n === 0)).slice(0, 6));
+// Each column gets 4 distinct parts; it is rendered twice so the -50% loop restarts seamlessly.
+function buildColumns(n: number, perCol = 4) {
+  return Array.from({ length: n }, (_, c) =>
+    Array.from({ length: perCol }, (_, k) => IMAGES[(c * perCol + k * 3) % IMAGES.length]),
+  );
 }
 
 const SUGGESTIONS = Array.from(
@@ -45,8 +46,8 @@ export function LoopHero({ onSearch, loading }: { onSearch: (phrase: string) => 
   };
 
   return (
-    <header className="relative isolate flex min-h-[88svh] w-full items-center justify-center overflow-hidden bg-background">
-      <div aria-hidden className="absolute inset-0 -z-10 grid grid-cols-3 gap-3 px-3 opacity-70 sm:grid-cols-5">
+    <header className="relative isolate flex min-h-[calc(100svh-44px)] w-full items-center justify-center overflow-hidden bg-background">
+      <div aria-hidden className="absolute inset-0 -z-10 grid grid-cols-3 gap-4 px-3 sm:grid-cols-5 sm:gap-6">
         {cols.map((col, c) => (
           <div key={c} className={`overflow-hidden ${c >= 3 ? "hidden sm:block" : ""}`}>
             <div
@@ -54,7 +55,7 @@ export function LoopHero({ onSearch, loading }: { onSearch: (phrase: string) => 
               style={{ ["--hero-speed" as string]: `${70 + c * 9}s` }}
             >
               {[...col, ...col].map((src, i) => (
-                <div key={i} className="mb-3 aspect-[3/4] overflow-hidden rounded-md border border-border bg-card">
+                <div key={i} className="hero-tile mb-6 aspect-square">
                   <img
                     src={src}
                     alt=""
@@ -62,8 +63,7 @@ export function LoopHero({ onSearch, loading }: { onSearch: (phrase: string) => 
                     decoding="async"
                     width={240}
                     height={320}
-                    className="h-full w-full object-contain p-3"
-                    style={{ opacity: 0.45 + ((i * 7 + c * 3) % 5) * 0.1 }}
+                    className="h-full w-full object-contain p-2"
                   />
                 </div>
               ))}
