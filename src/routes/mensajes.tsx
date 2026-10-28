@@ -23,18 +23,23 @@ import type {
 } from '../marketplace/types'
 
 interface MensajesSearch {
-  conversationId?: string
+  conversationId?: string | undefined
 }
 
 export const Route = createFileRoute('/mensajes')({
   validateSearch: (search: Record<string, unknown>): MensajesSearch => ({
     conversationId:
-      typeof search.conversationId === 'string'
-        ? search.conversationId
+      typeof search['conversationId'] === 'string'
+        ? search['conversationId']
         : undefined,
   }),
   head: () => ({
     meta: [
+      { property: 'og:title', content: 'Mensajes — ChronoParts Marketplace' },
+      { property: 'og:description', content: 'Consulta las conversaciones sobre tus relojes.' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'description', content: 'Consulta las conversaciones sobre tus relojes.' },
       {
         title: 'Mensajes Privados | ChronoParts Marketplace',
       },

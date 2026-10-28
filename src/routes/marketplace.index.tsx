@@ -34,6 +34,10 @@ import {
 export const Route = createFileRoute('/marketplace/')({
   head: () => ({
     meta: [
+      { property: 'og:title', content: 'Marketplace de relojes — ChronoParts' },
+      { property: 'og:description', content: 'Relojes de coleccionistas, filtros por marca y revisión fotográfica.' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
       {
         title:
           'Marketplace de Relojes Completos | ChronoParts — Compraventa con Revisión Fotográfica',

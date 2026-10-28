@@ -5,11 +5,11 @@
  */
 
 const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL ||
+  import.meta.env["VITE_SUPABASE_URL"] ||
   "https://bnspjqlbisinmoohgrxo.supabase.co";
 const SUPABASE_KEY =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
+  import.meta.env["VITE_SUPABASE_ANON_KEY"] ||
   "sb_publishable_iIoYiJ-oNqK4rFF5cgIV5Q_1mSxN794";
 
 function getSupabaseHeaders(): Record<string, string> {
@@ -19,7 +19,7 @@ function getSupabaseHeaders(): Record<string, string> {
     Prefer: "return=minimal",
   };
   if (!SUPABASE_KEY.startsWith("sb_publishable_")) {
-    headers.Authorization = `Bearer ${SUPABASE_KEY}`;
+    headers["Authorization"] = `Bearer ${SUPABASE_KEY}`;
   }
   return headers;
 }
