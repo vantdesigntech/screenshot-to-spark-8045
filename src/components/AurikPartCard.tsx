@@ -60,7 +60,7 @@ export function AurikPartCard({
           `${item.brand === "Generic" ? "" : item.brand} ${item.title}`
         );
 
-  const whatsappShareText = `🔧 Componente relojero encontrado en ChronoParts:\n*${item.title}*\nMarca/Calibre: ${item.brand} (${item.calibre})\nPrecio: ${fmtPrice(item.priceEur, currency)} en ${item.store}\n👉 Ver enlace directo: ${storeUrl}`;
+  const whatsappShareText = `🔧 Componente relojero encontrado en ChronoParts:\n*${item.title}*\nMarca/Calibre: ${item.brand}\nPrecio: ${fmtPrice(item.priceEur, currency)} en ${item.store}\n👉 Ver enlace directo: ${storeUrl}`;
   const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(whatsappShareText)}`;
 
   const handleCopyLink = async () => {
@@ -115,7 +115,7 @@ export function AurikPartCard({
                   : "border border-[#d4d4d8] bg-white text-[#111111]"
               }`}
             >
-              {item.origin === "oem" ? "OEM ORIGINAL" : "AFTERMARKET"}
+              {item.condition === "Sin verificar" ? "Origen no verificado" : item.origin === "oem" ? "OEM según anuncio" : "AFTERMARKET"}
             </span>
             {savingsPct !== null && (
               <span className="bg-[#e03127] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
@@ -190,10 +190,13 @@ export function AurikPartCard({
         {/* 3. Technical Specification Rows separated by 1px solid #e5e5e5 hairlines (Exact 3.webp match) */}
         <div className="aurik-spec-row text-[#111111]">
           <span className="aurik-spec-label">
-            TYPE : {item.origin === "oem" ? "OEM FACTORY" : "AFTERMARKET"}
+            TYPE : {item.condition === "Sin verificar" ? "SIN VERIFICAR" : item.origin === "oem" ? "OEM según anuncio" : "AFTERMARKET"}
           </span>
           <span className="aurik-spec-value font-semibold text-[#111111]">
             {fmtPrice(item.priceEur, currency)}
+            {item.listedCurrency && item.listedCurrency !== "EUR" && (
+              <span className="block text-xs text-muted-foreground">Conversión orientativa · anuncio: {item.listedPrice} {item.listedCurrency}</span>
+            )}
             {item.origin === "generic" &&
               refOemPrice &&
               refOemPrice > item.priceEur && (
@@ -206,7 +209,7 @@ export function AurikPartCard({
 
         <div className="aurik-spec-row border-b border-[#e5e5e5] text-[#111111]">
           <span className="min-w-0 flex-1 truncate pr-2">
-            FIT : {item.compatibleWith.slice(0, 2).join(" / ")}
+            {item.compatibleWith.length ? `FIT : ${item.compatibleWith.slice(0, 2).join(" / ")}` : "Compatibilidad no verificada"}
           </span>
           <div className="flex shrink-0 items-center gap-3">
             {onCompare && (

@@ -79,9 +79,9 @@ export default {
 
         if (url.pathname === "/api/search") {
           const q = (url.searchParams.get("q") || "").trim();
-          const items = await searchLiveWatchPartsCloud(q);
+          const result = await searchLiveWatchPartsCloud(q);
           return new Response(
-            JSON.stringify({ query: q, count: items.length, items }),
+            JSON.stringify(result),
             { status: 200, headers: API_CORS_HEADERS },
           );
         }

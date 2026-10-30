@@ -343,7 +343,9 @@ export interface Part {
   spec: string;
   oemRef?: string;
   compatibleWith: string[];
-  condition: "NOS Vintage" | "Certified OEM" | "Aftermarket 1:1" | "Swiss OEM";
+  condition: "NOS Vintage" | "Certified OEM" | "Aftermarket 1:1" | "Swiss OEM" | "Sin verificar";
+  listedPrice?: number;
+  listedCurrency?: "EUR" | "USD" | "GBP";
   equivalentOemPriceEur?: number;
   pairGroupId?: string;
   proOnly?: boolean;
@@ -359,20 +361,16 @@ export const PARTS: Part[] = [
     title: "Vintage Tissot 1990 leather strap, 18mm",
     brand: "Tissot",
     store: "eBay",
-    origin: "oem",
+    origin: "generic",
     category: "straps",
     priceEur: 64,
     delivery: "3–5 days",
     image: "https://www.picclickimg.com/PsUAAeSw1H1pE--j/For-Tissot-1853-Genuine-Leather-Watch-Band-Strap.webp",
     spec: "18mm · eBay #146957302117",
-    oemRef: "TS-1990-18L",
-    compatibleWith: ["Tissot Seastar 1990", "Tissot PRX (with adapter)", "18mm Classic Lugs"],
-    condition: "NOS Vintage",
+    compatibleWith: [],
+    condition: "Sin verificar",
     pairGroupId: "strap-tissot",
     customUrl: "https://www.ebay.es/itm/146957302117",
-    materialSpec: "Piel de becerro suiza NOS + Hebilla firmada Tissot (Foto y enlace real 1:1)",
-    toleranceSpec: "Original de fábrica (18.0mm exactos)",
-    resaleImpact: "Mantiene 100% autenticidad de colección",
   },
   {
     id: "2",
@@ -408,7 +406,7 @@ export const PARTS: Part[] = [
     spec: "20mm · eBay #198739161658",
     oemRef: "Ref. 78360 / Endlinks 558B",
     compatibleWith: ["Rolex Datejust 16200", "Rolex Oyster Perpetual 20mm"],
-    condition: "Certified OEM",
+    condition: "Sin verificar",
     pairGroupId: "oyster-20mm",
     customUrl: "https://www.ebay.es/itm/198739161658",
     materialSpec: "Oystersteel 904L manufactura Rolex Ginebra + Corona grabada",
@@ -470,7 +468,7 @@ export const PARTS: Part[] = [
     spec: "Genuine Sapphire · eBay #227574298269",
     oemRef: "Ref. B25-7030-C1",
     compatibleWith: ["Rolex Oyster Perpetual 41 (124300)", "Rolex Datejust 36/41"],
-    condition: "Certified OEM",
+    condition: "Sin verificar",
     pairGroupId: "crystal-124300",
     customUrl: "https://www.ebay.es/itm/227574298269",
     materialSpec: "Zafiro original Rolex en blister sellado con micro-corona láser (Foto 1:1)",
@@ -479,23 +477,19 @@ export const PARTS: Part[] = [
   },
   {
     id: "7",
-    title: "OEM Diver & Smooth Bezel Ring + Lumed Pip Assembly",
-    brand: "Rolex",
+    title: " Diver & Smooth Bezel Ring + Lumed Pip Assembly",
+    brand: "Sin identificar",
     store: "eBay",
-    origin: "oem",
+    origin: "generic",
     category: "bezels",
     priceEur: 480,
     delivery: "4–7 days",
     image: "https://www.picclickimg.com/EfcAAeSwvH1q1sRc/Watch-Parts-Bezel-Inserts-Diver-Style-Lume.webp",
-    spec: "OEM Bezel · eBay #237133169800",
-    oemRef: "Ref. 317-124300",
-    compatibleWith: ["Rolex OP 41 124300", "Seiko SKX007 OEM"],
-    condition: "NOS Vintage",
+    spec: " Bezel · eBay #237133169800",
+    compatibleWith: [],
+    condition: "Sin verificar",
     pairGroupId: "bezel-op41",
     customUrl: "https://www.ebay.es/itm/237133169800",
-    materialSpec: "Bisel e inserto original procedente de lote relojero (Foto real eBay)",
-    toleranceSpec: "Encaje a presión de precisión sobre anillo de retención",
-    resaleImpact: "Restaura el estado de fábrica sin pérdida de valor",
   },
   {
     id: "8",
@@ -520,24 +514,20 @@ export const PARTS: Part[] = [
   },
   {
     id: "9",
-    title: "Calibre 3230 / Skeletonized Precision Automatic Movement",
-    brand: "Rolex",
+    title: "Skeletonized automatic movement — modelo sin verificar",
+    brand: "Sin identificar",
     store: "Chrono24",
-    origin: "oem",
+    origin: "generic",
     category: "movements",
     priceEur: 890,
     delivery: "5–8 days",
     image: "https://cdn.shopify.com/s/files/1/0139/0434/7193/products/50080_SIINH70SkeletonizedMovement_13_front.png?v=1626326580",
     spec: "Chronergy escapement",
-    oemRef: "Cal. 3230-410",
-    compatibleWith: ["Rolex Calibre 3230", "Rolex Calibre 3235", "Submariner 124060"],
-    condition: "Certified OEM",
+    compatibleWith: [],
+    condition: "Sin verificar",
     pairGroupId: "movement-auto",
     proOnly: true,
     customUrl: "https://www.chrono24.es/search/index.htm?query=Rolex+3230+movement&dosearch=true",
-    materialSpec: "Espiral Parachrom azul antimagnética + volante Microstella",
-    toleranceSpec: "Certificación Superlative Chronometer (-2/+2 seg/día)",
-    resaleImpact: "Pieza original de manufactura para reparación de alto nivel",
   },
   {
     id: "10",
@@ -604,23 +594,19 @@ export const PARTS: Part[] = [
   {
     id: "13",
     title: "Sub-Style / Oyster Dial + Luminous Hands Set (SKX007 / NH35 / OP41)",
-    brand: "Rolex",
+    brand: "Sin identificar",
     store: "eBay",
-    origin: "oem",
+    origin: "generic",
     category: "dials",
     priceEur: 1100,
     delivery: "4–7 days",
     image: "https://www.picclickimg.com/21oAAeSwfCxqXeHa/New-Replacement-Sub-Military-Dial-Arrow-Hands.webp",
     spec: "Dial + Hands · eBay #137509275805",
-    oemRef: "Ref. 13-124300-SLV",
-    compatibleWith: ["Rolex Oyster Perpetual 41", "Seiko SKX007 / NH35"],
-    condition: "Certified OEM",
+    compatibleWith: [],
+    condition: "Sin verificar",
     pairGroupId: "dial-op41",
     proOnly: true,
     customUrl: "https://www.ebay.es/itm/137509275805",
-    materialSpec: "Esfera de alto contraste con índices luminiscentes y juego de agujas (Foto 1:1 eBay)",
-    toleranceSpec: "Encaje verificado en anuncio #137509275805",
-    resaleImpact: "Pieza verificada con enlace directo al anuncio de eBay",
   },
   {
     id: "14",
@@ -635,7 +621,7 @@ export const PARTS: Part[] = [
     spec: "6mm B24-600 · eBay #168614641239",
     oemRef: "Ref. B24-600-0",
     compatibleWith: ["Rolex 124300", "Rolex Datejust 16000 / 36 / 41"],
-    condition: "Certified OEM",
+    condition: "Sin verificar",
     pairGroupId: "crown-screw",
     customUrl: "https://www.ebay.es/itm/168614641239",
     materialSpec: "Corona Rolex 6mm de acero con tubo roscado y tije en blister (Foto real 1:1 eBay)",
@@ -689,21 +675,17 @@ export const PARTS: Part[] = [
     title: "Omega Speedmaster Moonwatch 20mm Curved Strap & Clasp",
     brand: "Omega",
     store: "eBay",
-    origin: "oem",
+    origin: "generic",
     category: "straps",
     priceEur: 295,
     delivery: "3–5 days",
     image: "https://www.picclickimg.com/rgIAAOSwRHlnmLej/Premium-Rubber-Watch-Strap-Band-Bracelet-Made-For.webp",
     spec: "20mm Moonwatch · eBay #306070246910",
-    oemRef: "Ref. 032CVZ015753",
-    compatibleWith: ["Omega Speedmaster Moonwatch 145.022", "Ref. 310.30.42.50"],
-    condition: "Certified OEM",
+    compatibleWith: [],
+    condition: "Sin verificar",
     proOnly: true,
     pairGroupId: "oyster-20mm",
     customUrl: "https://www.ebay.es/itm/306070246910",
-    materialSpec: "Correa curvada de alta precisión para caja Speedmaster 42mm (Foto real 1:1 eBay)",
-    toleranceSpec: "Ajuste sin holgura entre asas de 20mm",
-    resaleImpact: "Mantiene la estética deportiva del Moonwatch",
   },
   {
     id: "18",
@@ -762,7 +744,7 @@ export const PARTS: Part[] = [
     spec: "OEM Seiko · WatchPlaza Especialista",
     oemRef: "7T920CF8XB13",
     compatibleWith: ["Seiko SND253P1 Flightmaster", "Calibre 7T92 Original"],
-    condition: "Certified OEM",
+    condition: "Sin verificar",
     pairGroupId: "dial-op41",
     proOnly: true,
     customUrl: "https://www.watchplaza.com/products/seiko-7t920cf8xb13-dial-snd253p1-pilot",
@@ -794,24 +776,20 @@ export const PARTS: Part[] = [
   },
   {
     id: "22",
-    title: "Fornitura Oficial Suiza: Kit de Juntas Viton, Tubo y Corona Hermética ETA/Omega",
-    brand: "CousinsUK",
+    title: "Fornitura  Suiza: Kit de Juntas Viton, Tubo y Corona Hermética ETA/Omega",
+    brand: "Sin identificar",
     store: "CousinsUK",
-    origin: "oem",
+    origin: "generic",
     category: "crowns",
     priceEur: 42,
     delivery: "2–4 days · UK Trade Supply",
     image: "https://cdn.shopify.com/s/files/1/0858/3531/7585/files/seiko-320pa4jn02-crystal-glass-sna411-sna413-sna414-pilot-flightmaster-199370.jpg?v=1761309411",
     spec: "Fornitura Relojero · CousinsUK",
-    oemRef: "CUK-SWISS-CRW",
-    compatibleWith: ["Omega Speedmaster / Seamaster", "ETA 2824 / 2892", "Rolex Vintage Tubes"],
-    condition: "Swiss OEM",
+    compatibleWith: [],
+    condition: "Sin verificar",
     pairGroupId: "crown-screw",
     proOnly: true,
     customUrl: "https://www.cousinsuk.com/search?SearchText=omega+crown+tube+gasket",
-    materialSpec: "Suministro mayorista exclusivo para talleres relojeros (Cousins Material House UK)",
-    toleranceSpec: "Certificación ISO de estanqueidad suiza",
-    resaleImpact: "Acceso directo al mayor almacén profesional de fornitura relojera de Europa",
   },
 ];
 
@@ -847,7 +825,10 @@ export function getStoreSearchUrl(store: Store, query: string): string {
 
 export function filterParts(parts: Part[], f: Filters): Part[] {
   const words = f.query.toLowerCase().split(/\s+/).filter(Boolean);
+  const brands = ["rolex", "seiko", "omega", "tissot", "citizen", "casio", "tudor", "cartier", "breitling", "hamilton", "longines", "orient"];
+  const queriedBrands = brands.filter((brand) => new RegExp(`\\b${brand}\\b`, "i").test(f.query));
   return parts.filter((p) => {
+    if (queriedBrands.length && (!queriedBrands.every((brand) => new RegExp(`\\b${brand}\\b`, "i").test(p.title)) || brands.some((brand) => !queriedBrands.includes(brand) && new RegExp(`\\b${brand}\\b`, "i").test(p.title)))) return false;
     if (f.origin !== "all" && p.origin !== f.origin) return false;
     if (f.categories.length && !f.categories.includes(p.category)) return false;
     if (p.priceEur > f.maxPrice) return false;
@@ -872,149 +853,32 @@ export function resolveCategoryImage(category: Category, origin: Origin): string
   }
 }
 
-function detectQueryCategory(query: string): Category {
-  const q = query.toLowerCase();
-  if (/(bezel|bisel|insert|inserto)/.test(q)) return "bezels";
-  if (/(crystal|cristal|sapphire|zafiro|plexi|hesalite)/.test(q)) return "crystals";
-  if (/(dial|esfera|hands|agujas|manecillas)/.test(q)) return "dials";
-  if (/(crown|corona|stem|tije|pulsador)/.test(q)) return "crowns";
-  if (/(movement|movimiento|calibre|nh35|nh36|2824|3230|1861|9015|rotor|eta|seiko)/.test(q)) return "movements";
-  return "straps";
+export interface SearchSource {
+  name: string;
+  status: "ok" | "error" | "timeout";
+  count: number;
 }
+export interface LiveSearchResponse {
+  items: Part[];
+  sources: SearchSource[];
+}
+export const SEARCH_CLIENT_TIMEOUT_MS = 12000;
+export const ALSO_SEARCH_STORES: Store[] = ["eBay", "Chrono24", "CousinsUK", "Alibaba", "AliExpress"];
 
-export async function fetchLivePartsFromApi(query: string): Promise<Part[]> {
+export async function fetchLivePartsFromApi(query: string): Promise<LiveSearchResponse> {
   const q = query.trim();
-  if (!q) return [];
-
-  // 1. Try same-origin Cloud Server endpoint (/api/search handled by src/server.ts in Lovable / Cloudflare)
+  if (!q) return { items: [], sources: [] };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SEARCH_CLIENT_TIMEOUT_MS);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3200);
-    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
+    const response = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+      signal: controller.signal, headers: { Accept: "application/json" },
     });
-    clearTimeout(timer);
-    const contentType = res.headers.get("content-type") || "";
-    if (res.ok && contentType.includes("application/json")) {
-      const data = await res.json();
-      if (Array.isArray(data.items) && data.items.length > 0) {
-        return data.items.map((item: Part) => ({
-          ...item,
-          image:
-            item.image && item.image.startsWith("http")
-              ? item.image
-              : resolveCategoryImage(item.category, item.origin),
-        }));
-      }
-    }
+    if (!response.ok) throw new Error("Search unavailable");
+    const data = await response.json() as LiveSearchResponse;
+    if (!Array.isArray(data.items) || !Array.isArray(data.sources)) throw new Error("Invalid search response");
+    return data;
   } catch {
-    // Proceed to direct Cloud Engine below
-  }
-
-  // 2. Direct Cloud Live Engine (queries WatchPlaza JSON, NamokiMods JSON, eBay PicClick & AliExpress via HTTPS CORS gateways)
-  try {
-    const { searchLiveWatchPartsCloud } = await import("./live-watch-engine");
-    const cloudItems = await searchLiveWatchPartsCloud(q);
-    if (cloudItems.length > 0) {
-      return cloudItems;
-    }
-  } catch {
-    // Fallback to instant comparison cards below
-  }
-
-  return generateLiveComparisonCards(q);
-}
-
-export function generateLiveComparisonCards(query: string): Part[] {
-  const q = query.trim();
-  if (!q) return [];
-  const cap = q.charAt(0).toUpperCase() + q.slice(1);
-  const cat = detectQueryCategory(q);
-  const pairId = `live-pair-${q.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-  return [
-    {
-      id: `live-ali-${q}`,
-      title: `${cap} — Recambio Compatible Aftermarket 1:1`,
-      brand: "Aftermarket Direct",
-      store: "AliExpress",
-      origin: "generic",
-      category: cat,
-      priceEur: 18.5,
-      delivery: "8–14 días",
-      image: resolveCategoryImage(cat, "generic"),
-      spec: "Acero 316L / Zafiro AR / FKM",
-      oemRef: "LIVE-ALI-1TO1",
-      compatibleWith: [cap, "Ajuste 1:1 verificado"],
-      condition: "Aftermarket 1:1",
-      pairGroupId: pairId,
-      equivalentOemPriceEur: 240,
-      customUrl: getStoreSearchUrl("AliExpress", q),
-      materialSpec: "Acero 316L / Cristal Zafiro / Caucho FKM compatible directo",
-      toleranceSpec: "Tolerancia ±0.03 mm verificada",
-      resaleImpact: "Máximo ahorro para uso diario o modificación",
-    },
-    {
-      id: `live-namoki-${q}`,
-      title: `${cap} — Componente de Precisión Grado Taller`,
-      brand: "NamokiMods",
-      store: "NamokiMods",
-      origin: "generic",
-      category: cat,
-      priceEur: 44,
-      delivery: "4–7 días",
-      image: resolveCategoryImage(cat, "generic"),
-      spec: "Grado relojero · Juntas Viton incluidas",
-      oemRef: "NMK-PRO-FIT",
-      compatibleWith: [cap, "NH35 / SKX / Khaki / Speedmaster"],
-      condition: "Aftermarket 1:1",
-      pairGroupId: pairId,
-      equivalentOemPriceEur: 240,
-      customUrl: getStoreSearchUrl("NamokiMods", q),
-      materialSpec: "Mecanizado CNC con acabado cepillado/pulido de alta relojería",
-      toleranceSpec: "Encaje exacto en caja original",
-      resaleImpact: "Mejora funcional reversible sin alterar la caja",
-    },
-    {
-      id: `live-ebay-${q}`,
-      title: `${cap} — Pieza Original OEM / NOS de Relojero`,
-      brand: "Vintage OEM",
-      store: "eBay",
-      origin: "oem",
-      category: cat,
-      priceEur: 125,
-      delivery: "3–6 días",
-      image: resolveCategoryImage(cat, "oem"),
-      spec: "Stock original verificado (NOS)",
-      oemRef: "OEM-NOS-VERIFIED",
-      compatibleWith: [cap, "Referencia de fábrica"],
-      condition: "NOS Vintage",
-      pairGroupId: pairId,
-      customUrl: getStoreSearchUrl("eBay", `${q} original genuine`),
-      materialSpec: "Pieza original procedente de stock de relojero (New Old Stock)",
-      toleranceSpec: "Especificación oficial de fábrica",
-      resaleImpact: "Conserva la originalidad histórica del reloj",
-    },
-    {
-      id: `live-c24-${q}`,
-      title: `${cap} — Recambio Oficial Certificado con Escrow`,
-      brand: "Certified OEM",
-      store: "Chrono24",
-      origin: "oem",
-      category: cat,
-      priceEur: 240,
-      delivery: "2–4 días",
-      image: resolveCategoryImage(cat, "oem"),
-      spec: "Distribuidor verificado · Protección Escrow",
-      oemRef: "C24-OEM-CERT",
-      compatibleWith: [cap, "Calibre y caja original"],
-      condition: "Certified OEM",
-      pairGroupId: pairId,
-      proOnly: true,
-      customUrl: getStoreSearchUrl("Chrono24", q),
-      materialSpec: "Componente original sellado con protección Escrow de Chrono24",
-      toleranceSpec: "Certificado de fábrica 100%",
-      resaleImpact: "100% valor de colección garantizado",
-    },
-  ];
+    return { items: [], sources: [{ name: "Buscador en vivo", status: controller.signal.aborted ? "timeout" : "error", count: 0 }] };
+  } finally { clearTimeout(timer); }
 }

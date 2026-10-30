@@ -41,7 +41,7 @@ describe("App routing", () => {
       isShopifyProductRelevant("Seiko SKX007 bisel", "Seiko SKX007 Ceramic Bezel Insert"),
     ).toBe(true);
     expect(buildAliExpressCompatibleQuery("Rolex Datejust correa", "straps")).toContain(
-      "904l oyster jubilee",
+      "Rolex Datejust strap",
     );
   });
 
