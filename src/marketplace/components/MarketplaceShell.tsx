@@ -1,16 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import {
-  ArrowLeft,
   Heart,
   Layers,
   MessageSquare,
   PlusCircle,
-  ShieldCheck,
   Store,
   UserCheck,
-  Watch,
 } from 'lucide-react'
+import { AurikNavbar } from '@/components/AurikNavbar'
 import {
   getCurrentUser,
   listMarketplaceAccounts,
@@ -32,7 +30,7 @@ export function MarketplaceShell({
   children,
   title,
   subtitle,
-  badgeText = 'CHRONOPARTS MARKETPLACE · COMPRAVENTA ENTRE COLECCIONISTAS',
+  badgeText = 'CRONORA MARKETPLACE // COMPRAVENTA ENTRE COLECCIONISTAS',
 }: MarketplaceShellProps) {
   const routerState = useRouterState()
   const pathname = routerState.location.pathname
@@ -113,64 +111,16 @@ export function MarketplaceShell({
   ]
 
   return (
-    <div className="min-h-screen bg-[#ffffff] text-[#1d1d1f] flex flex-col selection:bg-[#0066cc] selection:text-white">
-      {/* 1. GLOBAL NAV (#000000, 44px height) */}
-      <nav aria-label="Navegación global" className="w-full bg-[#000000] text-[#ffffff]">
-        <div className="mx-auto flex h-[44px] max-w-[980px] items-center justify-between px-[22px]">
-          <div className="flex items-center gap-6">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-white/80 transition hover:text-white"
-              title="Volver al Ecosistema ChronoParts 3D y Piezas"
-            >
-              <Watch className="h-4 w-4 text-white" />
-              <span className="text-[12px] font-semibold tracking-[-0.01em] text-white">
-                ChronoParts
-              </span>
-            </Link>
-            <Link to="/" className="apple-nav-link hidden sm:inline-block">
-              Buscador de Piezas & 3D
-            </Link>
-            <Link to="/blog" className="apple-nav-link hidden md:inline-block">
-              Guías
-            </Link>
-          </div>
+    <div className="min-h-screen bg-white text-[#111111] flex flex-col">
+      {/* 1. SHARED AURIK GLOBAL NAVBAR */}
+      <AurikNavbar savedCount={favoritesCount} />
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
-              <UserCheck className="w-3.5 h-3.5 text-[#2997ff] shrink-0" />
-              <label htmlFor="marketplace-user-select" className="sr-only">
-                Sesión activa
-              </label>
-              <select
-                id="marketplace-user-select"
-                aria-label="Cambiar usuario activo del marketplace"
-                value={currentUser.id}
-                onChange={(e) => handleSwitchUser(e.target.value)}
-                className="bg-transparent text-[12px] text-white focus:outline-none cursor-pointer pr-1"
-              >
-                {accounts.map((acc) => (
-                  <option
-                    key={acc.id}
-                    value={acc.id}
-                    className="bg-[#1d1d1f] text-white"
-                  >
-                    {acc.displayName}
-                    {acc.role === 'moderator' ? ' (Moderador)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* 2. SUB-NAV FROSTED (52px height, #f5f5f7/80) */}
-      <header className="apple-frosted sticky top-0 z-40 border-b border-[#e0e0e0] bg-[#f5f5f7]/80">
-        <div className="mx-auto flex h-[52px] max-w-[980px] items-center justify-between gap-2 overflow-x-auto px-[22px] no-scrollbar">
+      {/* 2. MARKETPLACE SUB-HEADER BAR (Sharp AURIK 0px borders) */}
+      <div className="border-b border-[#e5e5e5] bg-[#f4f4f5]">
+        <div className="mx-auto flex min-h-[52px] max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-2 sm:px-8">
           <nav
             aria-label="Navegación del Marketplace"
-            className="flex items-center gap-1.5"
+            className="flex flex-wrap items-center gap-2"
           >
             {navItems.map((item) => {
               const Icon = item.icon
@@ -178,23 +128,15 @@ export function MarketplaceShell({
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] whitespace-nowrap transition-all ${
-                    item.active
-                      ? 'bg-[#0066cc] text-white font-semibold'
-                      : 'text-[#1d1d1f]/75 hover:text-[#1d1d1f]'
-                  }`}
+                  className={
+                    item.active ? 'aurik-btn-red' : 'aurik-btn-gray bg-white'
+                  }
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="h-3.5 w-3.5" />
                   <span>{item.label}</span>
                   {item.badge !== undefined && (
-                    <span
-                      className={`ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-semibold ${
-                        item.active
-                          ? 'bg-white text-[#0066cc]'
-                          : 'bg-[#0066cc]/15 text-[#0066cc]'
-                      }`}
-                    >
-                      {item.badge}
+                    <span className="ml-1 px-1.5 py-0.2 font-mono text-[10px]">
+                      [{item.badge}]
                     </span>
                   )}
                 </Link>
@@ -202,59 +144,83 @@ export function MarketplaceShell({
             })}
           </nav>
 
-          <div className="hidden xl:flex items-center gap-2 text-[12px] text-[#7a7a7a]">
-            <span>
-              Sesión:{' '}
-              <strong className="text-[#1d1d1f]">
-                {currentUser.displayName}
-              </strong>{' '}
-              ({currentUser.location})
-            </span>
+          {/* Active Collector Session Switcher */}
+          <div className="flex items-center gap-2 border border-[#e5e5e5] bg-white px-3 py-1.5">
+            <UserCheck className="h-3.5 w-3.5 text-[#e03127] shrink-0" />
+            <label htmlFor="marketplace-user-select" className="sr-only">
+              Sesión activa
+            </label>
+            <select
+              id="marketplace-user-select"
+              aria-label="Cambiar usuario activo del marketplace"
+              value={currentUser.id}
+              onChange={(e) => handleSwitchUser(e.target.value)}
+              className="bg-transparent font-mono text-[11px] uppercase tracking-[0.06em] text-[#111111] focus:outline-none cursor-pointer"
+            >
+              {accounts.map((acc) => (
+                <option
+                  key={acc.id}
+                  value={acc.id}
+                  className="bg-white text-[#111111]"
+                >
+                  {acc.displayName}
+                  {acc.role === 'moderator' ? ' (Moderador)' : ''}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Optional Hero Banner (Product Tile Light #ffffff, no gradients) */}
+      {/* Optional Hero Banner in AURIK Editorial Style */}
       {title && (
-        <section className="w-full border-b border-[#e0e0e0] bg-[#ffffff] py-[48px] px-[22px]">
-          <div className="max-w-[980px] mx-auto text-center">
-            <p className="apple-caption font-semibold text-[#0066cc] mb-2">
-              {badgeText}
-            </p>
-            <h1 className="apple-display-lg text-[34px] sm:text-[44px] text-[#1d1d1f]">
-              {title}
-            </h1>
-            {subtitle && (
-              <p className="apple-tagline mt-2.5 text-[19px] text-[#7a7a7a] max-w-2xl mx-auto">
-                {subtitle}
-              </p>
-            )}
+        <section className="mx-auto w-full max-w-[1440px] border-b border-[#e5e5e5] px-4 py-10 sm:px-8 sm:py-14">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-4">
+              <div className="aurik-section-tag">
+                <span className="aurik-dot" />
+                <span>{badgeText}</span>
+              </div>
+            </div>
+            <div className="lg:col-span-8">
+              <h1 className="aurik-hero-title text-2xl sm:text-4xl">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#52525b]">
+                  {subtitle}
+                </p>
+              )}
+            </div>
           </div>
         </section>
       )}
 
       {/* Main Content */}
-      <main className="flex-1 max-w-[980px] w-full mx-auto px-[22px] py-10">
+      <main className="flex-1 mx-auto w-full max-w-[1440px] px-4 py-10 sm:px-8">
         {children}
       </main>
 
-      {/* Footer consistent with Apple design system */}
-      <footer className="border-t border-[#e0e0e0] bg-[#f5f5f7] py-[48px] px-[22px] mt-16">
-        <div className="max-w-[980px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 apple-fine-print text-[#7a7a7a]">
+      {/* CRONORA Technical Footer */}
+      <footer className="border-t border-[#e5e5e5] bg-[#f4f4f5] py-10 px-4 sm:px-8 mt-16">
+        <div className="mx-auto max-w-[1440px] flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
           <div className="flex items-center gap-2">
-            <Watch className="w-3.5 h-3.5 text-[#0066cc]" />
-            <span className="font-semibold text-[#333333]">
-              ChronoParts Marketplace
-            </span>
-            <span>
-              · Arquitectura modular P2P.
+            <span className="text-[#e03127]">●</span>
+            <span className="font-semibold text-[#111111]">
+              CRONORA MARKETPLACE // P2P HOROLOGY EXCHANGE
             </span>
           </div>
-          <p className="text-center sm:text-right max-w-md">
-            La revisión fotográfica evalúa coherencia visual y documental; no
-            sustituye una inspección relojera presencial ni garantiza
-            autenticidad física.
-          </p>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="hover:text-[#111111]">
+              INICIO &gt;
+            </Link>
+            <Link to="/chollos" className="hover:text-[#111111]">
+              CHOLLOS &gt;
+            </Link>
+            <Link to="/blog" className="hover:text-[#111111]">
+              GUÍAS &gt;
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

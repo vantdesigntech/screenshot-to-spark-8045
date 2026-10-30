@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as ChollosRouteImport } from './routes/chollos'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MensajesRouteImport } from './routes/mensajes'
 import { Route as MisAnunciosRouteImport } from './routes/mis-anuncios'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChollosRoute = ChollosRouteImport.update({
+  id: '/chollos',
+  path: '/chollos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FavoritosRoute = FavoritosRouteImport.update({
@@ -62,6 +68,7 @@ const MarketplaceIdRoute = MarketplaceIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/mis-anuncios': typeof MisAnunciosRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/mis-anuncios': typeof MisAnunciosRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
   '/mis-anuncios': typeof MisAnunciosRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
+    | '/chollos'
     | '/favoritos'
     | '/mensajes'
     | '/mis-anuncios'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/blog'
+    | '/chollos'
     | '/favoritos'
     | '/mensajes'
     | '/mis-anuncios'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/blog'
+    | '/chollos'
     | '/favoritos'
     | '/mensajes'
     | '/mis-anuncios'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogRoute: typeof BlogRoute
+  ChollosRoute: typeof ChollosRoute
   FavoritosRoute: typeof FavoritosRoute
   MensajesRoute: typeof MensajesRoute
   MisAnunciosRoute: typeof MisAnunciosRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chollos': {
+      id: '/chollos'
+      path: '/chollos'
+      fullPath: '/chollos'
+      preLoaderRoute: typeof ChollosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/favoritos': {
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogRoute: BlogRoute,
+  ChollosRoute: ChollosRoute,
   FavoritosRoute: FavoritosRoute,
   MensajesRoute: MensajesRoute,
   MisAnunciosRoute: MisAnunciosRoute,
@@ -210,11 +231,10 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
+import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

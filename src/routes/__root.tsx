@@ -17,19 +17,23 @@ import { AccountProvider } from "@/components/AccountProvider";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#ffffff] px-4 text-[#1d1d1f]">
-      <div className="max-w-md text-center">
-        <h1 className="apple-hero-display text-[56px] text-[#1d1d1f]">404</h1>
-        <h2 className="apple-tagline mt-3 text-[21px] text-[#1d1d1f]">Página no encontrada</h2>
-        <p className="apple-body mt-2 text-[#7a7a7a]">
-          La página o referencia que buscas no existe o se ha movido dentro de ChronoParts.
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-[#111111]">
+      <div className="w-full max-w-md border border-[#e5e5e5] bg-[#f4f4f5] p-8 text-center">
+        <div className="aurik-section-tag justify-center">
+          <span className="aurik-dot" />
+          <span>ERROR // 404</span>
+        </div>
+        <h1 className="aurik-hero-title mt-3 text-4xl text-[#111111]">
+          Página no encontrada
+        </h1>
+        <p className="mt-3 text-xs leading-relaxed text-[#71717a]">
+          La referencia o ruta solicitada no existe en el catálogo técnico de
+          Cronora.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[17px] font-normal text-white transition-transform active:scale-95 focus:outline-2 focus:outline-[#0071e3]"
-          >
-            Volver al inicio
+        <div className="mt-6 flex justify-center">
+          <Link to="/" className="aurik-btn-red">
+            <span>VOLVER A INICIO</span>
+            <span>&gt;</span>
           </Link>
         </div>
       </div>
@@ -45,29 +49,32 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#ffffff] px-4 text-[#1d1d1f]">
-      <div className="max-w-md text-center">
-        <h1 className="apple-tagline text-[21px] text-[#1d1d1f]">
-          No se ha podido cargar esta página
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-[#111111]">
+      <div className="w-full max-w-md border border-[#e5e5e5] bg-[#f4f4f5] p-8 text-center">
+        <div className="aurik-section-tag justify-center">
+          <span className="aurik-dot" />
+          <span>SYSTEM FAULT</span>
+        </div>
+        <h1 className="aurik-hero-title mt-3 text-xl text-[#111111]">
+          Error al cargar la vista
         </h1>
-        <p className="apple-body mt-2 text-[#7a7a7a]">
-          Ha ocurrido un problema puntual al cargar la vista. Puedes reintentar o volver al buscador.
+        <p className="mt-3 text-xs text-[#71717a]">
+          {error instanceof Error ? error.message : "Error inesperado."}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             onClick={() => {
-              router.invalidate();
               reset();
+              router.invalidate();
             }}
-            className="inline-flex items-center justify-center rounded-full bg-[#0066cc] px-[22px] py-[11px] text-[17px] font-normal text-white transition-transform active:scale-95 focus:outline-2 focus:outline-[#0071e3]"
+            className="aurik-btn-red"
           >
-            Reintentar
+            <span>REINTENTAR</span>
+            <span>&gt;</span>
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-full border border-[#0066cc] bg-white px-[22px] py-[11px] text-[17px] font-normal text-[#0066cc] transition-transform active:scale-95"
-          >
-            Ir al buscador
+          <a href="/" className="aurik-btn-gray">
+            <span>IR A INICIO</span>
+            <span>&gt;</span>
           </a>
         </div>
       </div>
@@ -80,14 +87,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: buildChronoPartsHeadMeta(),
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "canonical", href: "https://chronoparts.watch/" },
-      { rel: "alternate", hrefLang: "es-ES", href: "https://chronoparts.watch/" },
-      { rel: "alternate", hrefLang: "es", href: "https://chronoparts.watch/" },
+      { rel: "canonical", href: "https://cronora.watch/" },
+      { rel: "alternate", hrefLang: "es-ES", href: "https://cronora.watch/" },
+      { rel: "alternate", hrefLang: "es", href: "https://cronora.watch/" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
@@ -117,7 +128,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <AccountProvider>
         <Outlet />
       </AccountProvider>

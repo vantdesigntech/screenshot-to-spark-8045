@@ -47,7 +47,7 @@ export const Route = createFileRoute('/marketplace/$id')({
   head: () => ({
     meta: [
       {
-        title: 'Ficha de Reloj | ChronoParts Marketplace',
+        title: 'Ficha de Reloj | Cronora Marketplace',
       },
     ],
   }),

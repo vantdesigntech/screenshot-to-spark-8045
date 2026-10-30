@@ -36,12 +36,12 @@ export const Route = createFileRoute('/marketplace/')({
     meta: [
       {
         title:
-          'Marketplace de Relojes Completos | ChronoParts — Compraventa con Revisión Fotográfica',
+          'Marketplace de Relojes Completos | Cronora — Compraventa con Revisión Fotográfica',
       },
       {
         name: 'description',
         content:
-          'Explora relojes mecánicos y de cuarzo publicados por coleccionistas. Filtros reales por marca, referencia, calibre, estado y revisión fotográfica.',
+          'Explora relojes mecánicos y de cuarzo publicados por coleccionistas en Cronora. Filtros reales por marca, referencia, calibre, estado y revisión fotográfica.',
       },
     ],
   }),
@@ -179,23 +179,23 @@ export function MarketplaceCatalogPage() {
       subtitle="Explora relojes completos con trazabilidad documental y control fotográfico de 4 a 10 ángulos. Filtra en tiempo real por referencia exacta, calibre, estado de conservación y ubicación."
     >
       {/* Transparency & Photographic Review Banner */}
-      <div className="mb-8 rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="mb-8 border border-[#e5e5e5] bg-[#f4f4f5] p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-accent/15 text-accent flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-10 h-10 bg-[#e03127]/10 text-[#e03127] border border-[#e03127]/30 flex items-center justify-center shrink-0 mt-0.5">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-              Protocolo de Revisión Fotográfica ChronoParts
-              <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border">
+            <h2 className="text-sm font-bold text-[#111111] flex flex-wrap items-center gap-2">
+              Protocolo de Revisión Fotográfica Cronora
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 bg-white text-[#52525b] border border-[#e5e5e5]">
                 Sin falsas promesas
               </span>
             </h2>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-3xl">
+            <p className="text-xs text-[#52525b] mt-1 leading-relaxed max-w-3xl">
               Verificamos que cada anuncio incluya fotografías nítidas de esfera,
               trasera, corona y cierre, ocultando públicamente los números de
               serie completos.{' '}
-              <strong className="text-foreground">
+              <strong className="text-[#111111]">
                 La revisión fotográfica reduce riesgos de anuncios fraudulentos,
                 pero no garantiza autenticidad física.
               </strong>
@@ -205,19 +205,19 @@ export function MarketplaceCatalogPage() {
 
         <Link
           to="/vender"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent text-accent-foreground text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity shrink-0"
+          className="aurik-btn-red shrink-0"
         >
           <PlusCircle className="w-4 h-4" />
-          Vender un Reloj
+          <span>Vender un Reloj</span>
         </Link>
       </div>
 
       {/* Top Search & Sort Controls */}
-      <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-soft mb-6 space-y-4">
+      <div className="bg-white border border-[#e5e5e5] p-4 sm:p-5 mb-6 space-y-4">
         <div className="flex flex-col lg:flex-row gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#71717a] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={query}
@@ -227,7 +227,7 @@ export function MarketplaceCatalogPage() {
               }}
               placeholder="Buscar por marca, modelo, referencia (ej. SKX007, 310.30.42, BB58) o calibre..."
               aria-label="Buscar relojes en el marketplace"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e5e5e5] text-sm text-[#111111] placeholder:text-[#71717a] focus:outline-none focus:border-[#111111]"
             />
           </div>
 
