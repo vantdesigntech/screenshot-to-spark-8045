@@ -14,7 +14,8 @@ import {
   WATCH_MODELS,
   fetchLivePartsFromApi,
   filterParts,
-  generateLiveComparisonCards,
+  ALSO_SEARCH_STORES,
+  type SearchSource,
   getStoreSearchUrl,
   isNicheProStore,
   type Category,
@@ -65,6 +66,8 @@ function Index() {
 
   const [savedIds, setSavedIds] = useState<string[]>(["1", "2"]);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [searchSources, setSearchSources] = useState<SearchSource[]>([]);
+  const requestVersion = useRef(0);
   const [apiResults, setApiResults] = useState<Part[]>([]);
   const [isLoadingApi, setIsLoadingApi] = useState(false);
 
@@ -135,25 +138,12 @@ function Index() {
     return count;
   }, [origin, categories, storeFilter, maxPrice]);
 
-  const liveGenerated = useMemo(() => {
-    if (!hasSearched || submittedQuery.trim().length < 2) return [];
-    const generated = generateLiveComparisonCards(submittedQuery.trim());
-    return filterParts(generated, {
-      query: "",
-      origin,
-      categories,
-      maxPrice,
-      currency,
-    });
-  }, [hasSearched, submittedQuery, origin, categories, maxPrice, currency]);
-
   const allPartsPool = useMemo(() => {
     const map = new Map<string, Part>();
     for (const p of PARTS) map.set(p.id, p);
-    for (const p of liveGenerated) map.set(p.id, p);
     for (const p of apiResults) map.set(p.id, p);
     return Array.from(map.values());
-  }, [liveGenerated, apiResults]);
+  }, [apiResults]);
 
   const displayedParts = useMemo(() => {
     if (!hasSearched) return [];
@@ -163,7 +153,6 @@ function Index() {
       origin,
       categories,
       maxPrice,
-      currency,
     });
 
     const filteredApi = filterParts(apiResults, {
@@ -171,7 +160,6 @@ function Index() {
       origin,
       categories,
       maxPrice,
-      currency,
     });
 
     const ids = new Set(catalogMatches.map((p) => p.id));
@@ -180,21 +168,9 @@ function Index() {
       ...filteredApi.filter((p) => !ids.has(p.id)),
     ];
 
-    // Use real catalog + live API items first; only fallback to generated store cards if no real matches exist for the current filter
-    let base =
-      realMatches.length > 0
-        ? realMatches
-        : liveGenerated.filter((p) => !ids.has(p.id));
-
-    if (storeFilter === "niche-pro") {
-      base = base.filter((p) => isNicheProStore(p.store));
-    } else if (storeFilter !== "all") {
-      const storeReal = base.filter((p) => p.store === storeFilter);
-      base =
-        storeReal.length > 0
-          ? storeReal
-          : liveGenerated.filter((p) => p.store === storeFilter);
-    }
+    let base = realMatches;
+    if (storeFilter === "niche-pro") base = base.filter((p) => isNicheProStore(p.store));
+    else if (storeFilter !== "all") base = base.filter((p) => p.store === storeFilter);
 
     const sorted = [...base];
     if (sortBy === "price-asc") {
@@ -227,13 +203,15 @@ function Index() {
     maxPrice,
     currency,
     apiResults,
-    liveGenerated,
     storeFilter,
     sortBy,
   ]);
 
   const executeSearch = async (termToSearch?: string) => {
     const clean = (termToSearch ?? query).trim();
+    const version = ++requestVersion.current;
+    setApiResults([]);
+    setSearchSources([]);
     setQuery(clean);
     setSubmittedQuery(clean);
     setSearchFocused(false);
@@ -246,14 +224,20 @@ function Index() {
     if (clean.length >= 2) {
       setIsLoadingApi(true);
       const live = await fetchLivePartsFromApi(clean);
-      setApiResults(live);
+      if (version !== requestVersion.current) return;
+      setApiResults(live.items);
+      setSearchSources(live.sources);
       setIsLoadingApi(false);
     } else {
+      setIsLoadingApi(false);
       setApiResults([]);
     }
   };
 
   const resetSearch = () => {
+    requestVersion.current += 1;
+    setIsLoadingApi(false);
+    setSearchSources([]);
     setQuery("");
     setSubmittedQuery("");
     setOrigin("all");
@@ -551,6 +535,17 @@ function Index() {
               </div>
             </div>
 
+            <div className="mb-6 space-y-3 text-sm text-foreground">
+              <ul aria-label="Estado de las fuentes" className="flex flex-wrap gap-x-6 gap-y-2">
+                {searchSources.map((source) => (
+                  <li key={source.name}>{source.name}: {source.status === "ok" ? `${source.count} resultados` : source.status === "timeout" ? "Tiempo de espera agotado" : "No se pudo consultar"}</li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <span>Buscar también en</span>
+                {ALSO_SEARCH_STORES.map((store) => <a key={store} href={getStoreSearchUrl(store, submittedQuery)} target="_blank" rel="noopener noreferrer" className="text-primary underline">{store}</a>)}
+              </div>
+            </div>
             {/* Results Grid (Exact 3.webp Product Card Grid) */}
             {displayedParts.length > 0 ? (
               <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">

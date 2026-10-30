@@ -13,3 +13,5 @@
 - Private account state is read and mutated through authenticated TanStack server functions with owner-only RLS; persisted PRO mode remains the existing interactive demo, not a paid entitlement.
 - Watch discovery uses ordinary photographs and model/category selectors, not a layered 3D stage, to keep mobile browsing direct and lightweight.
 - Natural-language search is interpreted only by a server function that returns filters; results always come from the existing catalog, and keyword fallback is labeled visibly — keeps keys server-side and prevents invented parts.
+
+- Live part search runs only on the server through /api/search, returning listing-only items and explicit per-source statuses; no generated products or browser source fetching, so missing evidence stays missing.

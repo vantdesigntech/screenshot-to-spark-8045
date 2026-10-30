@@ -1,6 +1,6 @@
 /**
  * ChronoParts Cloud Live Watch Parts & Chollos Engine
- * Works 100% in public production (Lovable Cloud SSR / Cloudflare Workers / Browser CORS Gateways)
+ * Fetches listing data on the server only; missing evidence is never filled in.
  * ZERO dependency on localhost.
  *
  * Extracts real 1:1 product photos, live EUR prices, and direct item URLs for ANY watch brand/reference from:
@@ -12,17 +12,13 @@
  */
 
 import {
-  getStoreSearchUrl,
-  resolveCategoryImage,
   type Category,
-  type Origin,
   type Part,
   type Store,
 } from "./parts";
 import { resolveCholloFallbackImage, type CholloDeal } from "./chollos";
 
 const MEMORY_CACHE = new Map<string, { ts: number; data: unknown }>();
-const PARTS_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes for parts search
 export const CHOLLOS_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours for daily chollos
 
 const BROWSER_HEADERS: Record<string, string> = {
@@ -69,39 +65,11 @@ export function translateHorologicalQuery(query: string): string {
   return translated.replace(/\s+/g, " ").trim();
 }
 
-const ALIEXPRESS_COMPATIBLE_SPEC_MAP: Record<string, string> = {
-  rolex: "20mm 904l oyster jubilee watch strap bezel sapphire nh35 3135",
-  omega: "20mm curved rubber watch strap speedmaster seamaster bezel crystal",
-  cartier: "quickswitch leather watch strap santos tank clasp 18mm 20mm",
-  patek: "nautilus style watch case rubber strap nh35 sapphire",
-  audemars: "royal oak style watch strap steel case 41mm nh35",
-  tudor: "20mm 22mm jubilee oyster watch bracelet bezel insert",
-  breitling: "22mm 24mm fkm rubber leather watch strap folding clasp",
-  iwc: "20mm 21mm pilot leather watch strap rivet deployment",
-  panerai: "24mm 26mm leather fkm rubber watch strap panerai buckle",
-  hublot: "25x19mm rubber watch strap big bang classic fusion screwdriver",
-  tag: "20mm 22mm racing perforated leather rubber watch strap clasp",
-};
-
-export function buildAliExpressCompatibleQuery(query: string, cat: Category): string {
-  const qLower = translateHorologicalQuery(query).toLowerCase();
-  const catKeywords: Record<Category, string> = {
-    straps: "watch strap bracelet 20mm",
-    bezels: "ceramic bezel insert watch",
-    crystals: "sapphire watch crystal gasket",
-    dials: "watch dial hands luminous",
-    movements: "automatic watch movement nh35 miyota",
-    crowns: "watch crown stem waterproof",
-  };
-  for (const [brandKey, specQuery] of Object.entries(ALIEXPRESS_COMPATIBLE_SPEC_MAP)) {
-    if (qLower.includes(brandKey)) {
-      return `${specQuery} ${catKeywords[cat]}`;
-    }
-  }
-  return `${qLower} ${catKeywords[cat]}`.trim();
+export function buildAliExpressCompatibleQuery(query: string, _cat: Category): string {
+  return translateHorologicalQuery(query);
 }
 
-const KNOWN_WATCH_BRANDS = [
+export const KNOWN_WATCH_BRANDS = [
   "rolex",
   "seiko",
   "omega",
@@ -154,7 +122,8 @@ export function isShopifyProductRelevant(query: string, productTitle: string): b
     new RegExp(`\\b${b}\\b`, "i").test(qLower),
   );
   if (queriedBrands.length > 0) {
-    if (!queriedBrands.some((b) => titleLower.includes(b))) {
+    if (!queriedBrands.every((b) => new RegExp(`\\b${b}\\b`, "i").test(titleLower)) ||
+        KNOWN_WATCH_BRANDS.some((b) => !queriedBrands.includes(b) && new RegExp(`\\b${b}\\b`, "i").test(titleLower))) {
       return false;
     }
   }
@@ -180,43 +149,45 @@ export function isShopifyProductRelevant(query: string, productTitle: string): b
   return tokens.some((t) => titleLower.includes(t));
 }
 
-export function detectWatchPartCategory(query: string): Category {
-  const q = query.toLowerCase();
-  if (
-    /(strap|correa|bracelet|brazalete|armis|oyster|jubilee|rubber|caucho|nato|malla|leather|cuero)/.test(
-      q,
-    )
-  ) {
-    return "straps";
-  }
-  if (/(bezel|bisel|insert|inserto)/.test(q)) return "bezels";
-  if (/(crystal|cristal|sapphire|zafiro|plexi|hesalite|glass|mineral)/.test(q)) return "crystals";
-  if (/(dial|esfera|hands|agujas|manecillas)/.test(q)) return "dials";
-  if (/(crown|corona|stem|tije|tija|pusher|pulsador|gasket|junta)/.test(q)) return "crowns";
-  if (
-    /(movement|movimiento|calibre|nh35|nh36|2824|3230|1861|9015|rotor|eta|miyota|7s26|4r35|6r15|valjoux|7750)/.test(
-      q,
-    )
-  ) {
-    return "movements";
-  }
+export function detectWatchPartCategory(title: string): Category {
+  const q = title.toLowerCase();
+  // Explicit part nouns take precedence over materials, styles and calibre numbers.
+  if (/\b(crystal|cristal|cristales|glass)\b/.test(q)) return "crystals";
+  if (/\b(bezel|bisel|biseles|insert|inserto)\b/.test(q)) return "bezels";
+  if (/\b(crown|corona|coronas|stem|tije|tija|pusher|pulsador)\b/.test(q)) return "crowns";
+  if (/\b(dial|esfera|esferas|hands|agujas|manecillas)\b/.test(q)) return "dials";
+  if (/\b(strap|straps|band|correa|correas|bracelet|brazalete|armis)\b/.test(q)) return "straps";
+  if (/\b(movement|movimiento|calibre|nh35|nh36|2824|3230|1861|9015|rotor|miyota|7s26|4r35|6r15|valjoux|7750)\b/.test(q)) return "movements";
+  if (/\b(sapphire|zafiro|plexi|hesalite|mineral)\b/.test(q)) return "crystals";
+  if (/\b(gasket|junta)\b/.test(q)) return "crowns";
   return "straps";
 }
 
-function parsePriceEur(text: string | number | undefined, fallback = 45): number {
-  if (typeof text === "number" && text >= 1 && text <= 25000) {
-    return Math.round(text * 100) / 100;
-  }
-  if (!text) return fallback;
-  const cleaned = String(text).replace(/\s+/g, "");
-  const match = cleaned.match(/(\d{1,5}(?:[.,]\d{1,2})?)/);
-  if (match) {
-    const val = parseFloat(match[1].replace(",", "."));
-    if (!Number.isNaN(val) && val >= 1 && val <= 25000) {
-      return Math.round(val * 100) / 100;
-    }
-  }
-  return fallback;
+export function detectListingBrand(title: string): string {
+  const brand = KNOWN_WATCH_BRANDS.find((b) => new RegExp(`\\b${b}\\b`, "i").test(title));
+  return brand ? brand.charAt(0).toUpperCase() + brand.slice(1) : "Sin identificar";
+}
+
+// Indicative conversion, never a listing price: preserve the quoted amount and currency.
+export const PRICE_TO_EUR = { EUR: 1, USD: 0.92, GBP: 1.18 } as const;
+export function parseListingPrice(text: unknown): {
+  priceEur: number; listedPrice: number; listedCurrency: keyof typeof PRICE_TO_EUR;
+} | null {
+  if (typeof text !== "string") return null;
+  const match = text.match(/(€|US\s*\$|\$|£|EUR|USD|GBP)\s*([0-9][0-9.,]*(?:\s[0-9]{3})*(?:[.,][0-9]{1,2})?)|([0-9][0-9.,]*(?:\s[0-9]{3})*(?:[.,][0-9]{1,2})?)\s*(€|US\s*\$|\$|£|EUR|USD|GBP)/i);
+  if (!match) return null;
+  const symbol = (match[1] || match[4] || "").replace(/\s/g, "").toUpperCase();
+  // Only an unambiguous currency attached to this amount is accepted.
+  const listedCurrency = /^(€|EUR)$/.test(symbol) ? "EUR" : /^(£|GBP)$/.test(symbol) ? "GBP" : "USD";
+  let amount = (match[2] || match[3] || "").replace(/\s/g, "");
+  const decimal = amount.match(/[.,](\d{1,2})$/);
+  if (decimal) {
+    const index = amount.length - decimal[0].length;
+    amount = amount.slice(0, index).replace(/[.,]/g, "") + "." + decimal[1];
+  } else amount = amount.replace(/[.,]/g, "");
+  const listedPrice = Number(amount);
+  if (!Number.isFinite(listedPrice) || listedPrice <= 0 || listedPrice > 25000) return null;
+  return { listedPrice, listedCurrency, priceEur: Math.round(listedPrice * PRICE_TO_EUR[listedCurrency] * 100) / 100 };
 }
 
 function normalizeImageUrl(rawUrl: string | undefined): string {
@@ -227,493 +198,111 @@ function normalizeImageUrl(rawUrl: string | undefined): string {
   return u;
 }
 
-/**
- * Fetches text/JSON either directly (when running on server/worker or CORS-enabled target)
- * or through public HTTPS CORS gateways when running directly in the user's browser.
- */
-async function fetchLiveUrlText(targetUrl: string, timeoutMs = 4200): Promise<string> {
-  const isBrowser = typeof window !== "undefined";
+export const SEARCH_SERVER_TIMEOUT_MS = 8000;
 
-  const tryFetch = async (url: string, init?: RequestInit): Promise<string> => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const res = await fetch(url, { ...init, signal: controller.signal });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.text();
-    } finally {
-      clearTimeout(timer);
-    }
+async function fetchLiveUrlText(targetUrl: string, timeoutMs = SEARCH_SERVER_TIMEOUT_MS, signal?: AbortSignal): Promise<string> {
+  if (typeof window !== "undefined") throw new Error("Live sources are server-only");
+  const response = await fetch(targetUrl, {
+    headers: BROWSER_HEADERS,
+    signal: signal ?? AbortSignal.timeout(timeoutMs),
+  });
+  if (!response.ok) throw new Error(`Source HTTP ${response.status}`);
+  return response.text();
+}
+
+function listingPart(id: string, title: string, store: Store, price: NonNullable<ReturnType<typeof parseListingPrice>>, image: string, url: string): Part {
+  return {
+    id, title, store, ...price,
+    brand: detectListingBrand(title),
+    origin: "generic",
+    category: detectWatchPartCategory(title),
+    delivery: "Envío no indicado",
+    image,
+    spec: "Datos del anuncio; autenticidad no verificada",
+    compatibleWith: [],
+    condition: "Sin verificar",
+    customUrl: url,
+    ...(store === "WatchPlaza" || store === "NamokiMods" ? { proOnly: true } : {}),
   };
-
-  if (!isBrowser) {
-    return await tryFetch(targetUrl, { headers: BROWSER_HEADERS });
-  }
-
-  // In browser: try direct first if it's a JSON suggest endpoint, else use public HTTPS CORS gateways
-  const gateways = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
-  ];
-
-  if (targetUrl.includes("/search/suggest.json")) {
-    try {
-      return await tryFetch(targetUrl);
-    } catch {
-      // Fallback to CORS gateways below
-    }
-  }
-
-  for (const gw of gateways) {
-    try {
-      const txt = await tryFetch(gw);
-      if (txt && txt.length > 50) return txt;
-    } catch {
-      // Try next gateway
-    }
-  }
-
-  return "";
 }
 
-/**
- * 1. Live eBay Visual Index (PicClick) -> Direct Canonical eBay Item Links & 1:1 Listing Photos
- */
-async function fetchEbayLivePicClick(
-  query: string,
-  cat: Category,
-  brandGuess: string,
-  pairGroup: string,
-): Promise<Part[]> {
+export function parseEbayListings(html: string, query: string): Part[] {
   const results: Part[] = [];
-  try {
-    const enQuery = translateHorologicalQuery(query);
-    const searchTerms = /watch|reloj|nh35|skx|prx|eta|miyota|rolex|omega|seiko|tissot|casio|citizen/i.test(
-      enQuery,
-    )
-      ? enQuery
-      : `${enQuery} watch part`;
-    const url = `https://picclick.com/?q=${encodeURIComponent(searchTerms)}`;
-    const html = await fetchLiveUrlText(url, 4200);
-    if (!html) return results;
-
-    const itemBlocks = html.split(/<li[^>]+id="item-/i).slice(1, 20);
-    for (const block of itemBlocks) {
-      const idMatch = block.match(/^(\d+)"/);
-      if (!idMatch) continue;
-      const itemId = idMatch[1];
-
-      // Only accept canonical 12-digit eBay item IDs starting with 1, 2, 3, or 4
-      if (!/^[1234]\d{11}$/.test(itemId)) continue;
-
-      const imgMatch =
-        block.match(/data-src="([^"]+)"/i) ||
-        block.match(/src="(https?:\/\/[^"]*picclickimg[^"]+)"/i) ||
-        block.match(/src="([^"]+)"/i);
-      const imgUrl = normalizeImageUrl(imgMatch?.[1]);
-      if (!imgUrl || imgUrl.includes("pixel") || imgUrl.startsWith("data:")) continue;
-
-      const altMatch = block.match(/alt="([^"]+)"/i);
-      const h3Match = block.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i);
-      const rawTitle = (altMatch?.[1] || h3Match?.[1] || query)
-        .replace(/<[^>]+>/g, "")
-        .replace(/&quot;/g, '"')
-        .replace(/&amp;/g, "&")
-        .replace(/&#39;/g, "'")
-        .trim();
-
-      const priceMatch = block.match(/[$€£]\s*(\d+(?:[.,]\d{1,2})?)/);
-      const priceEur = parsePriceEur(priceMatch?.[1], 68);
-
-      const isOem =
-        /(genuine|original|oem|nos|vintage|rolex|omega|tissot|eta|authentic|certina|longines|cartier|hamilton|tag|breitling|tudor|iwc|panerai|oris)/i.test(
-          rawTitle,
-        );
-
-      results.push({
-        id: `live-ebay-${itemId}`,
-        title: rawTitle.slice(0, 95),
-        brand: brandGuess,
-        store: "eBay",
-        origin: isOem ? "oem" : "generic",
-        category: detectWatchPartCategory(`${rawTitle} ${query}`),
-        priceEur,
-        delivery: "3–6 días · eBay Direct",
-        image: imgUrl,
-        spec: `eBay #${itemId} · Foto 1:1 Verificada`,
-        oemRef: `EBAY-${itemId.slice(-6)}`,
-        compatibleWith: [query.trim(), `eBay #${itemId}`],
-        condition: isOem ? "NOS Vintage" : "Aftermarket 1:1",
-        pairGroupId: pairGroup,
-        customUrl: `https://www.ebay.es/itm/${itemId}`,
-        materialSpec: "Anuncio real en vivo de eBay con fotografía 1:1 y enlace directo al artículo",
-        toleranceSpec: "Pieza real verificada en eBay",
-        resaleImpact: isOem
-          ? "Conserva el valor original del reloj con recambio auténtico"
-          : "Alternativa económica disponible para envío inmediato",
-      });
-
-      if (results.length >= 5) break;
-    }
-  } catch {
-    // Non-blocking
+  for (const block of html.split(/<li[^>]+id="item-/i).slice(1, 20)) {
+    const itemId = block.match(/^(\d+)"/)?.[1];
+    if (!itemId || !/^[1234]\d{11}$/.test(itemId)) continue;
+    const rawTitle = block.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i)?.[1] ?? block.match(/alt="([^"]+)"/i)?.[1];
+    if (!rawTitle) continue;
+    const title = rawTitle.replace(/<[^>]+>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&#39;/g, "'").trim();
+    if (!title || !isShopifyProductRelevant(query, title)) continue;
+    // Limit price extraction to the listing's price element, never shipping or neighbouring items.
+    const priceText = block.match(/<(?:span|div)[^>]*class="[^"]*\bprice\b[^"]*"[^>]*>([\s\S]*?)<\/(?:span|div)>/i)?.[1];
+    const price = parseListingPrice(priceText?.replace(/<[^>]+>/g, ""));
+    const image = normalizeImageUrl(block.match(/data-src="([^"]+)"/i)?.[1] ?? block.match(/src="([^"]+)"/i)?.[1]);
+    if (!price || !image || image.includes("pixel") || image.startsWith("data:")) continue;
+    results.push(listingPart(`live-ebay-${itemId}`, title, "eBay", price, image, `https://www.ebay.es/itm/${itemId}`));
+    if (results.length >= 5) break;
   }
   return results;
 }
 
-/**
- * 2. Live AliExpress Wholesale -> Direct AliExpress Item Links & 1:1 Product Photos
- */
-async function fetchAliExpressLive(
-  query: string,
-  cat: Category,
-  _brandGuess: string,
-  pairGroup: string,
-): Promise<Part[]> {
+async function fetchAliExpressLive(query: string, signal: AbortSignal): Promise<Part[]> {
+  const slug = translateHorologicalQuery(query).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const html = await fetchLiveUrlText(`https://es.aliexpress.com/w/wholesale-${slug}.html`, SEARCH_SERVER_TIMEOUT_MS, signal);
   const results: Part[] = [];
-  try {
-    const compatQuery = buildAliExpressCompatibleQuery(query, cat);
-    const slug = compatQuery
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
-    const url = `https://es.aliexpress.com/w/wholesale-${slug || "watch-parts"}.html`;
-    const html = await fetchLiveUrlText(url, 4200);
-    if (!html) return results;
-
-    const itemRegex = /href="((?:https?:)?\/\/es\.aliexpress\.com\/item\/(\d+)\.html[^"]*)"/gi;
-    const seenIds = new Set<string>();
-    let match: RegExpExecArray | null;
-
-    while ((match = itemRegex.exec(html)) !== null) {
-      const rawHref = match[1];
-      const itemId = match[2];
-      if (seenIds.has(itemId)) continue;
-      seenIds.add(itemId);
-
-      const snippetStart = Math.max(0, match.index - 600);
-      const snippetEnd = Math.min(html.length, match.index + 1800);
-      const snippet = html.slice(snippetStart, snippetEnd);
-
-      const imgMatch = snippet.match(
-        /src="((?:https?:)?\/\/ae-pic[^"]+|(?:https?:)?\/\/ae01[^"]+)"/i,
-      );
-      const imgUrl = normalizeImageUrl(imgMatch?.[1]) || resolveCategoryImage(cat, "generic");
-
-      const altMatch = snippet.match(/alt="([^"]{8,120})"/i);
-      const title = (altMatch?.[1] || `${query.trim()} — Recambio Compatible Aftermarket 1:1`)
-        .replace(/&quot;/g, '"')
-        .replace(/&amp;/g, "&")
-        .trim();
-
-      const npiMatch = rawHref.match(/EUR%21(\d+(?:\.\d{1,2})?)/);
-      const eurMatch = snippet.match(/(\d{1,4}[.,]\d{2})\s*€/);
-      const priceEur = parsePriceEur(npiMatch?.[1] || eurMatch?.[1], 18.9);
-
-      results.push({
-        id: `live-ali-${itemId}`,
-        title: title.slice(0, 95),
-        brand: "Aftermarket Direct",
-        store: "AliExpress",
-        origin: "generic",
-        category: cat,
-        priceEur,
-        delivery: "8–14 días · AliExpress Direct",
-        image: imgUrl,
-        spec: `AliExpress #${itemId.slice(-6)} · Foto 1:1`,
-        oemRef: `ALI-${itemId.slice(-6)}`,
-        compatibleWith: [query.trim(), "Compatible 1:1"],
-        condition: "Aftermarket 1:1",
-        pairGroupId: pairGroup,
-        customUrl: `https://es.aliexpress.com/item/${itemId}.html`,
-        materialSpec: "Producto real de AliExpress con imagen y enlace directo 1:1 al anuncio",
-        toleranceSpec: "Compatible Aftermarket / Modding",
-        resaleImpact: "Máximo ahorro directo de fábrica",
-      });
-
-      if (results.length >= 2) break;
-    }
-  } catch {
-    // Non-blocking
+  // Only accept fields contained in the same product anchor, not arbitrary neighbouring snippets.
+  const anchors = html.matchAll(/<a\b[^>]*href="((?:https?:)?\/\/(?:es|www)\.aliexpress\.com\/item\/(\d+)\.html[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi);
+  for (const match of anchors) {
+    const body = match[3] ?? "";
+    const title = body.match(/alt="([^"]+)"/i)?.[1]?.replace(/&amp;/g, "&").trim();
+    const image = normalizeImageUrl(body.match(/(?:src|data-src)="([^"]+)"/i)?.[1]);
+    const price = parseListingPrice(body.replace(/<[^>]+>/g, " "));
+    if (!title || !image || !price || !isShopifyProductRelevant(query, title)) continue;
+    results.push(listingPart(`live-ali-${match[2]}`, title, "AliExpress", price, image, `https://es.aliexpress.com/item/${match[2]}.html`));
   }
-  return results;
+  return results.slice(0, 2);
 }
 
-/**
- * 3. Live Shopify Horology Stores: WatchPlaza (Genuine OEM) & NamokiMods (Precision Mod Parts)
- */
-async function fetchShopifyNicheStore(
-  query: string,
-  baseUrl: string,
-  storeName: Store,
-  origin: Origin,
-  condition: Part["condition"],
-  cat: Category,
-  brandGuess: string,
-  pairGroup: string,
-): Promise<Part[]> {
+async function fetchShopifyNicheStore(query: string, baseUrl: string, store: Store, signal: AbortSignal): Promise<Part[]> {
+  const raw = await fetchLiveUrlText(`${baseUrl}/search/suggest.json?q=${encodeURIComponent(translateHorologicalQuery(query))}&resources[type]=product&resources[limit]=5`, SEARCH_SERVER_TIMEOUT_MS, signal);
+  const data = JSON.parse(raw) as { resources?: { results?: { products?: Array<{ id?: number | string; title?: string; url?: string; image?: string; price?: string | number }> } } };
   const results: Part[] = [];
-  try {
-    const enQuery = translateHorologicalQuery(query);
-    const apiUrl = `${baseUrl}/search/suggest.json?q=${encodeURIComponent(enQuery)}&resources[type]=product&resources[limit]=5`;
-    const rawJson = await fetchLiveUrlText(apiUrl, 3800);
-    if (!rawJson) return results;
-
-    const data = JSON.parse(rawJson) as {
-      resources?: {
-        results?: {
-          products?: Array<{
-            id?: number | string;
-            title?: string;
-            url?: string;
-            image?: string;
-            price?: string | number;
-          }>;
-        };
-      };
-    };
-
-    const products = data.resources?.results?.products || [];
-    for (const prod of products) {
-      const title = (prod.title || "").trim();
-      const prodUrl = (prod.url || "").split("?")[0];
-      const imgUrl = normalizeImageUrl(prod.image);
-      if (!title || !prodUrl || !imgUrl) continue;
-
-      // Verify brand and token relevance so WatchPlaza/NamokiMods don't return unrelated Seiko parts for Rolex/Omega
-      if (!isShopifyProductRelevant(enQuery, title)) continue;
-
-      const priceEur = parsePriceEur(prod.price, origin === "oem" ? 95 : 42);
-      results.push({
-        id: `live-${storeName.toLowerCase()}-${prod.id ?? results.length}`,
-        title: `${title} (${storeName})`,
-        brand: origin === "oem" ? brandGuess : storeName,
-        store: storeName,
-        origin,
-        category: detectWatchPartCategory(`${title} ${enQuery}`),
-        priceEur,
-        delivery: "3–5 días · Envío Especializado",
-        image: imgUrl,
-        spec: `Catálogo Verificado · ${storeName}`,
-        oemRef: `${storeName.slice(0, 4).toUpperCase()}-${prod.id ?? 1000}`,
-        compatibleWith: [query.trim(), `Catálogo ${storeName}`],
-        condition,
-        pairGroupId: pairGroup,
-        proOnly: true,
-        customUrl: prodUrl.startsWith("http") ? prodUrl : `${baseUrl}${prodUrl}`,
-        materialSpec: `Componente especializado de ${storeName} con fotografía real 1:1`,
-        toleranceSpec: "Grado relojero profesional",
-        resaleImpact:
-          origin === "oem"
-            ? "Pieza OEM original de fabricante verificada"
-            : "Componente de alta precisión para relojería y modding",
-      });
-
-      if (results.length >= 2) break;
-    }
-  } catch {
-    // Non-blocking
+  for (const product of data.resources?.results?.products ?? []) {
+    const title = product.title?.trim();
+    const price = parseListingPrice(product.price);
+    const image = normalizeImageUrl(product.image);
+    if (!title || !product.id || !product.url || !image || !price || !isShopifyProductRelevant(query, title)) continue;
+    results.push(listingPart(`live-${store}-${product.id}`, title, store, price, image, new URL(product.url, baseUrl).href));
   }
-  return results;
+  return results.slice(0, 2);
 }
 
-/**
- * Main Cloud Search Aggregator for ANY Watch Model / Calibre / Reference
- */
-export async function searchLiveWatchPartsCloud(query: string): Promise<Part[]> {
+export async function searchLiveWatchPartsCloud(query: string): Promise<import("./parts").LiveSearchResponse> {
   const q = query.trim();
-  if (!q) return [];
-
-  const cacheKey = `parts::${q.toLowerCase()}`;
-  const cached = MEMORY_CACHE.get(cacheKey);
-  if (cached && Date.now() - cached.ts < PARTS_CACHE_TTL_MS) {
-    return cached.data as Part[];
-  }
-
-  const cat = detectWatchPartCategory(q);
-  const rawBrand = q.split(/\s+/)[0] || "Swiss";
-  const brandGuess = rawBrand.charAt(0).toUpperCase() + rawBrand.slice(1);
-  const pairGroup = `live-group-${q.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14)}`;
-
-  const [ebayItems, aliItems, wpItems, namokiItems] = await Promise.all([
-    fetchEbayLivePicClick(q, cat, brandGuess, pairGroup),
-    fetchAliExpressLive(q, cat, brandGuess, pairGroup),
-    fetchShopifyNicheStore(
-      q,
-      "https://www.watchplaza.com",
-      "WatchPlaza",
-      "oem",
-      "Certified OEM",
-      cat,
-      brandGuess,
-      pairGroup,
-    ),
-    fetchShopifyNicheStore(
-      q,
-      "https://www.namokimods.com",
-      "NamokiMods",
-      "generic",
-      "Aftermarket 1:1",
-      cat,
-      brandGuess,
-      pairGroup,
-    ),
-  ]);
-
-  const oemPrices = [...ebayItems, ...wpItems]
-    .filter((x) => x.origin === "oem")
-    .map((x) => x.priceEur);
-  const oemRefPrice =
-    oemPrices.length > 0 ? Math.round(Math.max(...oemPrices) * 1.25 * 100) / 100 : 240;
-
-  const sampleFactoryImg =
-    aliItems[0]?.image ||
-    namokiItems[0]?.image ||
-    ebayItems[0]?.image ||
-    resolveCategoryImage(cat, "generic");
-
-  const sampleOemImg =
-    wpItems[0]?.image ||
-    ebayItems[0]?.image ||
-    sampleFactoryImg ||
-    resolveCategoryImage(cat, "oem");
-
-  const aliBasePrice = aliItems[0]?.priceEur ?? 18.5;
-  const babaB2bPrice = Math.round(Math.max(3.5, aliBasePrice * 0.42) * 100) / 100;
-  const slug = q.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  const enQuery = translateHorologicalQuery(q);
-
-  const guaranteedRetailCards: Part[] = [];
-  if (aliItems.length === 0 && namokiItems.length === 0) {
-    guaranteedRetailCards.push({
-      id: `live-ali-fallback-${slug}`,
-      title: `${q} — Recambio Compatible Aftermarket 1:1`,
-      brand: "Aftermarket Direct",
-      store: "AliExpress",
-      origin: "generic",
-      category: cat,
-      priceEur: 18.5,
-      delivery: "8–14 días · AliExpress Direct",
-      image: sampleFactoryImg,
-      spec: "Acero 316L / Zafiro AR / FKM",
-      oemRef: `ALI-1TO1-${brandGuess.slice(0, 4).toUpperCase()}`,
-      compatibleWith: [q, "Ajuste 1:1 verificado"],
-      condition: "Aftermarket 1:1",
-      pairGroupId: pairGroup,
-      equivalentOemPriceEur: oemRefPrice,
-      customUrl: getStoreSearchUrl("AliExpress", buildAliExpressCompatibleQuery(q, cat)),
-      materialSpec: "Acero 316L / Cristal Zafiro / Caucho FKM compatible directo",
-      toleranceSpec: "Tolerancia ±0.03 mm verificada",
-      resaleImpact: "Máximo ahorro para uso diario o modificación",
-    });
-  }
-
-  if (ebayItems.length === 0 && wpItems.length === 0) {
-    guaranteedRetailCards.push({
-      id: `live-ebay-fallback-${slug}`,
-      title: `${q} — Pieza Original OEM / NOS de Relojero`,
-      brand: brandGuess,
-      store: "eBay",
-      origin: "oem",
-      category: cat,
-      priceEur: 135,
-      delivery: "3–6 días · eBay Direct",
-      image: sampleOemImg,
-      spec: "Stock original verificado (NOS)",
-      oemRef: `OEM-${brandGuess.slice(0, 4).toUpperCase()}`,
-      compatibleWith: [q, "Referencia de fábrica"],
-      condition: "NOS Vintage",
-      pairGroupId: pairGroup,
-      customUrl: getStoreSearchUrl("eBay", `${enQuery} original genuine`),
-      materialSpec: "Pieza original procedente de stock de relojero (New Old Stock)",
-      toleranceSpec: "Especificación oficial de fábrica",
-      resaleImpact: "Conserva la originalidad histórica del reloj",
-    });
-  }
-
-  const chrono24Card: Part = {
-    id: `live-c24-${slug}`,
-    title: `${q} — Recambio Oficial Certificado con Escrow`,
-    brand: brandGuess,
-    store: "Chrono24",
-    origin: "oem",
-    category: cat,
-    priceEur: oemRefPrice,
-    delivery: "2–5 días · Chrono24 Escrow",
-    image: sampleOemImg,
-    spec: "Autenticidad garantizada · Chrono24",
-    oemRef: `C24-${brandGuess.slice(0, 4).toUpperCase()}`,
-    compatibleWith: [q, "Certificado Chrono24"],
-    condition: "Certified OEM",
-    pairGroupId: pairGroup,
-    customUrl: getStoreSearchUrl("Chrono24", enQuery),
-    materialSpec: "Componente original certificado por distribuidor en Chrono24",
-    toleranceSpec: "Estándar suizo/japonés de manufactura",
-    resaleImpact: "100% valor de colección con protección Escrow",
-  };
-
-  const b2bAndNicheCards: Part[] = [
-    {
-      id: `live-alibaba-${slug}`,
-      title: `${q} — Lote Mayorista Directo de Fábrica OEM/ODM (MOQ 2 uds)`,
-      brand: "Shenzhen Horology B2B",
-      store: "Alibaba",
-      origin: "generic",
-      category: cat,
-      priceEur: babaB2bPrice,
-      delivery: "7–12 días · Alibaba B2B Air",
-      image: sampleFactoryImg,
-      spec: "Mayorista B2B PRO · Precio Unitario Fábrica",
-      oemRef: `BABA-FACTORY-${brandGuess.slice(0, 4).toUpperCase()}`,
-      compatibleWith: [q, "Wholesale Factory Direct"],
-      condition: "Aftermarket 1:1",
-      equivalentOemPriceEur: oemRefPrice,
-      pairGroupId: pairGroup,
-      proOnly: true,
-      customUrl: getStoreSearchUrl("Alibaba", `${enQuery} watch parts`),
-      materialSpec: "Suministro directo de fábrica B2B en Alibaba (Acero 904L/316L, Zafiro AR, FKM)",
-      toleranceSpec: "Especificación OEM/ODM bajo plano técnico",
-      resaleImpact: "Ideal para relojeros, modders y compras a coste de fábrica (-58% vs AliExpress)",
-    },
-    {
-      id: `live-cousins-${slug}`,
-      title: `${q} — Fornitura Técnica de Relojero & Recambio Suizo/Japonés`,
-      brand: `${brandGuess} / Swiss Supply`,
-      store: "CousinsUK",
-      origin: "oem",
-      category: cat,
-      priceEur: Math.round(Math.max(48, oemRefPrice * 0.72) * 100) / 100,
-      delivery: "2–4 días · UK Trade Couriers",
-      image: sampleOemImg,
-      spec: "Distribuidor Relojero PRO · Reino Unido",
-      oemRef: `CUK-${brandGuess.slice(0, 4).toUpperCase()}-PRO`,
-      compatibleWith: [q, "Fornitura Profesional"],
-      condition: "Certified OEM",
-      pairGroupId: pairGroup,
-      proOnly: true,
-      customUrl: getStoreSearchUrl("CousinsUK", enQuery),
-      materialSpec: "Fornitura oficial distribuida a talleres relojeros europeos por CousinsUK",
-      toleranceSpec: "Estándar oficial de taller relojero",
-      resaleImpact: "Proveedor profesional de fornituras originales difíciles de encontrar",
-    },
+  if (!q) return { items: [], sources: [] };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SEARCH_SERVER_TIMEOUT_MS);
+  const providers = [
+    { name: "eBay", run: async () => parseEbayListings(await fetchLiveUrlText(`https://picclick.com/?q=${encodeURIComponent(translateHorologicalQuery(q))}`, SEARCH_SERVER_TIMEOUT_MS, controller.signal), q) },
+    { name: "AliExpress", run: () => fetchAliExpressLive(q, controller.signal) },
+    { name: "WatchPlaza", run: () => fetchShopifyNicheStore(q, "https://www.watchplaza.com", "WatchPlaza", controller.signal) },
+    { name: "NamokiMods", run: () => fetchShopifyNicheStore(q, "https://www.namokimods.com", "NamokiMods", controller.signal) },
   ];
-
-  const finalList = [
-    ...ebayItems,
-    ...aliItems,
-    ...wpItems,
-    ...namokiItems,
-    ...guaranteedRetailCards,
-    chrono24Card,
-    ...b2bAndNicheCards,
-  ].map((item) => ({
-    ...item,
-    equivalentOemPriceEur:
-      item.origin === "generic" ? (item.equivalentOemPriceEur ?? oemRefPrice) : undefined,
-  }));
-
-  MEMORY_CACHE.set(cacheKey, { ts: Date.now(), data: finalList });
-  return finalList;
+  try {
+    const responses = await Promise.all(providers.map(async (provider) => {
+      try {
+        // Race also bounds a source that ignores cancellation.
+        const items = await Promise.race([
+          provider.run(),
+          new Promise<never>((_, reject) => controller.signal.addEventListener("abort", () => reject(new DOMException("Source timeout", "AbortError")), { once: true })),
+        ]);
+        return { items, source: { name: provider.name, status: "ok" as const, count: items.length } };
+      } catch {
+        return { items: [], source: { name: provider.name, status: controller.signal.aborted ? "timeout" as const : "error" as const, count: 0 } };
+      }
+    }));
+    return { items: responses.flatMap((r) => r.items), sources: responses.map((r) => r.source) };
+  } finally { clearTimeout(timer); }
 }
 
 interface WatchBenchmarkSpec {
@@ -876,11 +465,9 @@ export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> 
 
         const priceMatch = block.match(/[$€£]\s*(\d+(?:[.,]\d{1,2})?)/);
         if (!priceMatch) continue;
-        const rawPrice = parsePriceEur(priceMatch[1], 0);
-        if (rawPrice <= 0) continue;
-
-        const isUsd = block.includes("$") && !block.includes("€");
-        const priceEur = Math.round(isUsd ? rawPrice * 0.92 : rawPrice);
+        const price = parseListingPrice(priceMatch[0]);
+        if (!price) continue;
+        const priceEur = price.priceEur;
 
         const bench = matchWatchBenchmark(title);
         if (bench) {
