@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Allow: /marketplace
 Allow: /blog
 Sitemap: https://chronoparts.watch/sitemap.xml
