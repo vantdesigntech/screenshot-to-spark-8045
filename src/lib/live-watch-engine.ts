@@ -439,7 +439,7 @@ export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> 
       for (const block of itemBlocks) {
         const idMatch = block.match(/^(\d+)"/);
         if (!idMatch) continue;
-        const itemId = idMatch[1];
+        const itemId = idMatch[1] ?? "";
 
         // Require canonical 12-digit eBay IDs starting with 1, 2, 3, or 4
         if (!/^[1234]\d{11}$/.test(itemId) || seenIds.has(itemId)) continue;

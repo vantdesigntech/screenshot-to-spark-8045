@@ -79,7 +79,7 @@ describe("Search integrity", () => {
     vi.stubGlobal("fetch", fetchMock);
     expect((await fetchLivePartsFromApi("Rolex crystal")).items).toEqual([]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/search?q=Rolex%20crystal");
+    expect((fetchMock.mock.calls as unknown[][])[0]?.[0]).toBe("/api/search?q=Rolex%20crystal");
     expect(SEARCH_SERVER_TIMEOUT_MS).toBe(8000);
     expect(SEARCH_CLIENT_TIMEOUT_MS).toBeGreaterThan(SEARCH_SERVER_TIMEOUT_MS);
   });

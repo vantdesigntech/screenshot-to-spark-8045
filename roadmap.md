@@ -1,5 +1,5 @@
 # Requested improvements
-- [ ] Remove fabricated search results and claims, expose source statuses, and test live search integrity.
+- [x] Remove fabricated search results and claims, expose source statuses, and test live search integrity.
 - [x] Adapt the Apple presentation for mobile and remove the 3D watch diagram and references; verified home, search, filters and Blog at 320px, 393px and 1280px.
 - [x] Move and emphasize search immediately after the watch and specifications.
 - [x] Add Supabase account/profile modal and gate all personal actions; synchronize personal data.

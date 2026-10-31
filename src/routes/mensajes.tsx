@@ -23,14 +23,14 @@ import type {
 } from '../marketplace/types'
 
 interface MensajesSearch {
-  conversationId?: string
+  conversationId?: string | undefined
 }
 
 export const Route = createFileRoute('/mensajes')({
   validateSearch: (search: Record<string, unknown>): MensajesSearch => ({
     conversationId:
-      typeof search.conversationId === 'string'
-        ? search.conversationId
+      typeof search["conversationId"] === 'string'
+        ? search["conversationId"]
         : undefined,
   }),
   head: () => ({

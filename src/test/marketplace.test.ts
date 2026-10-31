@@ -62,12 +62,12 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
     // Filter by Brand = Omega
     const omegaOnly = await queryCatalogListings({ brand: 'Omega' })
     expect(omegaOnly.items.length).toBe(1)
-    expect(omegaOnly.items[0].reference).toBe('310.30.42.50.01.001')
+    expect(omegaOnly.items[0]!.reference).toBe('310.30.42.50.01.001')
 
     // Filter by Reference substring
     const skxRef = await queryCatalogListings({ reference: 'SKX007' })
     expect(skxRef.items.length).toBe(1)
-    expect(skxRef.items[0].brand).toBe('Seiko')
+    expect(skxRef.items[0]!.brand).toBe('Seiko')
 
     // Filter by Price Range (400€ - 600€)
     const midPrice = await queryCatalogListings({
@@ -76,8 +76,8 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
       sortBy: 'price_asc',
     })
     expect(midPrice.items.length).toBeGreaterThanOrEqual(2)
-    expect(midPrice.items[0].priceEur).toBeLessThanOrEqual(
-      midPrice.items[midPrice.items.length - 1].priceEur,
+    expect(midPrice.items[0]!.priceEur).toBeLessThanOrEqual(
+      midPrice.items[midPrice.items.length - 1]!.priceEur,
     )
 
     // Filter by Movement = quartz
@@ -122,7 +122,7 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
     expect(created.reviewStatus).toBe('passed_photo_review')
     // Ensure raw serial number is never exposed in public object
     expect(
-      (created as unknown as Record<string, unknown>).serialNumberRaw,
+      (created as unknown as Record<string, unknown>)["serialNumberRaw"],
     ).toBeUndefined()
 
     const reloaded = await getListingById(created.id)
@@ -179,7 +179,7 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
       papersIncluded: false,
       location: 'Madrid, ES',
       authenticityConfirmed: false,
-      images: [VALID_FOUR_PHOTOS[0]],
+      images: [VALID_FOUR_PHOTOS[0]!],
       intent: 'draft',
     })
 
