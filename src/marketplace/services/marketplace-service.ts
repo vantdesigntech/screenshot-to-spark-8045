@@ -692,7 +692,7 @@ export function resetMarketplaceStateForTesting(): void {
     window.localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(fresh))
     window.localStorage.setItem(
       STORAGE_KEY_ACTIVE_USER,
-      MARKETPLACE_ACCOUNTS[0].id,
+      MARKETPLACE_ACCOUNTS[0]!.id,
     )
   }
 }
@@ -703,7 +703,7 @@ export function getCurrentUser(): MarketplaceUser {
     const found = MARKETPLACE_ACCOUNTS.find((u) => u.id === savedId)
     if (found) return found
   }
-  return MARKETPLACE_ACCOUNTS[0]
+  return MARKETPLACE_ACCOUNTS[0]!
 }
 
 export function setCurrentUser(userId: string): MarketplaceUser {
@@ -1110,7 +1110,7 @@ export async function createOrUpdateListing(
     if (existingIndex === -1) {
       throw new Error('El anuncio que intentas editar no existe.')
     }
-    const existing = state.listings[existingIndex]
+    const existing = state.listings[existingIndex]!
     if (existing.ownerId !== viewer.id) {
       throw new Error(
         'Permiso denegado: Solo el propietario puede modificar este anuncio.',
@@ -1286,7 +1286,7 @@ export async function updateListingCommercialStatus(
     throw new Error('Anuncio no encontrado.')
   }
 
-  const record = state.listings[index]
+  const record = state.listings[index]!
   if (record.ownerId !== viewer.id) {
     throw new Error(
       'Permiso denegado: Solo el propietario puede cambiar el estado comercial de su anuncio.',
