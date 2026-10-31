@@ -122,7 +122,7 @@ describe('ChronoParts Marketplace — Security, Filters, Persistence & Privacy',
     expect(created.reviewStatus).toBe('passed_photo_review')
     // Ensure raw serial number is never exposed in public object
     expect(
-      (created as unknown as Record<string, unknown>).serialNumberRaw,
+      (created as unknown as Record<string, unknown>)["serialNumberRaw"],
     ).toBeUndefined()
 
     const reloaded = await getListingById(created.id)

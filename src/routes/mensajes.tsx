@@ -29,8 +29,8 @@ interface MensajesSearch {
 export const Route = createFileRoute('/mensajes')({
   validateSearch: (search: Record<string, unknown>): MensajesSearch => ({
     conversationId:
-      typeof search.conversationId === 'string'
-        ? search.conversationId
+      typeof search["conversationId"] === 'string'
+        ? search["conversationId"]
         : undefined,
   }),
   head: () => ({

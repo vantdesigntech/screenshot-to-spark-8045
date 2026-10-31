@@ -12,10 +12,10 @@ export interface ChronoUser {
 }
 
 const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL || "https://bnspjqlbisinmoohgrxo.supabase.co";
+  import.meta.env["VITE_SUPABASE_URL"] || "https://bnspjqlbisinmoohgrxo.supabase.co";
 const SUPABASE_KEY =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
+  import.meta.env["VITE_SUPABASE_ANON_KEY"] ||
   "sb_publishable_iIoYiJ-oNqK4rFF5cgIV5Q_1mSxN794";
 const STORAGE_KEY = "cp_supabase_user_v1";
 

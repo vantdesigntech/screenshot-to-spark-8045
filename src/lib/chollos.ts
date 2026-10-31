@@ -293,41 +293,41 @@ export function resolveCholloFallbackImage(brand: string, idx = 0): string {
 }
 
 function normalizeRawCholloItem(raw: Record<string, unknown>, idx: number): CholloDeal {
-  const priceEur = Number(raw.priceEur) || 150;
-  const marketValueEur = Number(raw.marketValueEur) || Math.round(priceEur * 1.55);
+  const priceEur = Number(raw["priceEur"]) || 150;
+  const marketValueEur = Number(raw["marketValueEur"]) || Math.round(priceEur * 1.55);
   const profitMarginEur =
-    Number(raw.profitMarginEur) || Math.max(25, Math.round(marketValueEur - priceEur));
+    Number(raw["profitMarginEur"]) || Math.max(25, Math.round(marketValueEur - priceEur));
   const savingsPct =
-    Number(raw.savingsPct) ||
-    Number(raw.discountPct) ||
+    Number(raw["savingsPct"]) ||
+    Number(raw["discountPct"]) ||
     Math.round((profitMarginEur / marketValueEur) * 100);
-  const rawScore = Number(raw.cholloScore) || Number(raw.aiScore) || 9.4;
+  const rawScore = Number(raw["cholloScore"]) || Number(raw["aiScore"]) || 9.4;
   const cholloScore = rawScore > 10 ? Math.round((rawScore / 10) * 10) / 10 : rawScore;
-  const brand = String(raw.brand || "Swiss");
+  const brand = String(raw["brand"] || "Swiss");
 
   return {
-    id: String(raw.id || `live-ebay-${idx}`),
-    title: String(raw.title || "Reloj Automático Verificado"),
+    id: String(raw["id"] || `live-ebay-${idx}`),
+    title: String(raw["title"] || "Reloj Automático Verificado"),
     brand,
-    platform: (raw.platform as CholloPlatform) || "eBay",
-    dealType: (raw.dealType as CholloDealType) || "Rebaja Directa",
+    platform: (raw["platform"] as CholloPlatform) || "eBay",
+    dealType: (raw["dealType"] as CholloDealType) || "Rebaja Directa",
     priceEur,
     marketValueEur,
     savingsPct,
     profitMarginEur,
     cholloScore,
     aiVerdict: String(
-      raw.aiVerdict ||
-        raw.whyItIsAChollo ||
+      raw["aiVerdict"] ||
+        raw["whyItIsAChollo"] ||
         `Precio real verificado (${priceEur} €) un ${savingsPct}% por debajo de la media de mercado (${marketValueEur} €).`,
     ),
-    condition: String(raw.condition || "Anuncio Real Verificado · Foto 1:1"),
-    location: String(raw.location || "Envío con Garantía eBay"),
-    timeLeft: String(raw.timeLeft || raw.publishedAgo || "Actualizado hoy (Ciclo 24h)"),
-    image: String(raw.image || resolveCholloFallbackImage(brand, idx)),
-    url: String(raw.url || "https://www.ebay.es"),
-    proEarlyAccess: Boolean(raw.proEarlyAccess),
-    calibreRef: String(raw.calibreRef || raw.model || `${brand} Verificado`),
+    condition: String(raw["condition"] || "Anuncio Real Verificado · Foto 1:1"),
+    location: String(raw["location"] || "Envío con Garantía eBay"),
+    timeLeft: String(raw["timeLeft"] || raw["publishedAgo"] || "Actualizado hoy (Ciclo 24h)"),
+    image: String(raw["image"] || resolveCholloFallbackImage(brand, idx)),
+    url: String(raw["url"] || "https://www.ebay.es"),
+    proEarlyAccess: Boolean(raw["proEarlyAccess"]),
+    calibreRef: String(raw["calibreRef"] || raw["model"] || `${brand} Verificado`),
   };
 }
 

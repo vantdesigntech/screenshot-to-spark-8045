@@ -39,7 +39,7 @@ interface VenderSearch {
 
 export const Route = createFileRoute('/vender')({
   validateSearch: (search: Record<string, unknown>): VenderSearch => ({
-    edit: typeof search.edit === 'string' ? search.edit : undefined,
+    edit: typeof search["edit"] === 'string' ? search["edit"] : undefined,
   }),
   head: () => ({
     meta: [
