@@ -34,7 +34,7 @@ import {
 } from '../marketplace/types'
 
 interface VenderSearch {
-  edit?: string
+  edit?: string | undefined
 }
 
 export const Route = createFileRoute('/vender')({

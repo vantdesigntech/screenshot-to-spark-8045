@@ -238,7 +238,7 @@ const LOCAL_BLOG_IMAGES = [
 ];
 
 export function resolveBlogFallbackImage(index = 0): string {
-  return LOCAL_BLOG_IMAGES[Math.abs(index) % LOCAL_BLOG_IMAGES.length];
+  return LOCAL_BLOG_IMAGES[Math.abs(index) % LOCAL_BLOG_IMAGES.length] ?? "/blog/blog-1.jpg";
 }
 
 /**

@@ -23,7 +23,7 @@ import type {
 } from '../marketplace/types'
 
 interface MensajesSearch {
-  conversationId?: string
+  conversationId?: string | undefined
 }
 
 export const Route = createFileRoute('/mensajes')({
