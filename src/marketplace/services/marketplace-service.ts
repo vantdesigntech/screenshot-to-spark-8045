@@ -64,7 +64,7 @@ export const MARKETPLACE_ACCOUNTS: MarketplaceUser[] = [
 ]
 
 interface InternalListingRecord extends WatchListing {
-  serialNumberRaw?: string
+  serialNumberRaw?: string | undefined
 }
 
 interface PersistedMarketplaceState {
@@ -1579,7 +1579,7 @@ export async function getConversationThread(conversationId: string): Promise<{
 export async function createListingReport(params: {
   listingId: string
   reason: string
-  details?: string
+  details?: string | undefined
 }): Promise<ListingReportRecord> {
   const viewer = getCurrentUser()
   const state = loadState()
