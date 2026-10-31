@@ -879,7 +879,7 @@ async function syncWithLocalPythonApi(
         'X-User-Id': user.id,
         'X-User-Role': user.role,
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: body ? JSON.stringify(body) : null,
     })
   } catch {
     // Non-blocking fallback when running purely in browser/test environment
