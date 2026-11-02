@@ -94,34 +94,19 @@ export function AurikNavbar({
               </Link>
             )}
 
-            {onOpenWatchbox ? (
-              <button
-                type="button"
-                onClick={onOpenWatchbox}
-                aria-label="Mi Caja de piezas guardadas"
-                className="relative flex h-9 w-9 items-center justify-center text-[#111111] transition-colors hover:text-[#e03127]"
-              >
-                <User className="h-[17px] w-[17px]" strokeWidth={1.6} />
-                {savedCount > 0 && (
-                  <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center bg-[#e03127] px-1 font-mono text-[9px] font-bold text-white">
-                    {savedCount}
-                  </span>
-                )}
-              </button>
-            ) : (
-              <Link
-                to="/favoritos"
-                aria-label="Favoritos y cuenta"
-                className="relative flex h-9 w-9 items-center justify-center text-[#111111] transition-colors hover:text-[#e03127]"
-              >
-                <User className="h-[17px] w-[17px]" strokeWidth={1.6} />
-                {savedCount > 0 && (
-                  <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center bg-[#e03127] px-1 font-mono text-[9px] font-bold text-white">
-                    {savedCount}
-                  </span>
-                )}
-              </Link>
-            )}
+            <Link
+              to="/mi-caja"
+              onClick={onOpenWatchbox}
+              aria-label="Mi Caja: recambios favoritos y listas de compra"
+              className="relative flex h-11 w-11 items-center justify-center text-[#111111] transition-colors hover:text-[#e03127]"
+            >
+              <User className="h-[17px] w-[17px]" strokeWidth={1.6} />
+              {savedCount > 0 && (
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center bg-[#e03127] px-1 font-mono text-[9px] font-bold text-white">
+                  {savedCount}
+                </span>
+              )}
+            </Link>
 
             {/* Signature AURIK Two-Line Hamburger Button (Matches 2.webp / 3.webp / 4.webp) */}
             <button
