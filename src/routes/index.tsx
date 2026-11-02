@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Search, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { useAccount } from "@/components/AccountProvider";
+import { getSavedParts, removeFavorite, saveFavorite } from "@/lib/mi-caja";
+import { countActiveFilters } from "@/lib/filter-count";
 import { AnimatedHeroWatch } from "@/components/AnimatedHeroWatch";
 import { AurikNavbar } from "@/components/AurikNavbar";
 import { AurikPartCard } from "@/components/AurikPartCard";
 import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
-import { syncFavoriteToSupabase } from "@/lib/supabase";
 import {
   CATEGORIES,
   MAX_PRICE,
@@ -61,10 +63,9 @@ function Index() {
   const [sortBy, setSortBy] = useState<SortOption>("savings");
 
   const [showFiltersSheet, setShowFiltersSheet] = useState(false);
-  const [showWatchbox, setShowWatchbox] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const [savedIds, setSavedIds] = useState<string[]>(["1", "2"]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [searchSources, setSearchSources] = useState<SearchSource[]>([]);
   const requestVersion = useRef(0);
@@ -75,17 +76,11 @@ function Index() {
   const resultsRef = useRef<HTMLElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const { user, openAuth } = useAccount();
   useEffect(() => {
-    try {
-      const rawFavs = localStorage.getItem("chronoparts_favs");
-      if (rawFavs) {
-        const parsed = JSON.parse(rawFavs);
-        if (Array.isArray(parsed)) setSavedIds(parsed);
-      }
-    } catch {
-      // ignore storage errors
-    }
-  }, []);
+    if (!user) { setSavedIds([]); return; }
+    getSavedParts().then((rows) => setSavedIds(rows.map((r) => r.part_id))).catch(() => setSavedIds([]));
+  }, [user]);
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -129,14 +124,8 @@ function Index() {
     return results.slice(0, 6);
   }, [query]);
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (origin !== "all") count += 1;
-    count += categories.length;
-    if (storeFilter !== "all") count += 1;
-    if (maxPrice < MAX_PRICE) count += 1;
-    return count;
-  }, [origin, categories, storeFilter, maxPrice]);
+  const activeFilterCount = countActiveFilters({ origin, categories, storeFilter, maxPrice, maxPriceLimit: MAX_PRICE });
+
 
   const allPartsPool = useMemo(() => {
     const map = new Map<string, Part>();
@@ -248,42 +237,35 @@ function Index() {
     setHasSearched(false);
   };
 
-  const toggleSaveById = (id: string) => {
+  const toggleSaveById = async (id: string) => {
+    if (!user) { openAuth(); return; }
     const part = allPartsPool.find((p) => p.id === id);
-    if (savedIds.includes(id)) {
-      const next = savedIds.filter((item) => item !== id);
-      setSavedIds(next);
-      try {
-        localStorage.setItem("chronoparts_favs", JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      if (part) triggerToast(`ELIMINADO DE MI CAJA: ${part.title}`);
-      return;
-    }
-
-    const next = [...savedIds, id];
-    setSavedIds(next);
+    const wasSaved = savedIds.includes(id);
+    setSavedIds((cur) => (wasSaved ? cur.filter((x) => x !== id) : [...cur, id]));
     try {
-      localStorage.setItem("chronoparts_favs", JSON.stringify(next));
+      if (wasSaved) await removeFavorite(id);
+      else if (part) await saveFavorite(user.id, { id: part.id, title: part.title, priceEur: part.priceEur, store: part.store });
+      if (part) triggerToast(`${wasSaved ? "ELIMINADO DE" : "GUARDADO EN"} MI CAJA: ${part.title}`);
     } catch {
-      // ignore
-    }
-    if (part) {
-      void syncFavoriteToSupabase({
-        id: part.id,
-        title: part.title,
-        priceEur: part.priceEur,
-        store: part.store,
-      });
-      triggerToast(`GUARDADO EN MI CAJA: ${part.title}`);
+      setSavedIds((cur) => (wasSaved ? [...cur, id] : cur.filter((x) => x !== id)));
+      triggerToast("NO SE PUDO GUARDAR. INTÉNTALO DE NUEVO.");
     }
   };
 
-  const savedParts = useMemo(
-    () => allPartsPool.filter((p) => savedIds.includes(p.id)),
-    [allPartsPool, savedIds]
-  );
+  const clearFilters = () => {
+    setOrigin("all");
+    setCategories([]);
+    setStoreFilter("all");
+    setMaxPrice(MAX_PRICE);
+  };
+
+  const activeChips: { key: string; label: string; remove: () => void }[] = [
+    ...(origin !== "all" ? [{ key: "origin", label: ORIGINS.find((o) => o.id === origin)?.label ?? origin, remove: () => setOrigin("all") }] : []),
+    ...categories.map((c) => ({ key: `cat-${c}`, label: CATEGORIES.find((x) => x.id === c)?.label ?? c, remove: () => toggleCategory(c) })),
+    ...(storeFilter !== "all" ? [{ key: "store", label: storeFilter === "niche-pro" ? "PRO HOROLOGY" : storeFilter, remove: () => setStoreFilter("all") }] : []),
+    ...(maxPrice < MAX_PRICE ? [{ key: "price", label: `≤ ${maxPrice} ${currency === "EUR" ? "€" : "$"}`, remove: () => setMaxPrice(MAX_PRICE) }] : []),
+  ];
+
 
   const toggleCategory = (cat: Category) => {
     setCategories((prev) =>
@@ -296,7 +278,6 @@ function Index() {
       {/* Shared CRONORA Top Bar */}
       <AurikNavbar
         savedCount={savedIds.length}
-        onOpenWatchbox={() => setShowWatchbox(true)}
         onFocusSearch={() => {
           searchSectionRef.current?.scrollIntoView({ behavior: "smooth" });
           setTimeout(() => searchInputRef.current?.focus(), 200);
@@ -546,19 +527,34 @@ function Index() {
                 {ALSO_SEARCH_STORES.map((store) => <a key={store} href={getStoreSearchUrl(store, submittedQuery)} target="_blank" rel="noopener noreferrer" className="text-primary underline">{store}</a>)}
               </div>
             </div>
+            {activeChips.length > 0 && (
+              <div className="mb-5 flex flex-wrap items-center gap-2" aria-label="Filtros activos">
+                {activeChips.map((c) => (
+                  <button key={c.key} type="button" onClick={c.remove} aria-label={`Quitar filtro ${c.label}`} className="inline-flex min-h-9 items-center gap-1.5 border border-[#111111] bg-white px-3 font-mono text-[11px] uppercase">
+                    {c.label} <X className="h-3.5 w-3.5" />
+                  </button>
+                ))}
+                <button type="button" onClick={clearFilters} className="min-h-9 px-2 text-xs underline">Limpiar todo</button>
+              </div>
+            )}
             {/* Results Grid (Exact 3.webp Product Card Grid) */}
             {displayedParts.length > 0 ? (
-              <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+              <>
+              <p className="mb-3 text-xs text-muted-foreground sm:hidden">Desliza para ver más · {displayedParts.length} piezas</p>
+              <div aria-label="Resultados" className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-4 pb-4 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 sm:overflow-visible sm:px-0 lg:grid-cols-4">
                 {displayedParts.map((part) => (
+                  <div key={part.id} className="w-[82%] shrink-0 snap-start sm:w-auto">
                   <AurikPartCard
                     key={part.id}
                     part={part}
                     currency={currency}
                     isSaved={savedIds.includes(part.id)}
-                    onToggleSave={toggleSaveById}
+                    onToggleSave={(id) => void toggleSaveById(id)}
                   />
+                  </div>
                 ))}
               </div>
+              </>
             ) : (
               <div className="border border-[#e5e5e5] bg-[#f4f4f5] p-8 text-center sm:p-12">
                 <p className="text-sm font-medium text-[#111111]">
@@ -598,13 +594,14 @@ function Index() {
           FILTER MODAL SHEET
          ========================================================= */}
       {showFiltersSheet && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/50">
-          <div className="flex h-full w-full max-w-md flex-col justify-between border-l border-[#111111] bg-white p-5 sm:p-8">
+        <div role="dialog" aria-modal="true" aria-label="Filtros" className="fixed inset-0 z-50 flex items-end justify-end bg-black/50 sm:items-center" onClick={(e) => { if (e.target === e.currentTarget) setShowFiltersSheet(false); }}>
+          <div className="flex max-h-[88dvh] w-full flex-col justify-between rounded-t-2xl border-t border-[#111111] bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:h-full sm:max-h-none sm:max-w-md sm:rounded-none sm:border-l sm:border-t-0 sm:p-8">
             <div className="overflow-y-auto pr-1">
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[#d4d4d8] sm:hidden" aria-hidden="true" />
               <div className="flex items-center justify-between border-b border-[#e5e5e5] pb-4">
                 <div className="aurik-section-tag">
                   <span className="aurik-dot" />
-                  <span>FILTROS TÉCNICOS</span>
+                  <span>FILTROS{activeFilterCount > 0 ? ` · ${activeFilterCount} ACTIVOS` : ""}</span>
                 </div>
                 <button
                   type="button"
@@ -740,15 +737,10 @@ function Index() {
             <div className="mt-6 flex gap-2 border-t border-[#e5e5e5] pt-4">
               <button
                 type="button"
-                onClick={() => {
-                  setOrigin("all");
-                  setCategories([]);
-                  setStoreFilter("all");
-                  setMaxPrice(MAX_PRICE);
-                }}
+                onClick={clearFilters}
                 className="aurik-btn-gray flex-1 justify-center py-3"
               >
-                <span>RESETEAR</span>
+                <span>LIMPIAR</span>
               </button>
               <button
                 type="button"
@@ -758,7 +750,7 @@ function Index() {
                 }}
                 className="aurik-btn-red flex-1 justify-between py-3"
               >
-                <span>APLICAR Y BUSCAR</span>
+                <span>{hasSearched ? `VER ${displayedParts.length} PIEZAS` : "APLICAR Y BUSCAR"}</span>
                 <span>&gt;</span>
               </button>
             </div>
@@ -766,116 +758,6 @@ function Index() {
         </div>
       )}
 
-      {/* =========================================================
-          "MI CAJA" SAVED PARTS DRAWER
-         ========================================================= */}
-      {showWatchbox && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/50">
-          <div className="flex h-full w-full max-w-md flex-col justify-between border-l border-[#111111] bg-white p-5 sm:p-8">
-            <div className="overflow-y-auto pr-1">
-              <div className="flex items-center justify-between border-b border-[#e5e5e5] pb-4">
-                <div className="aurik-section-tag">
-                  <span className="aurik-dot" />
-                  <span>MI CAJA ({savedParts.length} PIEZAS)</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowWatchbox(false)}
-                  className="aurik-btn-gray px-2.5 py-1"
-                >
-                  <span>[X]</span>
-                </button>
-              </div>
-
-              {savedParts.length === 0 ? (
-                <p className="mt-8 text-xs text-[#71717a]">
-                  No tienes piezas guardadas en tu caja de proyecto.
-                </p>
-              ) : (
-                <div className="mt-6 space-y-4">
-                  {savedParts.map((part) => {
-                    const url =
-                      part.customUrl && part.customUrl !== "#"
-                        ? part.customUrl
-                        : getStoreSearchUrl(part.store, part.title);
-                    return (
-                      <div
-                        key={part.id}
-                        className="border border-[#e5e5e5] bg-[#f4f4f5] p-4"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#71717a]">
-                              {part.brand} // {part.store}
-                            </p>
-                            <h4 className="mt-1 text-xs font-semibold text-[#111111]">
-                              {part.title}
-                            </h4>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => toggleSaveById(part.id)}
-                            aria-label="Quitar de Mi Caja"
-                            className="shrink-0 p-1 text-[#71717a] hover:text-[#e03127]"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#e5e5e5] pt-3">
-                          <span className="font-mono text-xs font-semibold text-[#111111]">
-                            {part.priceEur} €
-                          </span>
-                          <div className="flex items-center gap-1.5">
-                            <a
-                              href={`https://wa.me/?text=${encodeURIComponent(
-                                `🔧 Componente relojero en ChronoParts: ${part.title} (${part.brand}) — ${part.priceEur} € en ${part.store}\n👉 ${url}`
-                              )}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              title="Compartir por WhatsApp"
-                              className="border border-[#25D366]/50 bg-[#25D366]/10 px-2 py-1 font-mono text-[10px] font-semibold uppercase text-[#128C7E] hover:bg-[#25D366] hover:text-white"
-                            >
-                              WHATSAPP
-                            </a>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard?.writeText(url);
-                                triggerToast("ENLACE COPIADO AL PORTAPAPELES");
-                              }}
-                              title="Copiar enlace"
-                              className="border border-[#d4d4d8] bg-white px-2 py-1 font-mono text-[10px] font-semibold uppercase text-[#111111] hover:border-[#111111]"
-                            >
-                              LINK
-                            </button>
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="aurik-btn-red"
-                            >
-                              <span>COMPRAR</span>
-                              <span>&gt;</span>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowWatchbox(false)}
-              className="aurik-btn-gray mt-4 w-full justify-center py-3"
-            >
-              <span>CERRAR CAJA</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ChollosRouteImport } from './routes/chollos'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MensajesRouteImport } from './routes/mensajes'
+import { Route as MiCajaRouteImport } from './routes/mi-caja'
 import { Route as MisAnunciosRouteImport } from './routes/mis-anuncios'
 import { Route as VenderRouteImport } from './routes/vender'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
@@ -22,6 +24,11 @@ import { Route as MarketplaceIdRouteImport } from './routes/marketplace.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -42,6 +49,11 @@ const FavoritosRoute = FavoritosRouteImport.update({
 const MensajesRoute = MensajesRouteImport.update({
   id: '/mensajes',
   path: '/mensajes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MiCajaRoute = MiCajaRouteImport.update({
+  id: '/mi-caja',
+  path: '/mi-caja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MisAnunciosRoute = MisAnunciosRouteImport.update({
@@ -67,10 +79,12 @@ const MarketplaceIdRoute = MarketplaceIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
   '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
+  '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -78,10 +92,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
   '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
+  '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -90,10 +106,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
   '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
+  '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -103,10 +121,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/blog'
     | '/chollos'
     | '/favoritos'
     | '/mensajes'
+    | '/mi-caja'
     | '/mis-anuncios'
     | '/vender'
     | '/marketplace/$id'
@@ -114,10 +134,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/blog'
     | '/chollos'
     | '/favoritos'
     | '/mensajes'
+    | '/mi-caja'
     | '/mis-anuncios'
     | '/vender'
     | '/marketplace/$id'
@@ -125,10 +147,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/blog'
     | '/chollos'
     | '/favoritos'
     | '/mensajes'
+    | '/mi-caja'
     | '/mis-anuncios'
     | '/vender'
     | '/marketplace/$id'
@@ -137,10 +161,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRoute
   ChollosRoute: typeof ChollosRoute
   FavoritosRoute: typeof FavoritosRoute
   MensajesRoute: typeof MensajesRoute
+  MiCajaRoute: typeof MiCajaRoute
   MisAnunciosRoute: typeof MisAnunciosRoute
   VenderRoute: typeof VenderRoute
   MarketplaceIdRoute: typeof MarketplaceIdRoute
@@ -154,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -182,6 +215,13 @@ declare module '@tanstack/react-router' {
       path: '/mensajes'
       fullPath: '/mensajes'
       preLoaderRoute: typeof MensajesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mi-caja': {
+      id: '/mi-caja'
+      path: '/mi-caja'
+      fullPath: '/mi-caja'
+      preLoaderRoute: typeof MiCajaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mis-anuncios': {
@@ -217,10 +257,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   BlogRoute: BlogRoute,
   ChollosRoute: ChollosRoute,
   FavoritosRoute: FavoritosRoute,
   MensajesRoute: MensajesRoute,
+  MiCajaRoute: MiCajaRoute,
   MisAnunciosRoute: MisAnunciosRoute,
   VenderRoute: VenderRoute,
   MarketplaceIdRoute: MarketplaceIdRoute,

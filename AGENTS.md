@@ -15,3 +15,4 @@
 - Natural-language search is interpreted only by a server function that returns filters; results always come from the existing catalog, and keyword fallback is labeled visibly — keeps keys server-side and prevents invented parts.
 
 - Live part search runs only on the server through /api/search, returning listing-only items and explicit per-source statuses; no generated products or browser source fetching, so missing evidence stays missing.
+- Auth uses the generated Supabase browser client (/auth page, AccountProvider listens to onAuthStateChange); never create fake local sessions. Mi Caja reads/writes watchbox_favorites and shopping_lists via the browser client under owner-only RLS.
