@@ -15,6 +15,7 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ChollosRouteImport } from './routes/chollos'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MensajesRouteImport } from './routes/mensajes'
+import { Route as MiCajaRouteImport } from './routes/mi-caja'
 import { Route as MisAnunciosRouteImport } from './routes/mis-anuncios'
 import { Route as VenderRouteImport } from './routes/vender'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
@@ -50,6 +51,11 @@ const MensajesRoute = MensajesRouteImport.update({
   path: '/mensajes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MiCajaRoute = MiCajaRouteImport.update({
+  id: '/mi-caja',
+  path: '/mi-caja',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MisAnunciosRoute = MisAnunciosRouteImport.update({
   id: '/mis-anuncios',
   path: '/mis-anuncios',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
+  '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
+  '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/chollos': typeof ChollosRoute
   '/favoritos': typeof FavoritosRoute
   '/mensajes': typeof MensajesRoute
+  '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/chollos'
     | '/favoritos'
     | '/mensajes'
+    | '/mi-caja'
     | '/mis-anuncios'
     | '/vender'
     | '/marketplace/$id'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/chollos'
     | '/favoritos'
     | '/mensajes'
+    | '/mi-caja'
     | '/mis-anuncios'
     | '/vender'
     | '/marketplace/$id'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/chollos'
     | '/favoritos'
     | '/mensajes'
+    | '/mi-caja'
     | '/mis-anuncios'
     | '/vender'
     | '/marketplace/$id'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   ChollosRoute: typeof ChollosRoute
   FavoritosRoute: typeof FavoritosRoute
   MensajesRoute: typeof MensajesRoute
+  MiCajaRoute: typeof MiCajaRoute
   MisAnunciosRoute: typeof MisAnunciosRoute
   VenderRoute: typeof VenderRoute
   MarketplaceIdRoute: typeof MarketplaceIdRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MensajesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mi-caja': {
+      id: '/mi-caja'
+      path: '/mi-caja'
+      fullPath: '/mi-caja'
+      preLoaderRoute: typeof MiCajaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mis-anuncios': {
       id: '/mis-anuncios'
       path: '/mis-anuncios'
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChollosRoute: ChollosRoute,
   FavoritosRoute: FavoritosRoute,
   MensajesRoute: MensajesRoute,
+  MiCajaRoute: MiCajaRoute,
   MisAnunciosRoute: MisAnunciosRoute,
   VenderRoute: VenderRoute,
   MarketplaceIdRoute: MarketplaceIdRoute,
