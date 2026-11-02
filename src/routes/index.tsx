@@ -385,7 +385,7 @@ function Index() {
               <span>BUSCADOR DE RECAMBIOS Y CALIBRES</span>
             </div>
 
-            <h2 className="text-xl font-bold tracking-tight text-[#111111] sm:text-3xl">
+            <h2 className="text-2xl font-medium tracking-tight text-foreground sm:text-4xl">
               Busca por referencia de reloj, calibre o pieza compatible
             </h2>
 
