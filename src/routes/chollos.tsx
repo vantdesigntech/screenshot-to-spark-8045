@@ -147,7 +147,7 @@ function ChollosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-[#111111]">
+    <div className="min-h-screen bg-white text-[#111111]">
       <AurikNavbar />
 
       <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-8 sm:py-16">

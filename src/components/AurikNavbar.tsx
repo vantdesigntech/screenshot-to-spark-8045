@@ -1,23 +1,17 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { X } from "lucide-react";
+import { Search, User, X } from "lucide-react";
 import { useState } from "react";
 
 interface AurikNavbarProps {
   savedCount?: number;
   onOpenWatchbox?: () => void;
   onFocusSearch?: () => void;
-  /** Float over a full-bleed hero photo (home page). */
-  overlay?: boolean;
 }
-
-const pill =
-  "uni-label flex h-9 items-center px-3 text-foreground transition-colors hover:text-primary";
 
 export function AurikNavbar({
   savedCount = 0,
   onOpenWatchbox,
   onFocusSearch,
-  overlay = false,
 }: AurikNavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = useRouterState({
@@ -31,63 +25,72 @@ export function AurikNavbar({
     { to: "/blog", label: "Guías" },
   ] as const;
 
-  const extraLinks = [
-    { to: "/vender", label: "Publicar reloj" },
-    { to: "/mis-anuncios", label: "Mis anuncios" },
-    { to: "/mensajes", label: "Mensajes" },
-  ] as const;
-
-  const isActive = (to: string) =>
-    to === "/" ? pathname === "/" : pathname.startsWith(to);
-
   return (
-    <header
-      className={`${overlay ? "absolute" : "sticky bg-background/90 backdrop-blur-sm"} inset-x-0 top-0 z-50 w-full`}
-    >
-      <div className="mx-auto flex max-w-[1920px] items-start justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/"
-            aria-label="CRONORA Inicio"
-            className={`aurik-brand flex h-9 items-center text-[22px] sm:text-[26px] ${overlay ? "text-background" : "text-foreground"}`}
-          >
+    <header className="sticky top-0 z-50 w-full border-b border-[#e5e5e5] bg-white/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-4 sm:h-[76px] sm:px-8">
+        {/* Left: CRONORA Stencil Brand Logo */}
+        <Link
+          to="/"
+          className="group relative flex items-center gap-2 text-[#111111] transition-opacity hover:opacity-80"
+          aria-label="CRONORA Inicio"
+        >
+          <span className="aurik-brand relative select-none text-[19px] tracking-[0.2em] text-[#111111] sm:text-[23px] sm:tracking-[0.22em]">
             CRONORA
-          </Link>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-1/2 h-[1.5px] -translate-y-1/2 bg-white/75"
+            />
+          </span>
+        </Link>
 
+        {/* Right: Desktop Links + Utility Icons + Two-Line Hamburger */}
+        <div className="flex items-center gap-3 sm:gap-6 lg:gap-8">
           <nav
             aria-label="Navegación principal"
-            className="uni-glass hidden items-center px-2 lg:flex"
+            className="hidden items-center gap-7 lg:flex"
           >
-            {navLinks.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`${pill} ${isActive(item.to) ? "text-primary" : ""}`}
-              >
-                {item.label}
-              </Link>
-            ))}
-            {extraLinks.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`${pill} ${isActive(item.to) ? "text-primary" : ""}`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navLinks.map((item) => {
+              const isActive =
+                item.to === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`text-[13px] font-semibold tracking-[0.02em] transition-colors ${
+                    isActive
+                      ? "text-[#e03127]"
+                      : "text-[#111111] hover:text-[#e03127]"
+                  }`}
+                >
+                  {isActive && (
+                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#e03127] align-middle" />
+                  )}
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
-        </div>
 
-        <div className="flex flex-col items-end gap-2">
-          <div className="uni-glass flex items-center px-1 sm:px-2">
+          {/* Search & User/Watchbox Icons */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {onFocusSearch ? (
-              <button type="button" onClick={onFocusSearch} aria-label="Ir al buscador" className={pill}>
-                Buscar
+              <button
+                type="button"
+                onClick={onFocusSearch}
+                aria-label="Ir al buscador"
+                className="flex h-9 w-9 items-center justify-center text-[#111111] transition-colors hover:text-[#e03127]"
+              >
+                <Search className="h-[17px] w-[17px]" strokeWidth={1.6} />
               </button>
             ) : (
-              <Link to="/" aria-label="Ir al buscador en Inicio" className={pill}>
-                Buscar
+              <Link
+                to="/"
+                aria-label="Ir al buscador en Inicio"
+                className="flex h-9 w-9 items-center justify-center text-[#111111] transition-colors hover:text-[#e03127]"
+              >
+                <Search className="h-[17px] w-[17px]" strokeWidth={1.6} />
               </Link>
             )}
 
@@ -96,49 +99,102 @@ export function AurikNavbar({
                 type="button"
                 onClick={onOpenWatchbox}
                 aria-label="Mi Caja de piezas guardadas"
-                className={`${pill} gap-2`}
+                className="relative flex h-9 w-9 items-center justify-center text-[#111111] transition-colors hover:text-[#e03127]"
               >
-                Mi caja
-                {savedCount > 0 && <span className="h-2 w-2 rounded-full bg-primary" />}
+                <User className="h-[17px] w-[17px]" strokeWidth={1.6} />
+                {savedCount > 0 && (
+                  <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center bg-[#e03127] px-1 font-mono text-[9px] font-bold text-white">
+                    {savedCount}
+                  </span>
+                )}
               </button>
             ) : (
-              <Link to="/favoritos" aria-label="Favoritos y cuenta" className={`${pill} gap-2`}>
-                Mi caja
-                {savedCount > 0 && <span className="h-2 w-2 rounded-full bg-primary" />}
+              <Link
+                to="/favoritos"
+                aria-label="Favoritos y cuenta"
+                className="relative flex h-9 w-9 items-center justify-center text-[#111111] transition-colors hover:text-[#e03127]"
+              >
+                <User className="h-[17px] w-[17px]" strokeWidth={1.6} />
+                {savedCount > 0 && (
+                  <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center bg-[#e03127] px-1 font-mono text-[9px] font-bold text-white">
+                    {savedCount}
+                  </span>
+                )}
               </Link>
             )}
 
+            {/* Signature AURIK Two-Line Hamburger Button (Matches 2.webp / 3.webp / 4.webp) */}
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
               aria-label="Abrir menú de navegación"
               aria-expanded={menuOpen}
-              className={`${pill} lg:hidden`}
+              className="flex h-9 w-11 flex-col items-end justify-center gap-[6px] pl-1 text-[#111111] transition-opacity hover:opacity-70"
             >
-              {menuOpen ? <X className="h-4 w-4" strokeWidth={1.6} /> : "Menú"}
+              {menuOpen ? (
+                <X className="h-5 w-5 text-[#111111]" strokeWidth={1.6} />
+              ) : (
+                <>
+                  <span className="block h-[1.5px] w-9 bg-[#111111] sm:w-10" />
+                  <span className="block h-[1.5px] w-9 bg-[#111111] sm:w-10" />
+                </>
+              )}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Expandable Full-Width Navigation Drawer */}
       {menuOpen && (
-        <div className="px-3 pb-3 sm:px-6 lg:hidden">
-          <div className="uni-glass grid grid-cols-1 gap-px overflow-hidden p-1 sm:grid-cols-2">
-            {[...navLinks, ...extraLinks].map((item, idx) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setMenuOpen(false)}
-                className={`uni-label flex min-h-11 items-center justify-between rounded-[3px] px-3 transition-colors hover:bg-foreground hover:text-background ${
-                  isActive(item.to) ? "bg-foreground text-background" : "text-foreground"
-                }`}
-              >
-                <span>
-                  0{idx + 1} · {item.label}
-                </span>
-                <span>→</span>
-              </Link>
-            ))}
+        <div className="border-t border-[#e5e5e5] bg-white px-4 py-6 sm:px-8">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {navLinks.map((item, idx) => {
+              const isActive =
+                item.to === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMenuOpen(false)}
+                  className={`flex items-center justify-between border border-[#e5e5e5] p-4 text-xs font-semibold tracking-[0.03em] uppercase transition-colors ${
+                    isActive
+                      ? "border-[#e03127] bg-[#e03127] text-white"
+                      : "bg-[#f4f4f5] text-[#111111] hover:bg-[#111111] hover:text-white"
+                  }`}
+                >
+                  <span>
+                    0{idx + 1} · {item.label}
+                  </span>
+                  <span>&gt;</span>
+                </Link>
+              );
+            })}
+            <Link
+              to="/vender"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-between border border-[#e03127] bg-white p-4 text-xs font-semibold tracking-[0.03em] uppercase text-[#e03127] transition-colors hover:bg-[#e03127] hover:text-white"
+            >
+              <span>05 · Publicar Reloj</span>
+              <span>&gt;</span>
+            </Link>
+            <Link
+              to="/mis-anuncios"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-between border border-[#e5e5e5] bg-[#f4f4f5] p-4 text-xs font-semibold tracking-[0.03em] uppercase text-[#111111] transition-colors hover:bg-[#111111] hover:text-white"
+            >
+              <span>06 · Mis Anuncios</span>
+              <span>&gt;</span>
+            </Link>
+            <Link
+              to="/mensajes"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-between border border-[#e5e5e5] bg-[#f4f4f5] p-4 text-xs font-semibold tracking-[0.03em] uppercase text-[#111111] transition-colors hover:bg-[#111111] hover:text-white"
+            >
+              <span>07 · Mensajes</span>
+              <span>&gt;</span>
+            </Link>
           </div>
         </div>
       )}
