@@ -538,6 +538,7 @@ export type Database = {
           id: string
           kind: string
           listing_id: string | null
+          message: string | null
           read_at: string | null
           user_id: string
         }
@@ -547,6 +548,7 @@ export type Database = {
           id?: string
           kind: string
           listing_id?: string | null
+          message?: string | null
           read_at?: string | null
           user_id: string
         }
@@ -556,6 +558,7 @@ export type Database = {
           id?: string
           kind?: string
           listing_id?: string | null
+          message?: string | null
           read_at?: string | null
           user_id?: string
         }
@@ -949,9 +952,14 @@ export type Database = {
       }
     }
     Functions: {
+      get_listing_serial: { Args: { p_listing_id: string }; Returns: string }
       is_marketplace_moderator: {
         Args: { check_user_id: string }
         Returns: boolean
+      }
+      moderate_listing: {
+        Args: { p_decision: string; p_listing_id: string; p_message: string }
+        Returns: undefined
       }
       normalize_token: { Args: { input: string }; Returns: string }
       part_type_label: { Args: { p: string }; Returns: string }
