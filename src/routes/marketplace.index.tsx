@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { MarketplaceShell } from '../marketplace/components/MarketplaceShell'
+import { CommunityListings } from '@/components/CommunityListings'
 import { ListingCard } from '../marketplace/components/ListingCard'
 import {
   getAvailableBrands,
@@ -178,6 +179,7 @@ export function MarketplaceCatalogPage() {
       title="Catálogo de Relojes entre Coleccionistas"
       subtitle="Explora relojes completos con trazabilidad documental y control fotográfico de 4 a 10 ángulos. Filtra en tiempo real por referencia exacta, calibre, estado de conservación y ubicación."
     >
+      <CommunityListings />
       {/* Transparency & Photographic Review Banner */}
       <div className="mb-8 border border-[#e5e5e5] bg-[#f4f4f5] p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
