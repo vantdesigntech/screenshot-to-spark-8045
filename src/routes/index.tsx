@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search, SlidersHorizontal, Trash2, X } from "lucide-react";
-import { AnimatedHeroWatch } from "@/components/AnimatedHeroWatch";
 import { AurikNavbar } from "@/components/AurikNavbar";
 import { AurikPartCard } from "@/components/AurikPartCard";
 import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
@@ -347,12 +346,6 @@ function Index() {
             </p>
           </div>
 
-          {/* Integrated Architectural Macro Watch Stage with 1-Click Part Callouts */}
-          <div className="mt-7 sm:mt-9">
-            <AnimatedHeroWatch
-              onSelectPart={(term) => void executeSearch(term)}
-            />
-          </div>
         </section>
 
         {/* =========================================================
