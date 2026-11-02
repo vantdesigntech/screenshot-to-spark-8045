@@ -17,6 +17,8 @@ import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MensajesRouteImport } from './routes/mensajes'
 import { Route as MiCajaRouteImport } from './routes/mi-caja'
 import { Route as MisAnunciosRouteImport } from './routes/mis-anuncios'
+import { Route as ModeracionRouteImport } from './routes/moderacion'
+import { Route as PublicarRouteImport } from './routes/publicar'
 import { Route as VenderRouteImport } from './routes/vender'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as MarketplaceIdRouteImport } from './routes/marketplace.$id'
@@ -61,6 +63,16 @@ const MisAnunciosRoute = MisAnunciosRouteImport.update({
   path: '/mis-anuncios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModeracionRoute = ModeracionRouteImport.update({
+  id: '/moderacion',
+  path: '/moderacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicarRoute = PublicarRouteImport.update({
+  id: '/publicar',
+  path: '/publicar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VenderRoute = VenderRouteImport.update({
   id: '/vender',
   path: '/vender',
@@ -86,6 +98,8 @@ export interface FileRoutesByFullPath {
   '/mensajes': typeof MensajesRoute
   '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
+  '/moderacion': typeof ModeracionRoute
+  '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -99,6 +113,8 @@ export interface FileRoutesByTo {
   '/mensajes': typeof MensajesRoute
   '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
+  '/moderacion': typeof ModeracionRoute
+  '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
   '/marketplace': typeof MarketplaceIndexRoute
@@ -113,6 +129,8 @@ export interface FileRoutesById {
   '/mensajes': typeof MensajesRoute
   '/mi-caja': typeof MiCajaRoute
   '/mis-anuncios': typeof MisAnunciosRoute
+  '/moderacion': typeof ModeracionRoute
+  '/publicar': typeof PublicarRoute
   '/vender': typeof VenderRoute
   '/marketplace/$id': typeof MarketplaceIdRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -128,6 +146,8 @@ export interface FileRouteTypes {
     | '/mensajes'
     | '/mi-caja'
     | '/mis-anuncios'
+    | '/moderacion'
+    | '/publicar'
     | '/vender'
     | '/marketplace/$id'
     | '/marketplace/'
@@ -141,6 +161,8 @@ export interface FileRouteTypes {
     | '/mensajes'
     | '/mi-caja'
     | '/mis-anuncios'
+    | '/moderacion'
+    | '/publicar'
     | '/vender'
     | '/marketplace/$id'
     | '/marketplace'
@@ -154,6 +176,8 @@ export interface FileRouteTypes {
     | '/mensajes'
     | '/mi-caja'
     | '/mis-anuncios'
+    | '/moderacion'
+    | '/publicar'
     | '/vender'
     | '/marketplace/$id'
     | '/marketplace/'
@@ -168,6 +192,8 @@ export interface RootRouteChildren {
   MensajesRoute: typeof MensajesRoute
   MiCajaRoute: typeof MiCajaRoute
   MisAnunciosRoute: typeof MisAnunciosRoute
+  ModeracionRoute: typeof ModeracionRoute
+  PublicarRoute: typeof PublicarRoute
   VenderRoute: typeof VenderRoute
   MarketplaceIdRoute: typeof MarketplaceIdRoute
   MarketplaceIndexRoute: typeof MarketplaceIndexRoute
@@ -231,6 +257,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MisAnunciosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/moderacion': {
+      id: '/moderacion'
+      path: '/moderacion'
+      fullPath: '/moderacion'
+      preLoaderRoute: typeof ModeracionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/publicar': {
+      id: '/publicar'
+      path: '/publicar'
+      fullPath: '/publicar'
+      preLoaderRoute: typeof PublicarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vender': {
       id: '/vender'
       path: '/vender'
@@ -264,6 +304,8 @@ const rootRouteChildren: RootRouteChildren = {
   MensajesRoute: MensajesRoute,
   MiCajaRoute: MiCajaRoute,
   MisAnunciosRoute: MisAnunciosRoute,
+  ModeracionRoute: ModeracionRoute,
+  PublicarRoute: PublicarRoute,
   VenderRoute: VenderRoute,
   MarketplaceIdRoute: MarketplaceIdRoute,
   MarketplaceIndexRoute: MarketplaceIndexRoute,

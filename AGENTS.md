@@ -16,3 +16,4 @@
 
 - Live part search runs only on the server through /api/search, returning listing-only items and explicit per-source statuses; no generated products or browser source fetching, so missing evidence stays missing.
 - Auth uses the generated Supabase browser client (/auth page, AccountProvider listens to onAuthStateChange); never create fake local sessions. Mi Caja reads/writes watchbox_favorites and shopping_lists via the browser client under owner-only RLS.
+- Marketplace listings created by real users live in Supabase (listings + private listing-photos bucket with signed URLs); full serials are column-revoked and only readable via get_listing_serial, and moderation goes through the moderate_listing RPC that also notifies the seller.
