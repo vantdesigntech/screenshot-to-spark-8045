@@ -291,7 +291,7 @@ function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-background text-[#111111]">
       {/* Shared CRONORA Top Bar */}
       <AurikNavbar
         savedCount={savedIds.length}

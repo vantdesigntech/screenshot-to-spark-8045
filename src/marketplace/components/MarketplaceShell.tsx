@@ -111,7 +111,7 @@ export function MarketplaceShell({
   ]
 
   return (
-    <div className="min-h-screen bg-white text-[#111111] flex flex-col">
+    <div className="min-h-screen bg-background text-[#111111] flex flex-col">
       {/* 1. SHARED AURIK GLOBAL NAVBAR */}
       <AurikNavbar savedCount={favoritesCount} />
 
