@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import heroEditorial from "@/assets/hero-editorial.jpg";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Search, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { Search, SlidersHorizontal, Trash2, X } from "lucide-react";
 import { AurikNavbar } from "@/components/AurikNavbar";
 import { AurikPartCard } from "@/components/AurikPartCard";
 import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
@@ -291,9 +292,10 @@ function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-background text-[#111111]">
       {/* Shared CRONORA Top Bar */}
       <AurikNavbar
+        overlay
         savedCount={savedIds.length}
         onOpenWatchbox={() => setShowWatchbox(true)}
         onFocusSearch={() => {
@@ -311,41 +313,64 @@ function Index() {
       )}
 
       <main>
-        {/* =========================================================
-            1. HERO SECTION
-           ========================================================= */}
-        <section className="mx-auto max-w-[1240px] border-b border-[#e5e5e5] bg-white px-4 pt-10 pb-8 sm:px-8 sm:pt-14 sm:pb-12">
-          {/* Main Headline using the special display/stencil font */}
-          <div className="mx-auto max-w-4xl text-center">
-            <h1 className="aurik-hero-title text-[26px] leading-[1.18] sm:text-[40px] md:text-[46px]">
-              BUSCA TUS RECAMBIOS PARA TU RELOJ
-              <br className="hidden sm:inline" /> CON UN SOLO CLIC
-            </h1>
+        {/* 1. FULL-BLEED EDITORIAL HERO (Unimatic-style) */}
+        <section className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-foreground">
+          <img
+            src={heroEditorial}
+            alt="Calibre automático y brazalete de acero sobre musgo"
+            className="absolute inset-0 h-full w-full object-cover"
+            width={1920}
+            height={1080}
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-foreground/70 to-transparent" />
+
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 p-3 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-[380px] text-background">
+              <h1 className="aurik-hero-title text-[28px] text-background sm:text-[34px]">
+                Busca tus recambios para tu reloj con un solo clic.
+              </h1>
+              <div className="uni-label mt-3 grid grid-cols-2 gap-x-6 text-[10px] text-background/80">
+                <span>OEM · Aftermarket</span>
+                <span>eBay · AliExpress</span>
+                <span>Calibres · Cristales</span>
+                <span>Chrono24 · CousinsUK</span>
+              </div>
+            </div>
+
+            <div className="uni-glass w-full p-2 lg:w-[450px]">
+              <div className="flex flex-wrap gap-1.5">
+                <span className="uni-label rounded-[3px] bg-card px-2 py-1 text-[10px]">Zafiro · Biseles · Agujas</span>
+                <span className="uni-label rounded-[3px] bg-card px-2 py-1 text-[10px]">Precios comparados</span>
+              </div>
+              <p className="mt-2 text-[15px] font-medium text-muted-foreground">
+                Cristales, calibres, coronas y brazaletes compatibles con tu modelo.
+              </p>
+              <p className="text-xl font-medium tracking-tight text-foreground">
+                Encuentra tu recambio exacto
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    searchSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                    setTimeout(() => searchInputRef.current?.focus(), 250);
+                  }}
+                  aria-label="Ir al buscador"
+                  className="flex min-h-11 items-center gap-2 rounded-[3px] bg-foreground px-3 text-sm text-background"
+                >
+                  <span className="h-4 w-4 rounded-full bg-background" />
+                  Buscar pieza
+                </button>
+                <Link
+                  to="/chollos"
+                  className="flex min-h-11 items-center gap-2 rounded-[3px] bg-background px-3 text-sm text-foreground"
+                >
+                  <span className="h-4 w-4 rounded-full border border-foreground" />
+                  Ver chollos
+                </Link>
+              </div>
+            </div>
           </div>
-
-          {/* Centered Red Circle Badge + Clean Readable Subtitle Row */}
-          <div className="mx-auto mt-5 flex max-w-xl flex-col items-center justify-center gap-4 text-center sm:mt-7 sm:flex-row sm:gap-5 sm:text-left">
-            <button
-              type="button"
-              onClick={() => {
-                searchSectionRef.current?.scrollIntoView({
-                  behavior: "smooth",
-                });
-                setTimeout(() => searchInputRef.current?.focus(), 250);
-              }}
-              aria-label="Ir al buscador"
-              className="order-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#e03127] text-white transition-transform hover:scale-105 sm:order-1"
-            >
-              <ChevronDown className="h-5 w-5" strokeWidth={2} />
-            </button>
-
-            <p className="order-1 text-sm leading-relaxed text-[#52525b] sm:order-2">
-              Encuentra al instante cristales de zafiro, calibres automáticos,
-              biseles, agujas, coronas y brazaletes OEM o Aftermarket
-              compatibles con tu modelo exacto.
-            </p>
-          </div>
-
         </section>
 
         {/* =========================================================
@@ -362,7 +387,7 @@ function Index() {
               <span>BUSCADOR DE RECAMBIOS Y CALIBRES</span>
             </div>
 
-            <h2 className="text-xl font-bold tracking-tight text-[#111111] sm:text-3xl">
+            <h2 className="text-2xl font-medium tracking-tight text-foreground sm:text-4xl">
               Busca por referencia de reloj, calibre o pieza compatible
             </h2>
 
