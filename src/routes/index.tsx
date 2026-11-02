@@ -295,6 +295,7 @@ function Index() {
     <div className="min-h-screen bg-background text-[#111111]">
       {/* Shared CRONORA Top Bar */}
       <AurikNavbar
+        overlay
         savedCount={savedIds.length}
         onOpenWatchbox={() => setShowWatchbox(true)}
         onFocusSearch={() => {
