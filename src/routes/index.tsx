@@ -4,7 +4,6 @@ import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { useAccount } from "@/components/AccountProvider";
 import { getSavedParts, removeFavorite, saveFavorite } from "@/lib/mi-caja";
 import { countActiveFilters } from "@/lib/filter-count";
-import { AnimatedHeroWatch } from "@/components/AnimatedHeroWatch";
 import { AurikNavbar } from "@/components/AurikNavbar";
 import { AurikPartCard } from "@/components/AurikPartCard";
 import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
@@ -328,12 +327,6 @@ function Index() {
             </p>
           </div>
 
-          {/* Integrated Architectural Macro Watch Stage with 1-Click Part Callouts */}
-          <div className="mt-7 sm:mt-9">
-            <AnimatedHeroWatch
-              onSelectPart={(term) => void executeSearch(term)}
-            />
-          </div>
         </section>
 
         {/* =========================================================
