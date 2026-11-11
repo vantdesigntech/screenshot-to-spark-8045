@@ -274,7 +274,7 @@ function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-white text-foreground">
       {/* Shared CRONORA Top Bar */}
       <AurikNavbar
         savedCount={savedIds.length}
@@ -286,8 +286,8 @@ function Index() {
 
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed bottom-4 left-4 right-4 z-50 border border-[#111111] bg-[#111111] px-4 py-3 font-mono text-xs uppercase tracking-[0.06em] text-white shadow-lg sm:left-auto sm:right-6 sm:max-w-md">
-          <span className="mr-2 text-[#e03127]">●</span>
+        <div className="fixed bottom-4 left-4 right-4 z-50 border border-foreground bg-foreground px-4 py-3 font-mono text-xs uppercase tracking-[0.06em] text-white shadow-lg sm:left-auto sm:right-6 sm:max-w-md">
+          <span className="mr-2 text-primary">●</span>
           {toastMsg}
         </div>
       )}
@@ -296,7 +296,7 @@ function Index() {
         {/* =========================================================
             1. HERO SECTION
            ========================================================= */}
-        <section className="mx-auto max-w-[1240px] border-b border-[#e5e5e5] bg-white px-4 pt-10 pb-8 sm:px-8 sm:pt-14 sm:pb-12">
+        <section className="mx-auto max-w-[1240px] border-b border-border bg-white px-4 pt-10 pb-8 sm:px-8 sm:pt-14 sm:pb-12">
           {/* Main Headline using the special display/stencil font */}
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="aurik-hero-title text-[26px] leading-[1.18] sm:text-[40px] md:text-[46px]">
@@ -316,12 +316,12 @@ function Index() {
                 setTimeout(() => searchInputRef.current?.focus(), 250);
               }}
               aria-label="Ir al buscador"
-              className="order-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#e03127] text-white transition-transform hover:scale-105 sm:order-1"
+              className="order-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-transform hover:scale-105 sm:order-1"
             >
               <ChevronDown className="h-5 w-5" strokeWidth={2} />
             </button>
 
-            <p className="order-1 text-sm leading-relaxed text-[#52525b] sm:order-2">
+            <p className="order-1 text-sm leading-relaxed text-muted-foreground sm:order-2">
               Encuentra al instante cristales de zafiro, calibres automáticos,
               biseles, agujas, coronas y brazaletes OEM o Aftermarket
               compatibles con tu modelo exacto.
@@ -350,7 +350,7 @@ function Index() {
               <span>BUSCADOR DE RECAMBIOS Y CALIBRES</span>
             </div>
 
-            <h2 className="text-xl font-bold tracking-tight text-[#111111] sm:text-3xl">
+            <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-3xl">
               Busca por referencia de reloj, calibre o pieza compatible
             </h2>
 
@@ -364,7 +364,7 @@ function Index() {
             >
               <div className="flex flex-col gap-2.5 sm:flex-row">
                 <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71717a]" />
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -373,14 +373,14 @@ function Index() {
                     onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Ej: Seiko NH35, Rolex 124300, Tissot PRX, ETA 2824..."
-                    className="h-13 w-full border border-[#111111] bg-[#f4f4f5] pl-11 pr-10 text-sm text-[#111111] placeholder:text-[#71717a] focus:bg-white focus:outline-none"
+                    className="h-13 w-full border border-foreground bg-muted pl-11 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:bg-white focus:outline-none"
                   />
                   {query && (
                     <button
                       type="button"
                       onClick={() => setQuery("")}
                       aria-label="Borrar texto"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#71717a] hover:text-[#111111]"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -411,16 +411,16 @@ function Index() {
 
               {/* Autocomplete Suggestions Dropdown */}
               {searchFocused && autocompleteSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-30 mt-1 border border-[#111111] bg-white shadow-lg">
+                <div className="absolute left-0 right-0 top-full z-30 mt-1 border border-foreground bg-white shadow-lg">
                   {autocompleteSuggestions.map((sug) => (
                     <button
                       key={`${sug.type}-${sug.label}`}
                       type="button"
                       onMouseDown={() => void executeSearch(sug.queryValue)}
-                      className="flex w-full items-center justify-between gap-2 border-b border-[#e5e5e5] px-4 py-3 text-left text-xs text-[#111111] hover:bg-[#f4f4f5] last:border-b-0"
+                      className="flex w-full items-center justify-between gap-2 border-b border-border px-4 py-3 text-left text-xs text-foreground hover:bg-muted last:border-b-0"
                     >
                       <span className="truncate font-medium">{sug.label}</span>
-                      <span className="shrink-0 bg-[#f4f4f5] px-2 py-0.5 font-mono text-[10px] uppercase text-[#e03127]">
+                      <span className="shrink-0 bg-muted px-2 py-0.5 font-mono text-[10px] uppercase text-primary">
                         {sug.type} &gt;
                       </span>
                     </button>
@@ -431,7 +431,7 @@ function Index() {
 
             {/* Quick Search Triggers */}
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#71717a]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                 BÚSQUEDAS RÁPIDAS:
               </span>
               {QUICK_SEARCHES.map((term) => (
@@ -439,7 +439,7 @@ function Index() {
                   key={term}
                   type="button"
                   onClick={() => void executeSearch(term)}
-                  className="border border-[#e5e5e5] bg-white px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-[#111111] transition-colors hover:border-[#111111] hover:bg-[#f4f4f5]"
+                  className="border border-border bg-white px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-foreground transition-colors hover:border-foreground hover:bg-muted"
                 >
                   {term} &gt;
                 </button>
@@ -455,10 +455,10 @@ function Index() {
           <section
             ref={resultsRef}
             id="resultados"
-            className="mx-auto max-w-[1440px] border-t border-[#e5e5e5] px-4 py-10 sm:px-8 sm:py-16"
+            className="mx-auto max-w-[1440px] border-t border-border px-4 py-10 sm:px-8 sm:py-16"
           >
             {/* Results Header Bar */}
-            <div className="mb-8 flex flex-col justify-between gap-4 border-b border-[#e5e5e5] pb-6 lg:flex-row lg:items-end">
+            <div className="mb-8 flex flex-col justify-between gap-4 border-b border-border pb-6 lg:flex-row lg:items-end">
               <div>
                 <div className="aurik-section-tag">
                   <span className="aurik-dot" />
@@ -467,13 +467,13 @@ function Index() {
                     ENCONTRADAS
                   </span>
                 </div>
-                <h3 className="mt-2 text-xl font-bold tracking-tight text-[#111111] sm:text-2xl">
+                <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                   {submittedQuery
                     ? `Resultados para "${submittedQuery}"`
                     : "Catálogo filtrado de recambios"}
                 </h3>
                 {isLoadingApi && (
-                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-[#e03127]">
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-primary">
                     ● ESCANEANDO DISTRIBUIDORES EN TIEMPO REAL...
                   </p>
                 )}
@@ -498,7 +498,7 @@ function Index() {
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   aria-label="Ordenar resultados"
-                  className="h-9 border border-[#e5e5e5] bg-[#f4f4f5] px-3 font-mono text-[11px] uppercase tracking-[0.05em] text-[#111111] focus:border-[#111111] focus:outline-none"
+                  className="h-9 border border-border bg-muted px-3 font-mono text-[11px] uppercase tracking-[0.05em] text-foreground focus:border-foreground focus:outline-none"
                 >
                   <option value="savings">ORDEN: MAYOR AHORRO</option>
                   <option value="price-asc">PRECIO: MENOR A MAYOR</option>
@@ -530,7 +530,7 @@ function Index() {
             {activeChips.length > 0 && (
               <div className="mb-5 flex flex-wrap items-center gap-2" aria-label="Filtros activos">
                 {activeChips.map((c) => (
-                  <button key={c.key} type="button" onClick={c.remove} aria-label={`Quitar filtro ${c.label}`} className="inline-flex min-h-9 items-center gap-1.5 border border-[#111111] bg-white px-3 font-mono text-[11px] uppercase">
+                  <button key={c.key} type="button" onClick={c.remove} aria-label={`Quitar filtro ${c.label}`} className="inline-flex min-h-9 items-center gap-1.5 border border-foreground bg-white px-3 font-mono text-[11px] uppercase">
                     {c.label} <X className="h-3.5 w-3.5" />
                   </button>
                 ))}
@@ -556,8 +556,8 @@ function Index() {
               </div>
               </>
             ) : (
-              <div className="border border-[#e5e5e5] bg-[#f4f4f5] p-8 text-center sm:p-12">
-                <p className="text-sm font-medium text-[#111111]">
+              <div className="border border-border bg-muted p-8 text-center sm:p-12">
+                <p className="text-sm font-medium text-foreground">
                   No se han encontrado referencias exactas para esta combinación
                   de filtros.
                 </p>
@@ -595,10 +595,10 @@ function Index() {
          ========================================================= */}
       {showFiltersSheet && (
         <div role="dialog" aria-modal="true" aria-label="Filtros" className="fixed inset-0 z-50 flex items-end justify-end bg-black/50 sm:items-center" onClick={(e) => { if (e.target === e.currentTarget) setShowFiltersSheet(false); }}>
-          <div className="flex max-h-[88dvh] w-full flex-col justify-between rounded-t-2xl border-t border-[#111111] bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:h-full sm:max-h-none sm:max-w-md sm:rounded-none sm:border-l sm:border-t-0 sm:p-8">
+          <div className="flex max-h-[88dvh] w-full flex-col justify-between rounded-t-2xl border-t border-foreground bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:h-full sm:max-h-none sm:max-w-md sm:rounded-none sm:border-l sm:border-t-0 sm:p-8">
             <div className="overflow-y-auto pr-1">
-              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[#d4d4d8] sm:hidden" aria-hidden="true" />
-              <div className="flex items-center justify-between border-b border-[#e5e5e5] pb-4">
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border sm:hidden" aria-hidden="true" />
+              <div className="flex items-center justify-between border-b border-border pb-4">
                 <div className="aurik-section-tag">
                   <span className="aurik-dot" />
                   <span>FILTROS{activeFilterCount > 0 ? ` · ${activeFilterCount} ACTIVOS` : ""}</span>
@@ -614,7 +614,7 @@ function Index() {
 
               {/* Origin */}
               <div className="mt-6">
-                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                   01 // ORIGEN DEL COMPONENTE
                 </p>
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -637,7 +637,7 @@ function Index() {
 
               {/* Categories */}
               <div className="mt-6">
-                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                   02 // CATEGORÍA DE PIEZA
                 </p>
                 <div className="mt-3 grid grid-cols-2 gap-2">
@@ -664,7 +664,7 @@ function Index() {
 
               {/* Store */}
               <div className="mt-6">
-                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                   03 // DISTRIBUIDOR
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -694,10 +694,10 @@ function Index() {
               {/* Max Price & Currency */}
               <div className="mt-6">
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                     04 // PRECIO MÁXIMO
                   </p>
-                  <span className="font-mono text-xs font-semibold text-[#111111]">
+                  <span className="font-mono text-xs font-semibold text-foreground">
                     {maxPrice} {currency === "EUR" ? "€" : "$"}
                   </span>
                 </div>
@@ -708,13 +708,13 @@ function Index() {
                   step={10}
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  className="mt-3 w-full accent-[#e03127]"
+                  className="mt-3 w-full accent-primary"
                 />
               </div>
 
               {/* Currency */}
               <div className="mt-6">
-                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                   05 // DIVISA
                 </p>
                 <div className="mt-3 flex gap-2">
@@ -734,7 +734,7 @@ function Index() {
               </div>
             </div>
 
-            <div className="mt-6 flex gap-2 border-t border-[#e5e5e5] pt-4">
+            <div className="mt-6 flex gap-2 border-t border-border pt-4">
               <button
                 type="button"
                 onClick={clearFilters}

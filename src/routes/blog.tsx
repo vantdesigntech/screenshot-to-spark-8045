@@ -49,14 +49,14 @@ function BlogPage() {
 
   if (!activeArticle) {
     return (
-      <p className="p-6 font-mono text-xs uppercase text-[#111111]">
+      <p className="p-6 font-mono text-xs uppercase text-foreground">
         NO HAY ARTÍCULOS DISPONIBLES.
       </p>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-white text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdObj) }}
@@ -67,7 +67,7 @@ function BlogPage() {
 
       <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-8 sm:py-16">
         {/* Editorial Header matching 3.webp / 4.webp */}
-        <div className="grid grid-cols-1 gap-6 border-b border-[#e5e5e5] pb-10 lg:grid-cols-12 lg:gap-8 lg:pb-12">
+        <div className="grid grid-cols-1 gap-6 border-b border-border pb-10 lg:grid-cols-12 lg:gap-8 lg:pb-12">
           <div className="lg:col-span-4">
             <div className="aurik-section-tag">
               <span className="aurik-dot" />
@@ -111,16 +111,16 @@ function BlogPage() {
         </div>
 
         {showJsonLd && (
-          <div className="mt-8 border border-[#111111] bg-[#111111] p-4 text-white sm:p-6">
+          <div className="mt-8 border border-foreground bg-foreground p-4 text-white sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/20 pb-3">
-              <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#e03127]">
+              <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-primary">
                 ● DATOS ESTRUCTURADOS // TECHARTICLE + FAQPAGE + WEBSITE
               </span>
               <span className="font-mono text-[10px] uppercase text-white/70">
                 INDEXACIÓN ACTIVA EN &lt;HEAD&gt;
               </span>
             </div>
-            <pre className="mt-4 max-h-60 overflow-auto bg-black p-4 font-mono text-[11px] text-[#f4f4f5]">
+            <pre className="mt-4 max-h-60 overflow-auto bg-black p-4 font-mono text-[11px] text-muted">
               {JSON.stringify(jsonLdObj, null, 2)}
             </pre>
           </div>
@@ -129,7 +129,7 @@ function BlogPage() {
         <div className="mt-10 grid grid-cols-1 gap-8 sm:mt-12 lg:grid-cols-12">
           {/* Sidebar List of Technical Guides */}
           <aside className="space-y-4 lg:col-span-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
+            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
               ÍNDICE DE EXPEDIENTES ({SEO_BLOG_ARTICLES.length})
             </p>
             {SEO_BLOG_ARTICLES.map((art, idx) => {
@@ -141,12 +141,12 @@ function BlogPage() {
                   onClick={() => setSelectedSlug(art.slug)}
                   className={`w-full border p-4 text-left transition-colors ${
                     active
-                      ? "border-2 border-[#e03127] bg-[#f4f4f5]"
-                      : "border-[#e5e5e5] bg-white hover:border-[#111111]"
+                      ? "border-2 border-primary bg-muted"
+                      : "border-border bg-white hover:border-foreground"
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="h-16 w-16 shrink-0 overflow-hidden border border-[#e5e5e5] bg-[#f4f4f5] p-1">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden border border-border bg-muted p-1">
                       <img
                         src={art.heroImage}
                         alt={art.title}
@@ -160,16 +160,16 @@ function BlogPage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-[#71717a]">
+                      <div className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                         <span className="truncate">{art.category}</span>
                         <span className="shrink-0">{art.readTime}</span>
                       </div>
-                      <h3 className="mt-1 line-clamp-2 text-xs font-semibold leading-snug text-[#111111]">
+                      <h3 className="mt-1 line-clamp-2 text-xs font-semibold leading-snug text-foreground">
                         {art.title}
                       </h3>
                     </div>
                   </div>
-                  <p className="mt-3 border-t border-[#e5e5e5] pt-2 font-mono text-[10px] uppercase tracking-[0.06em] text-[#e03127]">
+                  <p className="mt-3 border-t border-border pt-2 font-mono text-[10px] uppercase tracking-[0.06em] text-primary">
                     ● {art.oemSavingsHighlight}
                   </p>
                 </button>
@@ -178,9 +178,9 @@ function BlogPage() {
           </aside>
 
           {/* Active Article Full Technical Sheet */}
-          <article className="min-w-0 border border-[#e5e5e5] bg-white p-5 sm:p-10 lg:col-span-8">
-            <div className="flex flex-wrap items-center gap-2 border-b border-[#e5e5e5] pb-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[#71717a]">
-              <span className="bg-[#f4f4f5] px-2.5 py-1 text-[#e03127]">
+          <article className="min-w-0 border border-border bg-white p-5 sm:p-10 lg:col-span-8">
+            <div className="flex flex-wrap items-center gap-2 border-b border-border pb-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+              <span className="bg-muted px-2.5 py-1 text-primary">
                 ● {activeArticle.category}
               </span>
               <span>// {activeArticle.readTime}</span>
@@ -190,17 +190,17 @@ function BlogPage() {
             <h2 className="aurik-hero-title mt-6 text-xl sm:text-3xl">
               {activeArticle.title}
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-[#52525b]">
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {activeArticle.subtitle}
             </p>
 
             {/* Highlight & Action Box */}
-            <div className="mt-6 flex flex-col justify-between gap-4 border border-[#e5e5e5] bg-[#f4f4f5] p-4 sm:flex-row sm:items-center sm:p-5">
+            <div className="mt-6 flex flex-col justify-between gap-4 border border-border bg-muted p-4 sm:flex-row sm:items-center sm:p-5">
               <div className="min-w-0">
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.05em] text-[#e03127]">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.05em] text-primary">
                   ● {activeArticle.oemSavingsHighlight}
                 </p>
-                <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.04em] text-[#71717a]">
+                <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.04em] text-muted-foreground">
                   DESCRIPTORES: {activeArticle.targetKeywords.join(" · ")}
                 </p>
               </div>
@@ -210,7 +210,7 @@ function BlogPage() {
               </Link>
             </div>
 
-            <p className="mt-6 text-sm leading-relaxed text-[#111111]">
+            <p className="mt-6 text-sm leading-relaxed text-foreground">
               {activeArticle.summary}
             </p>
 
@@ -219,19 +219,19 @@ function BlogPage() {
               {activeArticle.sections.map((sec, idx) => (
                 <div
                   key={idx}
-                  className="space-y-4 border-t border-[#e5e5e5] pt-6"
+                  className="space-y-4 border-t border-border pt-6"
                 >
                   <h3 className="aurik-hero-title text-base sm:text-lg">
                     0{idx + 1} // {sec.heading}
                   </h3>
-                  <p className="text-sm leading-relaxed text-[#3f3f46]">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {sec.body}
                   </p>
 
                   {sec.specsTable && (
-                    <div className="overflow-x-auto border border-[#e5e5e5]">
+                    <div className="overflow-x-auto border border-border">
                       <table className="w-full min-w-[480px] text-left text-xs">
-                        <thead className="border-b border-[#e5e5e5] bg-[#f4f4f5] font-mono text-[10px] uppercase tracking-[0.08em] text-[#71717a]">
+                        <thead className="border-b border-border bg-muted font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                           <tr>
                             <th className="px-4 py-3">PARÁMETRO TÉCNICO</th>
                             <th className="px-4 py-3">
@@ -242,16 +242,16 @@ function BlogPage() {
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#e5e5e5]">
+                        <tbody className="divide-y divide-border">
                           {sec.specsTable.map((row, rIdx) => (
                             <tr key={rIdx} className="bg-white">
-                              <td className="px-4 py-3 font-semibold text-[#111111]">
+                              <td className="px-4 py-3 font-semibold text-foreground">
                                 {row.param}
                               </td>
-                              <td className="px-4 py-3 text-[#52525b]">
+                              <td className="px-4 py-3 text-muted-foreground">
                                 {row.oemValue}
                               </td>
-                              <td className="px-4 py-3 font-semibold text-[#e03127]">
+                              <td className="px-4 py-3 font-semibold text-primary">
                                 {row.aftermarketValue}
                               </td>
                             </tr>
@@ -265,7 +265,7 @@ function BlogPage() {
             </div>
 
             {/* FAQs Section */}
-            <div className="mt-10 border border-[#e5e5e5] bg-[#f4f4f5] p-5 sm:p-6">
+            <div className="mt-10 border border-border bg-muted p-5 sm:p-6">
               <div className="aurik-section-tag">
                 <span className="aurik-dot" />
                 <span>PREGUNTAS FRECUENTES DE TALLER</span>
@@ -274,12 +274,12 @@ function BlogPage() {
                 {activeArticle.faqs.map((faq, fIdx) => (
                   <div
                     key={fIdx}
-                    className="border border-[#e5e5e5] bg-white p-4"
+                    className="border border-border bg-white p-4"
                   >
-                    <p className="text-sm font-semibold text-[#111111]">
+                    <p className="text-sm font-semibold text-foreground">
                       {faq.q}
                     </p>
-                    <p className="mt-1.5 text-xs leading-relaxed text-[#52525b] sm:text-sm">
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                       {faq.a}
                     </p>
                   </div>

@@ -290,31 +290,31 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
   return (
     <div className="relative mx-auto w-full select-none">
       {/* Integrated Architectural Horological Stage (Flush bottom crop, zero floating PNG look) */}
-      <div className="relative overflow-hidden border border-[#e5e5e5] bg-gradient-to-b from-white via-[#fafafa] to-[#f2f2f5]">
+      <div className="relative overflow-hidden border border-border bg-gradient-to-b from-white via-muted to-muted">
         {/* Top Technical Telemetry Bar inside the stage */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5e5e5] bg-white/90 px-4 py-2.5 text-[11px] text-[#71717a] sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-white/90 px-4 py-2.5 text-[11px] text-muted-foreground sm:px-6">
           <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#e03127]" />
-            <span className="font-semibold text-[#111111]">
+            <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+            <span className="font-semibold text-foreground">
               ESQUEMA INTERACTIVO DE COMPONENTES
             </span>
-            <span className="hidden sm:inline text-[#a1a1aa]">
+            <span className="hidden sm:inline text-muted-foreground">
               · Haz clic en cualquier pieza del reloj para buscar su recambio
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] font-medium text-[#52525b]">
+          <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] font-medium text-muted-foreground">
             {digitalClock && (
               <span
                 title={`Hora sincronizada por ${tzSource === "IP" ? "Geolocalización IP" : "Zona Horaria Local"}: ${ipTimeZone}`}
-                className="inline-flex items-center gap-1.5 border border-[#e5e5e5] bg-[#f4f4f5] px-2 py-0.5 text-[#111111]"
+                className="inline-flex items-center gap-1.5 border border-border bg-muted px-2 py-0.5 text-foreground"
               >
                 <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-600" />
                 <span className="font-bold">{digitalClock}</span>
-                <span className="text-[#71717a]">
+                <span className="text-muted-foreground">
                   · {ipLocationLabel || ipTimeZone}
                   {ipUtcOffset ? ` (${ipUtcOffset})` : ""}
                 </span>
-                <span className="bg-[#111111] px-1 py-0.2 text-[9px] text-white">
+                <span className="bg-foreground px-1 py-0.2 text-[9px] text-white">
                   {tzSource === "IP" ? "SYNC IP" : "ZONA LOCAL"}
                 </span>
               </span>
@@ -340,19 +340,19 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
                   onClick={() => onSelectPart?.(item.query)}
                   className={`pointer-events-auto group flex flex-col border bg-white/95 p-3 text-left transition-all ${
                     isActive
-                      ? "border-[#e03127] shadow-md -translate-y-0.5"
-                      : "border-[#e5e5e5] hover:border-[#111111]"
+                      ? "border-primary shadow-md -translate-y-0.5"
+                      : "border-border hover:border-foreground"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-[#111111] group-hover:text-[#e03127]">
+                    <span className="text-xs font-bold text-foreground group-hover:text-primary">
                       {item.label}
                     </span>
-                    <span className="bg-[#f4f4f5] px-1.5 py-0.5 text-[10px] font-semibold text-[#e03127]">
+                    <span className="bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                       1 CLIC &gt;
                     </span>
                   </div>
-                  <span className="mt-0.5 text-[11px] text-[#71717a]">
+                  <span className="mt-0.5 text-[11px] text-muted-foreground">
                     {item.spec}
                   </span>
                 </button>
@@ -373,19 +373,19 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
                   onClick={() => onSelectPart?.(item.query)}
                   className={`pointer-events-auto group flex flex-col border bg-white/95 p-3 text-left transition-all ${
                     isActive
-                      ? "border-[#e03127] shadow-md -translate-y-0.5"
-                      : "border-[#e5e5e5] hover:border-[#111111]"
+                      ? "border-primary shadow-md -translate-y-0.5"
+                      : "border-border hover:border-foreground"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-[#111111] group-hover:text-[#e03127]">
+                    <span className="text-xs font-bold text-foreground group-hover:text-primary">
                       {item.label}
                     </span>
-                    <span className="bg-[#f4f4f5] px-1.5 py-0.5 text-[10px] font-semibold text-[#e03127]">
+                    <span className="bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                       1 CLIC &gt;
                     </span>
                   </div>
-                  <span className="mt-0.5 text-[11px] text-[#71717a]">
+                  <span className="mt-0.5 text-[11px] text-muted-foreground">
                     {item.spec}
                   </span>
                 </button>
@@ -1113,16 +1113,16 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
         </div>
 
         {/* Mobile / Tablet Quick 1-Click Component Selector Strip */}
-        <div className="grid grid-cols-2 gap-1.5 border-t border-[#e5e5e5] bg-white p-3 sm:grid-cols-3 lg:hidden">
+        <div className="grid grid-cols-2 gap-1.5 border-t border-border bg-white p-3 sm:grid-cols-3 lg:hidden">
           {PART_CALLOUTS.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => onSelectPart?.(item.query)}
-              className="flex items-center justify-between border border-[#e5e5e5] bg-[#f4f4f5] px-2.5 py-2 text-left text-[11px] font-semibold text-[#111111] active:bg-[#e03127] active:text-white"
+              className="flex items-center justify-between border border-border bg-muted px-2.5 py-2 text-left text-[11px] font-semibold text-foreground active:bg-primary active:text-white"
             >
               <span className="truncate">{item.label}</span>
-              <span className="ml-1 shrink-0 text-[#e03127]">&gt;</span>
+              <span className="ml-1 shrink-0 text-primary">&gt;</span>
             </button>
           ))}
         </div>

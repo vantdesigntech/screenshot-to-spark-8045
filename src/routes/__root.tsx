@@ -17,16 +17,16 @@ import { AccountProvider } from "@/components/AccountProvider";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-[#111111]">
-      <div className="w-full max-w-md border border-[#e5e5e5] bg-[#f4f4f5] p-8 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-foreground">
+      <div className="w-full max-w-md border border-border bg-muted p-8 text-center">
         <div className="aurik-section-tag justify-center">
           <span className="aurik-dot" />
           <span>ERROR // 404</span>
         </div>
-        <h1 className="aurik-hero-title mt-3 text-4xl text-[#111111]">
+        <h1 className="aurik-hero-title mt-3 text-4xl text-foreground">
           Página no encontrada
         </h1>
-        <p className="mt-3 text-xs leading-relaxed text-[#71717a]">
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
           La referencia o ruta solicitada no existe en el catálogo técnico de
           Cronora.
         </p>
@@ -49,16 +49,16 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-[#111111]">
-      <div className="w-full max-w-md border border-[#e5e5e5] bg-[#f4f4f5] p-8 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-foreground">
+      <div className="w-full max-w-md border border-border bg-muted p-8 text-center">
         <div className="aurik-section-tag justify-center">
           <span className="aurik-dot" />
           <span>SYSTEM FAULT</span>
         </div>
-        <h1 className="aurik-hero-title mt-3 text-xl text-[#111111]">
+        <h1 className="aurik-hero-title mt-3 text-xl text-foreground">
           Error al cargar la vista
         </h1>
-        <p className="mt-3 text-xs text-[#71717a]">
+        <p className="mt-3 text-xs text-muted-foreground">
           {error instanceof Error ? error.message : "Error inesperado."}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
