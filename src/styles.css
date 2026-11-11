@@ -9,12 +9,12 @@
      - Stencil/Tech Display ONLY for Navbar Brand (.aurik-brand) and Main Hero Title (.aurik-hero-title)
      - Clean, ultra-legible Plus Jakarta Sans + Inter for ALL other UI elements, buttons, nav links, specs, cards, and body text
   */
-  --font-brand: "Orbitron", "Share Tech Mono", sans-serif;
-  --font-title: "Share Tech Mono", "Orbitron", sans-serif;
-  --font-display: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif;
-  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif;
-  --font-serif: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif;
+  --font-brand: "Lexend Exa", Arial, sans-serif;
+  --font-title: "Gloock", "Times New Roman", serif;
+  --font-display: "Gloock", "Times New Roman", serif;
+  --font-sans: "Open Sans", system-ui, sans-serif;
+  --font-serif: "Gloock", "Times New Roman", serif;
+  --font-mono: "Lexend Exa", Arial, sans-serif;
 
   /* Strict 0px Sharp Swiss Grid Border Radius Scale */
   --radius-none: 0px;
@@ -48,35 +48,25 @@
 }
 
 :root {
-  /* Light Swiss Horology Lab Palette (2.webp, 3.webp, 4.webp) */
-  --background: #ffffff;
-  --foreground: #111111;
-
-  --card: #f4f4f5;
-  --card-foreground: #111111;
-
-  --popover: #ffffff;
-  --popover-foreground: #111111;
-
-  /* Swiss Crimson Red (#E03127) */
-  --primary: #e03127;
-  --primary-foreground: #ffffff;
-
-  --secondary: #f4f4f5;
-  --secondary-foreground: #111111;
-
-  --muted: #f4f4f5;
-  --muted-foreground: #666666;
-
-  --accent: #e03127;
-  --accent-foreground: #ffffff;
-
-  --destructive: #e03127;
-  --destructive-foreground: #ffffff;
-
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #e03127;
+  --background: #fefcf6;
+  --foreground: #16292c;
+  --card: #f6f2e7;
+  --card-foreground: #16292c;
+  --popover: #fefcf6;
+  --popover-foreground: #16292c;
+  --primary: #16292c;
+  --primary-foreground: #fefcf6;
+  --secondary: #efe9da;
+  --secondary-foreground: #16292c;
+  --muted: #f1ece0;
+  --muted-foreground: #5b6a6c;
+  --accent: #16292c;
+  --accent-foreground: #fefcf6;
+  --destructive: #b3261e;
+  --destructive-foreground: #fefcf6;
+  --border: #16292c33;
+  --input: #16292c40;
+  --ring: #16292c;
 }
 
 @layer base {
@@ -92,8 +82,8 @@
   }
 
   body {
-    background-color: #ffffff;
-    color: #111111;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 14px;
     font-weight: 400;
@@ -107,7 +97,8 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    font-weight: 400;
+    letter-spacing: -0.02em;
     overflow-wrap: break-word;
   }
 }
@@ -127,10 +118,10 @@
 @utility aurik-hero-title {
   font-family: var(--font-title);
   font-weight: 400;
-  letter-spacing: 0.04em;
-  line-height: 1.18;
-  text-transform: uppercase;
-  color: #111111;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  text-transform: none;
+  color: var(--foreground);
   overflow-wrap: break-word;
 }
 
@@ -140,7 +131,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #111111;
+  color: var(--foreground);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -150,7 +141,7 @@
   width: 7px;
   height: 7px;
   border-radius: 9999px;
-  background-color: #e03127;
+  background-color: var(--primary);
   display: inline-block;
   flex-shrink: 0;
 }
@@ -163,7 +154,7 @@
   gap: 0.35rem 0.75rem;
   padding-top: 0.55rem;
   padding-bottom: 0.55rem;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--border);
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: 0.01em;
@@ -171,7 +162,7 @@
 }
 
 @utility aurik-spec-label {
-  color: #71717a;
+  color: var(--muted-foreground);
   font-weight: 600;
   font-size: 11px;
   letter-spacing: 0.03em;
@@ -180,7 +171,7 @@
 }
 
 @utility aurik-spec-value {
-  color: #111111;
+  color: var(--foreground);
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 12px;
@@ -195,8 +186,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
-  background-color: #e03127;
-  color: #ffffff;
+  background-color: var(--primary);
+  color: var(--background);
   font-family: var(--font-sans);
   font-size: 11.5px;
   font-weight: 600;
@@ -204,7 +195,7 @@
   text-transform: uppercase;
   padding: 0.55rem 0.95rem;
   border-radius: 0px;
-  border: 1px solid #e03127;
+  border: 1px solid var(--primary);
   transition: background-color 150ms ease, transform 150ms ease;
   cursor: pointer;
   white-space: nowrap;
@@ -215,8 +206,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
-  background-color: #e4e4e7;
-  color: #111111;
+  background-color: var(--secondary);
+  color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 11.5px;
   font-weight: 600;
@@ -224,7 +215,7 @@
   text-transform: uppercase;
   padding: 0.55rem 0.95rem;
   border-radius: 0px;
-  border: 1px solid #d4d4d8;
+  border: 1px solid var(--border);
   transition: background-color 150ms ease, color 150ms ease;
   cursor: pointer;
   white-space: nowrap;
