@@ -10,7 +10,8 @@ export type Store =
   | "Alibaba"
   | "WatchPlaza"
   | "NamokiMods"
-  | "CousinsUK";
+  | "CousinsUK"
+  | "Wallapop";
 export type Origin = "oem" | "generic";
 export type Category = "straps" | "bezels" | "crystals" | "dials" | "movements" | "crowns";
 
@@ -820,6 +821,8 @@ export function getStoreSearchUrl(store: Store, query: string): string {
       return `https://www.namokimods.com/search?q=${encoded}`;
     case "CousinsUK":
       return `https://www.cousinsuk.com/search?SearchText=${encoded}`;
+    case "Wallapop":
+      return `https://es.wallapop.com/search?keywords=${encoded}`;
   }
 }
 
@@ -863,7 +866,7 @@ export interface LiveSearchResponse {
   sources: SearchSource[];
 }
 export const SEARCH_CLIENT_TIMEOUT_MS = 12000;
-export const ALSO_SEARCH_STORES: Store[] = ["eBay", "Chrono24", "CousinsUK", "Alibaba", "AliExpress"];
+export const ALSO_SEARCH_STORES: Store[] = ["eBay", "Wallapop", "Chrono24", "CousinsUK", "Alibaba", "AliExpress"];
 
 export async function fetchLivePartsFromApi(query: string): Promise<LiveSearchResponse> {
   const q = query.trim();

@@ -190,11 +190,32 @@ export function parseListingPrice(text: unknown): {
   return { listedPrice, listedCurrency, priceEur: Math.round(listedPrice * PRICE_TO_EUR[listedCurrency] * 100) / 100 };
 }
 
-function normalizeImageUrl(rawUrl: string | undefined): string {
+export function normalizeImageUrl(rawUrl: string | undefined): string {
   if (!rawUrl) return "";
   let u = rawUrl.trim();
   if (u.startsWith("//")) u = `https:${u}`;
   u = u.replace(/_\.avif$/i, "");
+
+  // 1. eBay: s-l225, s-l300, s-l400, s-l500 -> s-l1600 (Ultra HD 1600px sin compresión)
+  if (/ebayimg\.com/i.test(u)) {
+    u = u.replace(/\/s-l\d+\.([a-zA-Z0-9]+)/i, "/s-l1600.$1");
+  }
+
+  // 2. Wallapop: cambia /medium/ o /small/ por /original/ y limpia parámetros de recorte
+  if (/wallapop\.com/i.test(u)) {
+    u = u
+      .replace(/\/(medium|small|picture)\//i, "/original/")
+      .replace(/[?&]pictureSize=[^&]+/gi, "")
+      .replace(/[?&]w=\d+/gi, "")
+      .replace(/[?&]h=\d+/gi, "")
+      .replace(/\?$/, "");
+  }
+
+  // 3. PicClick: pide tamaño máximo 1600
+  if (/picclickimg\.com/i.test(u)) {
+    u = u.replace(/\/(200|400|500)\//, "/1600/");
+  }
+
   return u;
 }
 
@@ -280,6 +301,38 @@ async function fetchShopifyNicheStore(query: string, baseUrl: string, store: Sto
 export async function searchLiveWatchPartsCloud(query: string): Promise<import("./parts").LiveSearchResponse> {
   const q = query.trim();
   if (!q) return { items: [], sources: [] };
+
+  // 1. Motor de búsqueda oficial en vivo (eBay Browse API Oficial + Wallapop Stealth)
+  const engineBaseUrl =
+    (typeof process !== "undefined" && process.env?.VITE_CHOLLOS_ENGINE_URL) ||
+    (typeof process !== "undefined" && process.env?.CHOLLOS_ENGINE_URL) ||
+    "http://localhost:3001";
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4500);
+    const res = await fetch(`${engineBaseUrl}/api/parts?q=${encodeURIComponent(q)}`, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.items) && data.items.length > 0) {
+        return {
+          items: data.items,
+          sources: data.sources || [
+            { name: "eBay", status: "ok", count: data.items.filter((i: any) => i.store === "eBay").length },
+            { name: "Wallapop", status: "ok", count: data.items.filter((i: any) => i.store === "Wallapop").length },
+          ],
+        };
+      }
+    }
+  } catch {
+    // Continuar con los proveedores de contingencia
+  }
+
+  // 2. Fallbacks de contingencia (PicClick / AliExpress / WatchPlaza / NamokiMods)
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SEARCH_SERVER_TIMEOUT_MS);
   const providers = [

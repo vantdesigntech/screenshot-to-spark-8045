@@ -77,7 +77,7 @@ export default {
           );
         }
 
-        if (url.pathname === "/api/search") {
+        if (url.pathname === "/api/search" || url.pathname === "/api/parts") {
           const q = (url.searchParams.get("q") || "").trim();
           const result = await searchLiveWatchPartsCloud(q);
           return new Response(
