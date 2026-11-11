@@ -299,7 +299,7 @@ export function MyListingsPage() {
                           onClick={() =>
                             void handleStatusChange(item.id, 'published')
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold cursor-pointer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 text-primary-foreground text-xs font-semibold cursor-pointer"
                         >
                           <PlayCircle className="w-3.5 h-3.5" />
                           Publicar
@@ -406,7 +406,7 @@ export function MyListingsPage() {
                           'Revisión fotográfica superada tras validación de moderador.',
                         )
                       }
-                      className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-600 text-primary-foreground text-xs font-bold cursor-pointer"
                     >
                       Superar Revisión Foto
                     </button>
@@ -419,7 +419,7 @@ export function MyListingsPage() {
                           'Marcado para revisión manual adicional.',
                         )
                       }
-                      className="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-bold cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-sky-600 text-primary-foreground text-xs font-bold cursor-pointer"
                     >
                       Revisión Manual
                     </button>
@@ -432,7 +432,7 @@ export function MyListingsPage() {
                           'Rechazado por moderación por incoherencia visual o documental.',
                         )
                       }
-                      className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-red-600 text-primary-foreground text-xs font-bold cursor-pointer"
                     >
                       Rechazar
                     </button>

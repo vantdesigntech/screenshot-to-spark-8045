@@ -147,17 +147,17 @@ function ChollosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#111111]">
+    <div className="min-h-screen bg-background text-foreground">
       <AurikNavbar />
 
       <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-8 sm:py-16">
         {/* Section Header */}
-        <div className="flex flex-col justify-between gap-4 border-b border-[#e5e5e5] pb-8 lg:flex-row lg:items-end">
+        <div className="flex flex-col justify-between gap-4 border-b border-border pb-8 lg:flex-row lg:items-end">
           <div>
             <div className="aurik-section-tag flex flex-wrap items-center gap-2">
               <span className="aurik-dot" />
               <span>RADAR DE OPORTUNIDADES // ACTUALIZACIÓN AUTOMÁTICA 24H</span>
-              <span className="inline-flex items-center gap-1 border border-[#111111] bg-[#111111] px-2 py-0.5 font-mono text-[10px] text-white">
+              <span className="inline-flex items-center gap-1 border border-foreground bg-foreground px-2 py-0.5 font-mono text-[10px] text-primary-foreground">
                 <Clock className="h-3 w-3 text-[#22c55e]" />
                 PRÓXIMO ESCANEO 24H: {formatRemaining24h(nextRefreshAtMs)}
               </span>
@@ -165,7 +165,7 @@ function ChollosPage() {
             <h1 className="aurik-hero-title mt-3 text-2xl sm:text-4xl">
               Relojes completos verificados bajo mercado
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#52525b]">
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
               Escáner diario sincronizado cada 24 horas que filtra únicamente
               anuncios reales activos de relojes completos (excluyendo cajas
               vacías, correas o piezas rotas) con descuento legítimo de entre el
@@ -180,10 +180,10 @@ function ChollosPage() {
         </div>
 
         {/* Filter & Live Scanner Bar */}
-        <div className="mt-8 border border-[#e5e5e5] bg-[#f4f4f5] p-4 sm:p-6">
+        <div className="mt-8 border border-border bg-muted p-4 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex h-12 flex-1 items-center gap-3 border border-[#111111] bg-white px-4">
-              <Search className="h-4 w-4 shrink-0 text-[#71717a]" />
+            <div className="flex h-12 flex-1 items-center gap-3 border border-foreground bg-background px-4">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={cholloQuery}
                 onChange={(e) => setCholloQuery(e.target.value)}
@@ -192,7 +192,7 @@ function ChollosPage() {
                 }}
                 placeholder="Filtrar o escanear relojes en vivo (ej. Seiko SKX007, Tissot PRX, Omega, Hamilton)..."
                 aria-label="Filtrar o escanear chollos"
-                className="min-w-0 flex-1 bg-transparent text-sm text-[#111111] outline-none placeholder:text-[#71717a]"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </div>
 
@@ -215,9 +215,9 @@ function ChollosPage() {
           </div>
 
           {/* Platform Selector Tabs */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e5e5e5] pt-4">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#71717a]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                 PLATAFORMA:
               </span>
               {[
@@ -235,8 +235,8 @@ function ChollosPage() {
                     onClick={() => setCholloPlatform(plat.id)}
                     className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] transition ${
                       active
-                        ? "bg-[#e03127] text-white"
-                        : "border border-[#d4d4d8] bg-white text-[#111111] hover:border-[#111111]"
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border bg-background text-foreground hover:border-foreground"
                     }`}
                   >
                     {plat.label}
@@ -246,7 +246,7 @@ function ChollosPage() {
             </div>
 
             {statusMessage && (
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-[#e03127]">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">
                 ● {statusMessage}
               </span>
             )}
@@ -262,11 +262,11 @@ function ChollosPage() {
             return (
               <article
                 key={deal.id}
-                className="group flex min-w-0 flex-col justify-between bg-white"
+                className="group flex min-w-0 flex-col justify-between bg-background"
               >
                 <div>
                   {/* Light Gray Product Image Container (#f4f4f5) */}
-                  <div className="relative aspect-square overflow-hidden bg-[#f4f4f5] p-5 sm:p-6">
+                  <div className="relative aspect-square overflow-hidden bg-muted p-5 sm:p-6">
                     <img
                       src={deal.image || resolveCholloFallbackImage(deal.brand, idx)}
                       alt={deal.title}
@@ -281,12 +281,12 @@ function ChollosPage() {
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                     <div className="absolute left-3 top-3 flex items-center gap-1.5">
-                      <span className="bg-[#111111] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white">
+                      <span className="bg-foreground px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-primary-foreground">
                         {deal.platform} · VERIFICADO
                       </span>
                     </div>
                     <div className="absolute right-3 top-3">
-                      <span className="bg-[#e03127] px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white">
+                      <span className="bg-primary px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-primary-foreground">
                         -{deal.savingsPct}% CHOLLO
                       </span>
                     </div>
@@ -295,10 +295,10 @@ function ChollosPage() {
                   {/* Title & Red Rectangular CTA Button */}
                   <div className="mt-3.5 flex items-center justify-between gap-3 pb-2.5">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-mono text-[10px] uppercase tracking-[0.08em] text-[#71717a]">
+                      <p className="truncate font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                         {deal.brand} · {deal.condition}
                       </p>
-                      <h2 className="mt-0.5 line-clamp-1 text-sm font-semibold tracking-tight text-[#111111]">
+                      <h2 className="mt-0.5 line-clamp-1 text-sm font-semibold tracking-tight text-foreground">
                         {deal.title}
                       </h2>
                     </div>
@@ -317,9 +317,9 @@ function ChollosPage() {
                   {/* 1px Hairline Spec Rows */}
                   <div className="aurik-spec-row">
                     <span className="aurik-spec-label">PRECIO DETECTADO</span>
-                    <span className="aurik-spec-value font-semibold text-[#111111]">
+                    <span className="aurik-spec-value font-semibold text-foreground">
                       {fmtPrice(deal.priceEur, "EUR")}{" "}
-                      <span className="ml-1.5 text-[10px] font-normal text-[#71717a] line-through">
+                      <span className="ml-1.5 text-[10px] font-normal text-muted-foreground line-through">
                         {fmtPrice(deal.marketValueEur, "EUR")}
                       </span>
                     </span>
@@ -329,14 +329,14 @@ function ChollosPage() {
                     <span className="aurik-spec-label">REFERENCIA / AHORRO</span>
                     <span className="aurik-spec-value">
                       {deal.calibreRef ?? deal.aiVerdict} ·{" "}
-                      <strong className="text-[#e03127]">
+                      <strong className="text-primary">
                         AHORRO -{fmtPrice(deal.profitMarginEur, "EUR")}
                       </strong>
                     </span>
                   </div>
 
                   {/* Share via WhatsApp & Copy Direct Link Bar */}
-                  <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#e5e5e5] pt-2.5">
+                  <div className="mt-2 flex items-center justify-between gap-2 border-t border-border pt-2.5">
                     <div className="flex items-center gap-1.5">
                       <a
                         href={whatsappUrl}
@@ -353,7 +353,7 @@ function ChollosPage() {
                         type="button"
                         onClick={() => void handleCopyDealLink(deal)}
                         title="Copiar enlace directo al chollo"
-                        className="inline-flex items-center gap-1 border border-[#d4d4d8] bg-white px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#52525b] transition hover:border-[#111111] hover:text-[#111111]"
+                        className="inline-flex items-center gap-1 border border-border bg-background px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground transition hover:border-foreground hover:text-foreground"
                       >
                         {copiedDealId === deal.id ? (
                           <>
@@ -369,7 +369,7 @@ function ChollosPage() {
                       </button>
                     </div>
 
-                    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-[#71717a]">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
                       {deal.timeLeft}
                     </span>
                   </div>

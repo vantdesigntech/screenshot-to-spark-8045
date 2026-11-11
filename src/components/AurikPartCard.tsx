@@ -83,13 +83,13 @@ export function AurikPartCard({
 
   return (
     <article
-      className={`group flex w-full min-w-0 flex-col justify-between bg-[#ffffff] transition ${
-        isSelectedForCompare ? "ring-2 ring-[#e03127]" : ""
+      className={`group flex w-full min-w-0 flex-col justify-between bg-background transition ${
+        isSelectedForCompare ? "ring-2 ring-primary" : ""
       }`}
     >
       <div className="min-w-0">
         {/* 1. Light Gray Product Container (#f4f4f5) matching 3.webp & 4.webp */}
-        <div className="relative aspect-square w-full overflow-hidden bg-[#f4f4f5] p-5 sm:p-6">
+        <div className="relative aspect-square w-full overflow-hidden bg-muted p-5 sm:p-6">
           <img
             src={item.image}
             alt={item.title}
@@ -111,14 +111,14 @@ export function AurikPartCard({
             <span
               className={`px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] ${
                 item.origin === "oem"
-                  ? "bg-[#111111] text-white"
-                  : "border border-[#d4d4d8] bg-white text-[#111111]"
+                  ? "bg-foreground text-primary-foreground"
+                  : "border border-border bg-background text-foreground"
               }`}
             >
               {item.condition === "Sin verificar" ? "Origen no verificado" : item.origin === "oem" ? "OEM según anuncio" : "AFTERMARKET"}
             </span>
             {savingsPct !== null && (
-              <span className="bg-[#e03127] px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+              <span className="bg-primary px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-primary-foreground">
                 -{savingsPct}% VS OEM
               </span>
             )}
@@ -132,7 +132,7 @@ export function AurikPartCard({
                 onClick={onCreateAlert}
                 aria-label="Crear alerta de bajada de precio"
                 title="Avisarme si baja de precio"
-                className="grid h-7 w-7 place-items-center border border-[#d4d4d8] bg-white text-[#111111] transition hover:border-[#111111]"
+                className="grid h-7 w-7 place-items-center border border-border bg-background text-foreground transition hover:border-foreground"
               >
                 <Bell className="h-3.5 w-3.5" />
               </button>
@@ -149,8 +149,8 @@ export function AurikPartCard({
                 }
                 className={`grid h-7 w-7 place-items-center border transition ${
                   isSaved
-                    ? "border-[#e03127] bg-[#e03127] text-white"
-                    : "border-[#d4d4d8] bg-white text-[#111111] hover:border-[#111111]"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-foreground hover:border-foreground"
                 }`}
               >
                 <Heart
@@ -164,13 +164,13 @@ export function AurikPartCard({
         {/* 2. Header Row Below Image: Model/Ref on Left + Red Rectangular Button on Right (Exact 3.webp match) */}
         <div className="mt-3.5 flex items-center justify-between gap-2.5 pb-2.5">
           <div className="min-w-0 flex-1">
-            <p className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-[#666666]">
+            <p className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
               {item.oemRef ? `REF. ${item.oemRef}` : item.brand.toUpperCase()} ·{" "}
               {item.store.toUpperCase()}
             </p>
             <h3
               style={{ fontFamily: "var(--font-display)" }}
-              className="mt-0.5 line-clamp-1 text-[14px] font-semibold tracking-tight text-[#111111]"
+              className="mt-0.5 line-clamp-1 text-[14px] font-semibold tracking-tight text-foreground"
             >
               {item.title}
             </h3>
@@ -188,11 +188,11 @@ export function AurikPartCard({
         </div>
 
         {/* 3. Technical Specification Rows separated by 1px solid #e5e5e5 hairlines (Exact 3.webp match) */}
-        <div className="aurik-spec-row text-[#111111]">
+        <div className="aurik-spec-row text-foreground">
           <span className="aurik-spec-label">
             TYPE : {item.condition === "Sin verificar" ? "SIN VERIFICAR" : item.origin === "oem" ? "OEM según anuncio" : "AFTERMARKET"}
           </span>
-          <span className="aurik-spec-value font-semibold text-[#111111]">
+          <span className="aurik-spec-value font-semibold text-foreground">
             {fmtPrice(item.priceEur, currency)}
             {item.listedCurrency && item.listedCurrency !== "EUR" && (
               <span className="block text-xs text-muted-foreground">Conversión orientativa · anuncio: {item.listedPrice} {item.listedCurrency}</span>
@@ -200,14 +200,14 @@ export function AurikPartCard({
             {item.origin === "generic" &&
               refOemPrice &&
               refOemPrice > item.priceEur && (
-                <span className="ml-1.5 text-[10px] font-normal text-[#666666] line-through">
+                <span className="ml-1.5 text-[10px] font-normal text-muted-foreground line-through">
                   {fmtPrice(refOemPrice, currency)}
                 </span>
               )}
           </span>
         </div>
 
-        <div className="aurik-spec-row border-b border-[#e5e5e5] text-[#111111]">
+        <div className="aurik-spec-row border-b border-border text-foreground">
           <span className="min-w-0 flex-1 truncate pr-2">
             {item.compatibleWith.length ? `FIT : ${item.compatibleWith.slice(0, 2).join(" / ")}` : "Compatibilidad no verificada"}
           </span>
@@ -216,7 +216,7 @@ export function AurikPartCard({
               <button
                 type="button"
                 onClick={onCompare}
-                className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.08em] text-[#e03127] hover:underline"
+                className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.08em] text-primary hover:underline"
               >
                 <Scale className="h-3 w-3" />
                 <span>1:1</span>
@@ -226,7 +226,7 @@ export function AurikPartCard({
               <button
                 type="button"
                 onClick={() => setShowTechDetails((v) => !v)}
-                className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.08em] text-[#666666] hover:text-[#111111]"
+                className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground"
               >
                 <span>SPECS</span>
                 <ChevronDown
@@ -246,7 +246,7 @@ export function AurikPartCard({
             target="_blank"
             rel="noopener noreferrer"
             title="Compartir este componente por WhatsApp"
-            className="inline-flex flex-1 items-center justify-center gap-1.5 border border-[#25D366]/40 bg-[#25D366]/10 px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#128C7E] transition hover:border-[#25D366] hover:bg-[#25D366] hover:text-white"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 border border-[#25D366]/40 bg-[#25D366]/10 px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#128C7E] transition hover:border-[#25D366] hover:bg-[#25D366] hover:text-primary-foreground"
           >
             <MessageCircle className="h-3.5 w-3.5 shrink-0" />
             <span>WHATSAPP</span>
@@ -257,8 +257,8 @@ export function AurikPartCard({
             title="Copiar enlace directo del componente"
             className={`inline-flex flex-1 items-center justify-center gap-1.5 border px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] transition ${
               copiedLink
-                ? "border-emerald-600 bg-emerald-600 text-white"
-                : "border-[#e5e5e5] bg-[#f4f4f5] text-[#111111] hover:border-[#111111]"
+                ? "border-emerald-600 bg-emerald-600 text-primary-foreground"
+                : "border-border bg-muted text-foreground hover:border-foreground"
             }`}
           >
             {copiedLink ? (
@@ -276,43 +276,43 @@ export function AurikPartCard({
         </div>
 
         {showTechDetails && (
-          <dl className="mt-2 space-y-1.5 border border-[#e5e5e5] bg-[#f8f8f8] p-3 text-[11px]">
+          <dl className="mt-2 space-y-1.5 border border-border bg-muted p-3 text-[11px]">
             {item.spec && (
               <div className="flex justify-between gap-3">
-                <dt className="font-mono text-[10px] uppercase text-[#666666]">
+                <dt className="font-mono text-[10px] uppercase text-muted-foreground">
                   ESPECIFICACIÓN
                 </dt>
-                <dd className="text-right font-medium text-[#111111]">
+                <dd className="text-right font-medium text-foreground">
                   {item.spec}
                 </dd>
               </div>
             )}
             {item.materialSpec && (
               <div className="flex justify-between gap-3">
-                <dt className="font-mono text-[10px] uppercase text-[#666666]">
+                <dt className="font-mono text-[10px] uppercase text-muted-foreground">
                   MATERIAL
                 </dt>
-                <dd className="text-right font-medium text-[#111111]">
+                <dd className="text-right font-medium text-foreground">
                   {item.materialSpec}
                 </dd>
               </div>
             )}
             {item.toleranceSpec && (
               <div className="flex justify-between gap-3">
-                <dt className="font-mono text-[10px] uppercase text-[#666666]">
+                <dt className="font-mono text-[10px] uppercase text-muted-foreground">
                   TOLERANCIA
                 </dt>
-                <dd className="text-right font-medium text-[#111111]">
+                <dd className="text-right font-medium text-foreground">
                   {item.toleranceSpec}
                 </dd>
               </div>
             )}
             {item.resaleImpact && (
               <div className="flex justify-between gap-3">
-                <dt className="font-mono text-[10px] uppercase text-[#666666]">
+                <dt className="font-mono text-[10px] uppercase text-muted-foreground">
                   IMPACTO
                 </dt>
-                <dd className="text-right font-medium text-[#111111]">
+                <dd className="text-right font-medium text-foreground">
                   {item.resaleImpact}
                 </dd>
               </div>

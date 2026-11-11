@@ -707,7 +707,7 @@ export function ListingDetailPage() {
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-bold cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-red-600 text-primary-foreground text-xs font-bold cursor-pointer"
                       >
                         Enviar denuncia a moderación
                       </button>
@@ -729,7 +729,7 @@ export function ListingDetailPage() {
                   <button
                     type="button"
                     onClick={() => void handleOwnerStatusChange('published')}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-emerald-600 text-primary-foreground text-xs font-semibold cursor-pointer"
                   >
                     Publicar / Reactivar
                   </button>
@@ -792,28 +792,28 @@ export function ListingDetailPage() {
                   onClick={() =>
                     void handleModeratorDecision('passed_photo_review')
                   }
-                  className="py-2 px-3 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-emerald-600 text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Aprobar revisión fotográfica
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleModeratorDecision('manual_review')}
-                  className="py-2 px-3 rounded-xl bg-sky-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-sky-600 text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Solicitar revisión manual
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleModeratorDecision('pending')}
-                  className="py-2 px-3 rounded-xl bg-amber-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-amber-600 text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Marcar pendiente
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleModeratorDecision('rejected')}
-                  className="py-2 px-3 rounded-xl bg-red-600 text-white text-xs font-bold cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-red-600 text-primary-foreground text-xs font-bold cursor-pointer"
                 >
                   Rechazar por moderación
                 </button>
