@@ -409,6 +409,31 @@ export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> 
     return cached.data as CholloDeal[];
   }
 
+  // 1. Try our high-speed Node.js Watch Chollos Engine (eBay Browse API + Wallapop Stealth)
+  const engineBaseUrl =
+    (typeof process !== "undefined" && process.env?.VITE_CHOLLOS_ENGINE_URL) ||
+    (typeof process !== "undefined" && process.env?.CHOLLOS_ENGINE_URL) ||
+    "http://localhost:3001";
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4500);
+    const res = await fetch(`${engineBaseUrl}/api/chollos?q=${encodeURIComponent(q)}`, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.items) && data.items.length > 0) {
+        MEMORY_CACHE.set(cacheKey, { ts: Date.now(), data: data.items });
+        return data.items as CholloDeal[];
+      }
+    }
+  } catch {
+    // Proceed to PicClick fallback
+  }
+
   const queriesToScan = q
     ? [`${translateHorologicalQuery(q)} watch`]
     : [

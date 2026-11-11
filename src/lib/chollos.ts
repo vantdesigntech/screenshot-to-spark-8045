@@ -382,7 +382,37 @@ export async function fetchLiveChollosFromApi(
     }
   }
 
-  // 1. Try same-origin Cloud Server endpoint (/api/chollos handled by src/server.ts)
+  // 1. Try dedicated Watch Chollos Engine (Node.js + eBay Browse API + Wallapop Stealth)
+  const engineBaseUrl =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_CHOLLOS_ENGINE_URL) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
+    "http://localhost:3001";
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4500);
+    const url = `${engineBaseUrl}/api/chollos?q=${encodeURIComponent(q)}${forceRefresh ? "&refresh=1" : ""}`;
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+    clearTimeout(timer);
+    const contentType = res.headers.get("content-type") || "";
+    if (res.ok && contentType.includes("application/json")) {
+      const data = await res.json();
+      if (Array.isArray(data.items) && data.items.length > 0) {
+        const normalized = data.items.map((item: Record<string, unknown>, i: number) =>
+          normalizeRawCholloItem(item, i),
+        );
+        if (!q) saveDailyChollosSyncState(normalized);
+        return normalized;
+      }
+    }
+  } catch {
+    // Proceed to next fallback
+  }
+
+  // 2. Try same-origin Cloud Server endpoint (/api/chollos handled by src/server.ts)
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 3600);
