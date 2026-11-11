@@ -274,7 +274,7 @@ function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Shared CRONORA Top Bar */}
       <AurikNavbar
         savedCount={savedIds.length}
@@ -286,7 +286,7 @@ function Index() {
 
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed bottom-4 left-4 right-4 z-50 border border-foreground bg-foreground px-4 py-3 font-mono text-xs uppercase tracking-[0.06em] text-white shadow-lg sm:left-auto sm:right-6 sm:max-w-md">
+        <div className="fixed bottom-4 left-4 right-4 z-50 border border-foreground bg-foreground px-4 py-3 font-mono text-xs uppercase tracking-[0.06em] text-primary-foreground shadow-lg sm:left-auto sm:right-6 sm:max-w-md">
           <span className="mr-2 text-primary">●</span>
           {toastMsg}
         </div>
@@ -296,7 +296,7 @@ function Index() {
         {/* =========================================================
             1. HERO SECTION
            ========================================================= */}
-        <section className="mx-auto max-w-[1240px] border-b border-border bg-white px-4 pt-10 pb-8 sm:px-8 sm:pt-14 sm:pb-12">
+        <section className="mx-auto max-w-[1240px] border-b border-border bg-background px-4 pt-10 pb-8 sm:px-8 sm:pt-14 sm:pb-12">
           {/* Main Headline using the special display/stencil font */}
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="aurik-hero-title text-[26px] leading-[1.18] sm:text-[40px] md:text-[46px]">
@@ -316,7 +316,7 @@ function Index() {
                 setTimeout(() => searchInputRef.current?.focus(), 250);
               }}
               aria-label="Ir al buscador"
-              className="order-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-transform hover:scale-105 sm:order-1"
+              className="order-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105 sm:order-1"
             >
               <ChevronDown className="h-5 w-5" strokeWidth={2} />
             </button>
@@ -373,7 +373,7 @@ function Index() {
                     onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Ej: Seiko NH35, Rolex 124300, Tissot PRX, ETA 2824..."
-                    className="h-13 w-full border border-foreground bg-muted pl-11 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:bg-white focus:outline-none"
+                    className="h-13 w-full border border-foreground bg-muted pl-11 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:bg-background focus:outline-none"
                   />
                   {query && (
                     <button
@@ -411,7 +411,7 @@ function Index() {
 
               {/* Autocomplete Suggestions Dropdown */}
               {searchFocused && autocompleteSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-30 mt-1 border border-foreground bg-white shadow-lg">
+                <div className="absolute left-0 right-0 top-full z-30 mt-1 border border-foreground bg-background shadow-lg">
                   {autocompleteSuggestions.map((sug) => (
                     <button
                       key={`${sug.type}-${sug.label}`}
@@ -439,7 +439,7 @@ function Index() {
                   key={term}
                   type="button"
                   onClick={() => void executeSearch(term)}
-                  className="border border-border bg-white px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-foreground transition-colors hover:border-foreground hover:bg-muted"
+                  className="border border-border bg-background px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-foreground transition-colors hover:border-foreground hover:bg-muted"
                 >
                   {term} &gt;
                 </button>
@@ -530,7 +530,7 @@ function Index() {
             {activeChips.length > 0 && (
               <div className="mb-5 flex flex-wrap items-center gap-2" aria-label="Filtros activos">
                 {activeChips.map((c) => (
-                  <button key={c.key} type="button" onClick={c.remove} aria-label={`Quitar filtro ${c.label}`} className="inline-flex min-h-9 items-center gap-1.5 border border-foreground bg-white px-3 font-mono text-[11px] uppercase">
+                  <button key={c.key} type="button" onClick={c.remove} aria-label={`Quitar filtro ${c.label}`} className="inline-flex min-h-9 items-center gap-1.5 border border-foreground bg-background px-3 font-mono text-[11px] uppercase">
                     {c.label} <X className="h-3.5 w-3.5" />
                   </button>
                 ))}
@@ -595,7 +595,7 @@ function Index() {
          ========================================================= */}
       {showFiltersSheet && (
         <div role="dialog" aria-modal="true" aria-label="Filtros" className="fixed inset-0 z-50 flex items-end justify-end bg-black/50 sm:items-center" onClick={(e) => { if (e.target === e.currentTarget) setShowFiltersSheet(false); }}>
-          <div className="flex max-h-[88dvh] w-full flex-col justify-between rounded-t-2xl border-t border-foreground bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:h-full sm:max-h-none sm:max-w-md sm:rounded-none sm:border-l sm:border-t-0 sm:p-8">
+          <div className="flex max-h-[88dvh] w-full flex-col justify-between rounded-t-2xl border-t border-foreground bg-background p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:h-full sm:max-h-none sm:max-w-md sm:rounded-none sm:border-l sm:border-t-0 sm:p-8">
             <div className="overflow-y-auto pr-1">
               <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border sm:hidden" aria-hidden="true" />
               <div className="flex items-center justify-between border-b border-border pb-4">

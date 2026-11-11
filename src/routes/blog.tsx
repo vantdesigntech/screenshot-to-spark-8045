@@ -56,7 +56,7 @@ function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdObj) }}
@@ -111,12 +111,12 @@ function BlogPage() {
         </div>
 
         {showJsonLd && (
-          <div className="mt-8 border border-foreground bg-foreground p-4 text-white sm:p-6">
+          <div className="mt-8 border border-foreground bg-foreground p-4 text-primary-foreground sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/20 pb-3">
               <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-primary">
                 ● DATOS ESTRUCTURADOS // TECHARTICLE + FAQPAGE + WEBSITE
               </span>
-              <span className="font-mono text-[10px] uppercase text-white/70">
+              <span className="font-mono text-[10px] uppercase text-primary-foreground/70">
                 INDEXACIÓN ACTIVA EN &lt;HEAD&gt;
               </span>
             </div>
@@ -142,7 +142,7 @@ function BlogPage() {
                   className={`w-full border p-4 text-left transition-colors ${
                     active
                       ? "border-2 border-primary bg-muted"
-                      : "border-border bg-white hover:border-foreground"
+                      : "border-border bg-background hover:border-foreground"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -178,7 +178,7 @@ function BlogPage() {
           </aside>
 
           {/* Active Article Full Technical Sheet */}
-          <article className="min-w-0 border border-border bg-white p-5 sm:p-10 lg:col-span-8">
+          <article className="min-w-0 border border-border bg-background p-5 sm:p-10 lg:col-span-8">
             <div className="flex flex-wrap items-center gap-2 border-b border-border pb-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
               <span className="bg-muted px-2.5 py-1 text-primary">
                 ● {activeArticle.category}
@@ -244,7 +244,7 @@ function BlogPage() {
                         </thead>
                         <tbody className="divide-y divide-border">
                           {sec.specsTable.map((row, rIdx) => (
-                            <tr key={rIdx} className="bg-white">
+                            <tr key={rIdx} className="bg-background">
                               <td className="px-4 py-3 font-semibold text-foreground">
                                 {row.param}
                               </td>
@@ -274,7 +274,7 @@ function BlogPage() {
                 {activeArticle.faqs.map((faq, fIdx) => (
                   <div
                     key={fIdx}
-                    className="border border-border bg-white p-4"
+                    className="border border-border bg-background p-4"
                   >
                     <p className="text-sm font-semibold text-foreground">
                       {faq.q}

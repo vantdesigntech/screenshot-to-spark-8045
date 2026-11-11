@@ -292,7 +292,7 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
       {/* Integrated Architectural Horological Stage (Flush bottom crop, zero floating PNG look) */}
       <div className="relative overflow-hidden border border-border bg-gradient-to-b from-white via-muted to-muted">
         {/* Top Technical Telemetry Bar inside the stage */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-white/90 px-4 py-2.5 text-[11px] text-muted-foreground sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background/90 px-4 py-2.5 text-[11px] text-muted-foreground sm:px-6">
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 rounded-full bg-primary" />
             <span className="font-semibold text-foreground">
@@ -314,7 +314,7 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
                   · {ipLocationLabel || ipTimeZone}
                   {ipUtcOffset ? ` (${ipUtcOffset})` : ""}
                 </span>
-                <span className="bg-foreground px-1 py-0.2 text-[9px] text-white">
+                <span className="bg-foreground px-1 py-0.2 text-[9px] text-primary-foreground">
                   {tzSource === "IP" ? "SYNC IP" : "ZONA LOCAL"}
                 </span>
               </span>
@@ -338,7 +338,7 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
                   onMouseEnter={() => setActiveCallout(item.id)}
                   onMouseLeave={() => setActiveCallout(null)}
                   onClick={() => onSelectPart?.(item.query)}
-                  className={`pointer-events-auto group flex flex-col border bg-white/95 p-3 text-left transition-all ${
+                  className={`pointer-events-auto group flex flex-col border bg-background/95 p-3 text-left transition-all ${
                     isActive
                       ? "border-primary shadow-md -translate-y-0.5"
                       : "border-border hover:border-foreground"
@@ -371,7 +371,7 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
                   onMouseEnter={() => setActiveCallout(item.id)}
                   onMouseLeave={() => setActiveCallout(null)}
                   onClick={() => onSelectPart?.(item.query)}
-                  className={`pointer-events-auto group flex flex-col border bg-white/95 p-3 text-left transition-all ${
+                  className={`pointer-events-auto group flex flex-col border bg-background/95 p-3 text-left transition-all ${
                     isActive
                       ? "border-primary shadow-md -translate-y-0.5"
                       : "border-border hover:border-foreground"
@@ -1113,13 +1113,13 @@ export function AnimatedHeroWatch({ onSelectPart }: AnimatedHeroWatchProps) {
         </div>
 
         {/* Mobile / Tablet Quick 1-Click Component Selector Strip */}
-        <div className="grid grid-cols-2 gap-1.5 border-t border-border bg-white p-3 sm:grid-cols-3 lg:hidden">
+        <div className="grid grid-cols-2 gap-1.5 border-t border-border bg-background p-3 sm:grid-cols-3 lg:hidden">
           {PART_CALLOUTS.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => onSelectPart?.(item.query)}
-              className="flex items-center justify-between border border-border bg-muted px-2.5 py-2 text-left text-[11px] font-semibold text-foreground active:bg-primary active:text-white"
+              className="flex items-center justify-between border border-border bg-muted px-2.5 py-2 text-left text-[11px] font-semibold text-foreground active:bg-primary active:text-primary-foreground"
             >
               <span className="truncate">{item.label}</span>
               <span className="ml-1 shrink-0 text-primary">&gt;</span>

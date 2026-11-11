@@ -189,7 +189,7 @@ export function MarketplaceCatalogPage() {
           <div>
             <h2 className="text-sm font-bold text-foreground flex flex-wrap items-center gap-2">
               Protocolo de Revisión Fotográfica Cronora
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 bg-white text-muted-foreground border border-border">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 bg-background text-muted-foreground border border-border">
                 Sin falsas promesas
               </span>
             </h2>
@@ -215,7 +215,7 @@ export function MarketplaceCatalogPage() {
       </div>
 
       {/* Top Search & Sort Controls */}
-      <div className="bg-white border border-border p-4 sm:p-5 mb-6 space-y-4">
+      <div className="bg-background border border-border p-4 sm:p-5 mb-6 space-y-4">
         <div className="flex flex-col lg:flex-row gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
@@ -229,7 +229,7 @@ export function MarketplaceCatalogPage() {
               }}
               placeholder="Buscar por marca, modelo, referencia (ej. SKX007, 310.30.42, BB58) o calibre..."
               aria-label="Buscar relojes en el marketplace"
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground"
+              className="w-full pl-10 pr-4 py-2.5 bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground"
             />
           </div>
 

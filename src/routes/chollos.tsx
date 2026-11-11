@@ -147,7 +147,7 @@ function ChollosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <AurikNavbar />
 
       <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-8 sm:py-16">
@@ -157,7 +157,7 @@ function ChollosPage() {
             <div className="aurik-section-tag flex flex-wrap items-center gap-2">
               <span className="aurik-dot" />
               <span>RADAR DE OPORTUNIDADES // ACTUALIZACIÓN AUTOMÁTICA 24H</span>
-              <span className="inline-flex items-center gap-1 border border-foreground bg-foreground px-2 py-0.5 font-mono text-[10px] text-white">
+              <span className="inline-flex items-center gap-1 border border-foreground bg-foreground px-2 py-0.5 font-mono text-[10px] text-primary-foreground">
                 <Clock className="h-3 w-3 text-[#22c55e]" />
                 PRÓXIMO ESCANEO 24H: {formatRemaining24h(nextRefreshAtMs)}
               </span>
@@ -182,7 +182,7 @@ function ChollosPage() {
         {/* Filter & Live Scanner Bar */}
         <div className="mt-8 border border-border bg-muted p-4 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="flex h-12 flex-1 items-center gap-3 border border-foreground bg-white px-4">
+            <div className="flex h-12 flex-1 items-center gap-3 border border-foreground bg-background px-4">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={cholloQuery}
@@ -235,8 +235,8 @@ function ChollosPage() {
                     onClick={() => setCholloPlatform(plat.id)}
                     className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] transition ${
                       active
-                        ? "bg-primary text-white"
-                        : "border border-border bg-white text-foreground hover:border-foreground"
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border bg-background text-foreground hover:border-foreground"
                     }`}
                   >
                     {plat.label}
@@ -262,7 +262,7 @@ function ChollosPage() {
             return (
               <article
                 key={deal.id}
-                className="group flex min-w-0 flex-col justify-between bg-white"
+                className="group flex min-w-0 flex-col justify-between bg-background"
               >
                 <div>
                   {/* Light Gray Product Image Container (#f4f4f5) */}
@@ -281,12 +281,12 @@ function ChollosPage() {
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                     <div className="absolute left-3 top-3 flex items-center gap-1.5">
-                      <span className="bg-foreground px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white">
+                      <span className="bg-foreground px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-primary-foreground">
                         {deal.platform} · VERIFICADO
                       </span>
                     </div>
                     <div className="absolute right-3 top-3">
-                      <span className="bg-primary px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white">
+                      <span className="bg-primary px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-primary-foreground">
                         -{deal.savingsPct}% CHOLLO
                       </span>
                     </div>
@@ -353,7 +353,7 @@ function ChollosPage() {
                         type="button"
                         onClick={() => void handleCopyDealLink(deal)}
                         title="Copiar enlace directo al chollo"
-                        className="inline-flex items-center gap-1 border border-border bg-white px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground transition hover:border-foreground hover:text-foreground"
+                        className="inline-flex items-center gap-1 border border-border bg-background px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground transition hover:border-foreground hover:text-foreground"
                       >
                         {copiedDealId === deal.id ? (
                           <>

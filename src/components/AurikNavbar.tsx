@@ -26,7 +26,7 @@ export function AurikNavbar({
   ] as const;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-4 sm:h-[76px] sm:px-8">
         {/* Left: CRONORA Stencil Brand Logo */}
         <Link
@@ -38,7 +38,7 @@ export function AurikNavbar({
             CRONORA
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-1/2 h-[1.5px] -translate-y-1/2 bg-white/75"
+              className="pointer-events-none absolute inset-x-0 top-1/2 h-[1.5px] -translate-y-1/2 bg-background/75"
             />
           </span>
         </Link>
@@ -102,7 +102,7 @@ export function AurikNavbar({
             >
               <User className="h-[17px] w-[17px]" strokeWidth={1.6} />
               {savedCount > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center bg-primary px-1 font-mono text-[9px] font-bold text-white">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center bg-primary px-1 font-mono text-[9px] font-bold text-primary-foreground">
                   {savedCount}
                 </span>
               )}
@@ -131,7 +131,7 @@ export function AurikNavbar({
 
       {/* Expandable Full-Width Navigation Drawer */}
       {menuOpen && (
-        <div className="border-t border-border bg-white px-4 py-6 sm:px-8">
+        <div className="border-t border-border bg-background px-4 py-6 sm:px-8">
           <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {navLinks.map((item, idx) => {
               const isActive =
@@ -145,8 +145,8 @@ export function AurikNavbar({
                   onClick={() => setMenuOpen(false)}
                   className={`flex items-center justify-between border border-border p-4 text-xs font-semibold tracking-[0.03em] uppercase transition-colors ${
                     isActive
-                      ? "border-primary bg-primary text-white"
-                      : "bg-muted text-foreground hover:bg-foreground hover:text-white"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground hover:bg-foreground hover:text-primary-foreground"
                   }`}
                 >
                   <span>
@@ -159,7 +159,7 @@ export function AurikNavbar({
             <Link
               to="/vender"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-between border border-primary bg-white p-4 text-xs font-semibold tracking-[0.03em] uppercase text-primary transition-colors hover:bg-primary hover:text-white"
+              className="flex items-center justify-between border border-primary bg-background p-4 text-xs font-semibold tracking-[0.03em] uppercase text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
             >
               <span>05 · Publicar Reloj</span>
               <span>&gt;</span>
@@ -167,7 +167,7 @@ export function AurikNavbar({
             <Link
               to="/mis-anuncios"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-between border border-border bg-muted p-4 text-xs font-semibold tracking-[0.03em] uppercase text-foreground transition-colors hover:bg-foreground hover:text-white"
+              className="flex items-center justify-between border border-border bg-muted p-4 text-xs font-semibold tracking-[0.03em] uppercase text-foreground transition-colors hover:bg-foreground hover:text-primary-foreground"
             >
               <span>06 · Mis Anuncios</span>
               <span>&gt;</span>
@@ -175,7 +175,7 @@ export function AurikNavbar({
             <Link
               to="/mensajes"
               onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-between border border-border bg-muted p-4 text-xs font-semibold tracking-[0.03em] uppercase text-foreground transition-colors hover:bg-foreground hover:text-white"
+              className="flex items-center justify-between border border-border bg-muted p-4 text-xs font-semibold tracking-[0.03em] uppercase text-foreground transition-colors hover:bg-foreground hover:text-primary-foreground"
             >
               <span>07 · Mensajes</span>
               <span>&gt;</span>

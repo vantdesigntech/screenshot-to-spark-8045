@@ -17,7 +17,7 @@ import { AccountProvider } from "@/components/AccountProvider";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-foreground">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
       <div className="w-full max-w-md border border-border bg-muted p-8 text-center">
         <div className="aurik-section-tag justify-center">
           <span className="aurik-dot" />
@@ -49,7 +49,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4 text-foreground">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
       <div className="w-full max-w-md border border-border bg-muted p-8 text-center">
         <div className="aurik-section-tag justify-center">
           <span className="aurik-dot" />

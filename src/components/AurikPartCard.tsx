@@ -111,14 +111,14 @@ export function AurikPartCard({
             <span
               className={`px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] ${
                 item.origin === "oem"
-                  ? "bg-foreground text-white"
-                  : "border border-border bg-white text-foreground"
+                  ? "bg-foreground text-primary-foreground"
+                  : "border border-border bg-background text-foreground"
               }`}
             >
               {item.condition === "Sin verificar" ? "Origen no verificado" : item.origin === "oem" ? "OEM según anuncio" : "AFTERMARKET"}
             </span>
             {savingsPct !== null && (
-              <span className="bg-primary px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
+              <span className="bg-primary px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-primary-foreground">
                 -{savingsPct}% VS OEM
               </span>
             )}
@@ -132,7 +132,7 @@ export function AurikPartCard({
                 onClick={onCreateAlert}
                 aria-label="Crear alerta de bajada de precio"
                 title="Avisarme si baja de precio"
-                className="grid h-7 w-7 place-items-center border border-border bg-white text-foreground transition hover:border-foreground"
+                className="grid h-7 w-7 place-items-center border border-border bg-background text-foreground transition hover:border-foreground"
               >
                 <Bell className="h-3.5 w-3.5" />
               </button>
@@ -149,8 +149,8 @@ export function AurikPartCard({
                 }
                 className={`grid h-7 w-7 place-items-center border transition ${
                   isSaved
-                    ? "border-primary bg-primary text-white"
-                    : "border-border bg-white text-foreground hover:border-foreground"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-foreground hover:border-foreground"
                 }`}
               >
                 <Heart
@@ -246,7 +246,7 @@ export function AurikPartCard({
             target="_blank"
             rel="noopener noreferrer"
             title="Compartir este componente por WhatsApp"
-            className="inline-flex flex-1 items-center justify-center gap-1.5 border border-[#25D366]/40 bg-[#25D366]/10 px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#128C7E] transition hover:border-[#25D366] hover:bg-[#25D366] hover:text-white"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 border border-[#25D366]/40 bg-[#25D366]/10 px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#128C7E] transition hover:border-[#25D366] hover:bg-[#25D366] hover:text-primary-foreground"
           >
             <MessageCircle className="h-3.5 w-3.5 shrink-0" />
             <span>WHATSAPP</span>
@@ -257,7 +257,7 @@ export function AurikPartCard({
             title="Copiar enlace directo del componente"
             className={`inline-flex flex-1 items-center justify-center gap-1.5 border px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] transition ${
               copiedLink
-                ? "border-emerald-600 bg-emerald-600 text-white"
+                ? "border-emerald-600 bg-emerald-600 text-primary-foreground"
                 : "border-border bg-muted text-foreground hover:border-foreground"
             }`}
           >
