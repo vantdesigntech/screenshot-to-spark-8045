@@ -411,8 +411,8 @@ export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> 
 
   // 1. Try our high-speed Node.js Watch Chollos Engine (eBay Browse API + Wallapop Stealth)
   const engineBaseUrl =
-    (typeof process !== "undefined" && process.env?.VITE_CHOLLOS_ENGINE_URL) ||
-    (typeof process !== "undefined" && process.env?.CHOLLOS_ENGINE_URL) ||
+    (typeof process !== "undefined" && process.env?.["VITE_CHOLLOS_ENGINE_URL"]) ||
+    (typeof process !== "undefined" && process.env?.["CHOLLOS_ENGINE_URL"]) ||
     "http://localhost:3001";
 
   try {

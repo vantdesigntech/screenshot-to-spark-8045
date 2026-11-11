@@ -8,3 +8,4 @@
 - [ ] Verify signed-in cloud round-trip and hosted email settings: external Supabase does not provide a managed test session or hosted auth-settings read.- [x] Dark system, looping hero and natural-language search (Prompt 1)
 - [x] Login/registro page, Mi Caja (favoritos + listas), filter counter + chips, mobile swipe results, Blog/Marketplace mobile review
 - [ ] Verify signed-in Mi Caja save round-trip (needs a real account on external Supabase)
+- [ ] Quitar el dibujo del reloj (AnimatedHeroWatch) de inicio

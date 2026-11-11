@@ -384,8 +384,8 @@ export async function fetchLiveChollosFromApi(
 
   // 1. Try dedicated Watch Chollos Engine (Node.js + eBay Browse API + Wallapop Stealth)
   const engineBaseUrl =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_CHOLLOS_ENGINE_URL) ||
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.["VITE_CHOLLOS_ENGINE_URL"]) ||
+    (typeof import.meta !== "undefined" && import.meta.env?.["VITE_API_URL"]) ||
     "http://localhost:3001";
 
   try {
