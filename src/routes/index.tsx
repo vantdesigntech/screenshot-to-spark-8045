@@ -299,9 +299,9 @@ function Index() {
         <section className="mx-auto max-w-[1240px] border-b border-border bg-background px-4 pt-10 pb-8 sm:px-8 sm:pt-14 sm:pb-12">
           {/* Main Headline using the special display/stencil font */}
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="aurik-hero-title text-[26px] leading-[1.18] sm:text-[40px] md:text-[46px]">
-              BUSCA TUS RECAMBIOS PARA TU RELOJ
-              <br className="hidden sm:inline" /> CON UN SOLO CLIC
+            <h1 className="aurik-hero-title text-[44px] sm:text-[80px] md:text-[104px]">
+              Recambios para
+              <br /> tu reloj
             </h1>
           </div>
 
