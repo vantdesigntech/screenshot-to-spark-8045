@@ -4,7 +4,7 @@ export type Theme = "light" | "dark";
 
 /**
  * Only an explicit saved choice wins. Anything else (nothing saved, a corrupt
- * value) keeps the default cream/light look instead of guessing.
+ * value) falls back to the default night look.
  */
 export function resolveStoredTheme(stored: string | null): Theme | null {
   return stored === "dark" || stored === "light" ? stored : null;
@@ -21,4 +21,4 @@ const STORAGE_KEY_LITERAL = JSON.stringify(THEME_STORAGE_KEY);
  * Runs before the first paint so a saved night mode never flashes the cream
  * theme. It has to be inlined in the document head, so it lives as a string.
  */
-export const THEME_BOOTSTRAP_SCRIPT = `(function(){try{var t=localStorage.getItem(${STORAGE_KEY_LITERAL});if(t==="dark"){document.documentElement.classList.add("dark");}}catch(e){}})();`;
+export const THEME_BOOTSTRAP_SCRIPT = `(function(){try{var t=localStorage.getItem(${STORAGE_KEY_LITERAL});document.documentElement.classList.toggle("dark",t!=="light");}catch(e){}})();`;
