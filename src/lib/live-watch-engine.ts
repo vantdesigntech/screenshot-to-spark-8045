@@ -17,9 +17,9 @@ import {
   type Store,
 } from "./parts";
 import { resolveCholloFallbackImage, type CholloDeal } from "./chollos";
-import { translateHorologicalQuery } from "./search-query";
+import { isLikelyWatchPartListing, translateHorologicalQuery } from "./search-query";
 
-export { translateHorologicalQuery } from "./search-query";
+export { isLikelyWatchPartListing, translateHorologicalQuery } from "./search-query";
 
 const MEMORY_CACHE = new Map<string, { ts: number; data: unknown }>();
 export const CHOLLOS_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours for daily chollos
@@ -80,6 +80,7 @@ export const KNOWN_WATCH_BRANDS = [
  * when the user searches for a brand that store does not stock (e.g. Rolex, Omega, Cartier, Casio).
  */
 export function isShopifyProductRelevant(query: string, productTitle: string): boolean {
+  if (!isLikelyWatchPartListing(productTitle)) return false;
   const qLower = translateHorologicalQuery(query).toLowerCase();
   const titleLower = productTitle.toLowerCase();
 

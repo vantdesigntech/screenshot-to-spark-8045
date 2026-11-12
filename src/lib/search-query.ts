@@ -24,12 +24,30 @@ const SPANISH_TO_ENGLISH_PARTS: Array<[RegExp, string]> = [
   [/\beslab[oó]n\b/gi, "link"],
 ];
 
+const NON_WATCH_JEWELRY = /\b(?:earrings?|necklaces?|pendants?|jewelry|jewellery)\b/i;
+const WATCH_NOUN = /\b(?:watch|wristwatch|reloj|relojes|smartwatch)\b/i;
+const PART_SALE_CUE =
+  /\b(?:replacement|spare|parts?|recambio|repuesto|aftermarket|compatible|fitting|holder|bracket|repair|kit|assembly)\b/i;
+const WATCH_COMPONENT_PHRASE =
+  /\b(?:watch|wristwatch|reloj|relojes)\s+(?:movement|movimiento|dial|esfera|hands|agujas|bezel|bisel|insert|inserto|crystal|cristal|crown|corona|stem|tija|gasket|junta|rotor|strap|correa|bracelet|brazalete|armis|pusher|pulsador|parts?|piezas)\b/i;
+const COMPATIBILITY_PHRASE =
+  /\b(?:for|fits|compatible with|suitable for)\s+(?:the\s+)?(?:watch|wristwatch|reloj|rolex|seiko|omega|tissot|citizen|casio|orient|tudor|cartier)\b/i;
+
 export function translateHorologicalQuery(query: string): string {
   let translated = query.trim();
   for (const [pattern, replacement] of SPANISH_TO_ENGLISH_PARTS) {
     translated = translated.replace(pattern, replacement);
   }
   return translated.replace(/\s+/g, " ").trim();
+}
+
+export function isLikelyWatchPartListing(title: string): boolean {
+  const text = normalizeHorologicalSearchText(title);
+  if (NON_WATCH_JEWELRY.test(text)) return false;
+  if (!WATCH_NOUN.test(text)) return true;
+  return PART_SALE_CUE.test(text) ||
+    WATCH_COMPONENT_PHRASE.test(text) ||
+    COMPATIBILITY_PHRASE.test(text);
 }
 
 export function normalizeHorologicalSearchText(text: string): string {

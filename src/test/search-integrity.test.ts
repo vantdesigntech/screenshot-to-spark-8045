@@ -37,6 +37,25 @@ describe("Search integrity", () => {
     expect(parseEbayListings(html, "Rolex Submariner bezel")).toEqual([]);
   });
 
+  it("excludes jewelry and complete watches from parts searches", () => {
+    expect(isShopifyProductRelevant(
+      "Cristal Zafiro",
+      "Earrings By Mariana Woman Caribbean Blue Opal and Sapphire Swarovski Crystals",
+    )).toBe(false);
+    expect(isShopifyProductRelevant(
+      "Cristal Zafiro",
+      "Shearwater Teric Dive Computer Watch Black AMOLED Sapphire Crystal 200M",
+    )).toBe(false);
+    expect(isShopifyProductRelevant(
+      "Cristal Zafiro",
+      "Replacement sapphire crystal 31.5mm, double AR coated + gasket",
+    )).toBe(true);
+    expect(isShopifyProductRelevant(
+      "Rolex crystal",
+      "Sapphire crystal for Rolex watch",
+    )).toBe(true);
+  });
+
   it("filters irrelevant items returned by the external search engine", async () => {
     vi.stubGlobal("window", undefined);
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
