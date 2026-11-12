@@ -746,7 +746,7 @@ function Index() {
                 rippleColor="var(--background)"
                 onClick={() => {
                   // Let the click ripple play before the panel disappears.
-                  window.setTimeout(() => setShowFiltersSheet(false), 260);
+                  window.setTimeout(() => setShowFiltersSheet(false), 450);
                   void executeSearch(query);
                 }}
                 className="aurik-btn-red flex-1 justify-between rounded-none bg-primary px-[0.95rem] py-3 text-background"
