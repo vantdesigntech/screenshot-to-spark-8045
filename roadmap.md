@@ -10,3 +10,4 @@
 - [ ] Verify signed-in Mi Caja save round-trip (needs a real account on external Supabase)
 - [x] Quitar el dibujo del reloj (AnimatedHeroWatch) de inicio
 - [x] Modo noche con AnimatedThemeToggler (Magic UI) en la barra superior: guarda la elección y se restaura antes de pintar; verificado en inicio y Chollos a 1280px y 390px
+- [x] Onda al pulsar (RippleButton de Magic UI) en los botones BUSCAR del buscador y del panel de filtros

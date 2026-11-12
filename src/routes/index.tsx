@@ -7,6 +7,7 @@ import { countActiveFilters } from "@/lib/filter-count";
 import { AurikNavbar } from "@/components/AurikNavbar";
 import { AurikPartCard } from "@/components/AurikPartCard";
 import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
+import { RippleButton } from "@/registry/magicui/ripple-button";
 import heroWatch from "@/assets/watch_movement_hero.jpg.asset.json";
 import {
   CATEGORIES,
@@ -396,13 +397,14 @@ function Index() {
                     </span>
                   </button>
 
-                  <button
+                  <RippleButton
                     type="submit"
-                    className="aurik-btn-red h-13 flex-1 justify-between px-7 sm:flex-initial"
+                    rippleColor="var(--background)"
+                    className="aurik-btn-red h-13 flex-1 justify-between rounded-none bg-primary px-7 py-[0.55rem] text-background sm:flex-initial"
                   >
                     <span>BUSCAR</span>
                     <span>&gt;</span>
-                  </button>
+                  </RippleButton>
                 </div>
               </div>
 
@@ -739,17 +741,19 @@ function Index() {
               >
                 <span>LIMPIAR</span>
               </button>
-              <button
+              <RippleButton
                 type="button"
+                rippleColor="var(--background)"
                 onClick={() => {
-                  setShowFiltersSheet(false);
+                  // Let the click ripple play before the panel disappears.
+                  window.setTimeout(() => setShowFiltersSheet(false), 450);
                   void executeSearch(query);
                 }}
-                className="aurik-btn-red flex-1 justify-between py-3"
+                className="aurik-btn-red flex-1 justify-between rounded-none bg-primary px-[0.95rem] py-3 text-background"
               >
                 <span>{hasSearched ? `VER ${displayedParts.length} PIEZAS` : "APLICAR Y BUSCAR"}</span>
                 <span>&gt;</span>
-              </button>
+              </RippleButton>
             </div>
           </div>
         </div>
