@@ -70,7 +70,10 @@ describe("Search integrity", () => {
     vi.stubGlobal("window", undefined);
     vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
     const pending = searchLiveWatchPartsCloud("Rolex crystal");
-    await vi.advanceTimersByTimeAsync(8000);
+    // The engine probe gives up at 4.5s, then each fallback source gets its own
+    // 8s deadline, so the fake clock has to pass both before anything resolves.
+    await vi.advanceTimersByTimeAsync(4500);
+    await vi.advanceTimersByTimeAsync(SEARCH_SERVER_TIMEOUT_MS);
     expect((await pending).sources.map((s) => s.status)).toEqual(["timeout", "timeout", "timeout", "timeout"]);
   });
 
