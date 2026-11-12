@@ -50,18 +50,18 @@ describe("Night mode theme choice", () => {
     expect(root.classList.contains("dark")).toBe(false);
   });
 
-  it("the toggler flips the site to night mode and remembers it", () => {
+  it("the toggler flips the site to night mode and remembers it", async () => {
     render(<AnimatedThemeToggler variant="square" />);
     const button = document.querySelector("button") as HTMLButtonElement;
 
-    act(() => {
+    await act(async () => {
       fireEvent.click(button);
     });
 
     expect(root.classList.contains("dark")).toBe(true);
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
 
-    act(() => {
+    await act(async () => {
       fireEvent.click(button);
     });
 
