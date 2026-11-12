@@ -304,8 +304,8 @@ export async function searchLiveWatchPartsCloud(query: string): Promise<import("
 
   // 1. Motor de búsqueda oficial en vivo (eBay Browse API Oficial + Wallapop Stealth)
   const engineBaseUrl =
-    (typeof process !== "undefined" && process.env?.VITE_CHOLLOS_ENGINE_URL) ||
-    (typeof process !== "undefined" && process.env?.CHOLLOS_ENGINE_URL) ||
+    (typeof process !== "undefined" && process.env?.["VITE_CHOLLOS_ENGINE_URL"]) ||
+    (typeof process !== "undefined" && process.env?.["CHOLLOS_ENGINE_URL"]) ||
     "http://localhost:3001";
 
   try {
