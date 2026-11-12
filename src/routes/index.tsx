@@ -10,6 +10,8 @@ import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
 import { RippleButton } from "@/registry/magicui/ripple-button";
 import heroWatch from "@/assets/watch_movement_hero.jpg.asset.json";
 import heroVideo from "@/assets/videos/cronora_watch_hero.mp4.asset.json";
+import heroVideo2 from "@/assets/videos/cronora_skeleton_hero.mp4.asset.json";
+import { HeroVideoLoop } from "@/components/HeroVideoLoop";
 import {
   CATEGORIES,
   MAX_PRICE,
@@ -299,7 +301,7 @@ function Index() {
             1. HERO SECTION
            ========================================================= */}
         <section className="relative isolate flex min-h-[78svh] items-center overflow-hidden border-b border-border px-4 py-16 sm:px-8">
-          <video src={heroVideo.url} poster={heroWatch.url} autoPlay muted loop playsInline preload="auto" aria-hidden className="absolute inset-0 -z-20 h-full w-full object-cover" />
+          <HeroVideoLoop sources={[heroVideo.url, heroVideo2.url]} poster={heroWatch.url} className="absolute inset-0 -z-20 h-full w-full object-cover" />
           <div aria-hidden className="hero-photo-shade absolute inset-0 -z-10" />
           <div className="mx-auto w-full max-w-[1240px]">
           {/* Main Headline using the special display/stencil font */}
