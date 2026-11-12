@@ -342,18 +342,25 @@ export interface Part {
   delivery: string;
   image: string;
   spec: string;
-  oemRef?: string;
+  oemRef?: string | undefined;
+  listingType?: string | undefined;
+  relevanceScore?: number | undefined;
+  model?: string | undefined;
+  reference?: string | undefined;
+  calibre?: string | undefined;
+  dealScore?: number | undefined;
+  dealVerdict?: string | undefined;
   compatibleWith: string[];
   condition: "NOS Vintage" | "Certified OEM" | "Aftermarket 1:1" | "Swiss OEM" | "Sin verificar";
-  listedPrice?: number;
-  listedCurrency?: "EUR" | "USD" | "GBP";
-  equivalentOemPriceEur?: number;
-  pairGroupId?: string;
-  proOnly?: boolean;
-  customUrl?: string;
-  materialSpec?: string;
-  toleranceSpec?: string;
-  resaleImpact?: string;
+  listedPrice?: number | undefined;
+  listedCurrency?: "EUR" | "USD" | "GBP" | undefined;
+  equivalentOemPriceEur?: number | undefined;
+  pairGroupId?: string | undefined;
+  proOnly?: boolean | undefined;
+  customUrl?: string | undefined;
+  materialSpec?: string | undefined;
+  toleranceSpec?: string | undefined;
+  resaleImpact?: string | undefined;
 }
 
 export const PARTS: Part[] = [

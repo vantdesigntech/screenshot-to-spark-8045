@@ -9,6 +9,8 @@ export interface CholloDeal {
   id: string;
   title: string;
   brand: string;
+  model?: string | undefined;
+  reference?: string | undefined;
   platform: CholloPlatform;
   dealType: CholloDealType;
   priceEur: number;
@@ -22,8 +24,13 @@ export interface CholloDeal {
   timeLeft: string;
   image: string;
   url: string;
-  proEarlyAccess?: boolean;
-  calibreRef?: string;
+  proEarlyAccess?: boolean | undefined;
+  calibreRef?: string | undefined;
+  listingType?: string | undefined;
+  relevanceScore?: number | undefined;
+  dealVerdict?: string | undefined;
+  confidence?: number | undefined;
+  dealReasons?: string[] | undefined;
 }
 
 export const CHOLLO_PLATFORMS: CholloPlatform[] = [
