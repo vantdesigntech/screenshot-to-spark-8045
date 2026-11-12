@@ -293,7 +293,7 @@
 
 /* ============================================================================
    NIGHT MODE (modo noche)
-   Same token names as :root with an inverted palette, so every bg-*/text-*
+   Same token names as :root with an inverted palette, so every bg-* and text-*
    utility and .aurik-* rule flips with the .dark class on <html>.
    ============================================================================ */
 :root {
