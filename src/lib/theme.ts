@@ -15,13 +15,10 @@ export function applyTheme(theme: Theme): void {
   document.documentElement.classList.toggle("dark", theme === "dark");
 }
 
+const STORAGE_KEY_LITERAL = JSON.stringify(THEME_STORAGE_KEY);
+
 /**
  * Runs before the first paint so a saved night mode never flashes the cream
  * theme. It has to be inlined in the document head, so it lives as a string.
  */
-export const THEME_BOOTSTRAP_SCRIPT = `(function(){try{var t=localStorage.getItem(${JSON.stringify(
-  THEME_STORAGE_KEY,
-)
-  // The key is quoted above; keep the IIFE on one line for the head script.
-  .replace(/^"|"$/g, '"')})
-;if(t==="dark"){document.documentElement.classList.add("dark");}}catch(e){}})();`;
+export const THEME_BOOTSTRAP_SCRIPT = `(function(){try{var t=localStorage.getItem(${STORAGE_KEY_LITERAL});if(t==="dark"){document.documentElement.classList.add("dark");}}catch(e){}})();`;
