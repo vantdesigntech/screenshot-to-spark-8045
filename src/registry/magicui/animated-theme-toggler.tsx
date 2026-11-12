@@ -174,8 +174,8 @@ export const AnimatedThemeToggler = ({
     return () => {
       cancelAnim()
       const root = document.documentElement
-      if (root.dataset.magicuiThemeVt !== "active") return
-      delete root.dataset.magicuiThemeVt
+      if (root.dataset["magicuiThemeVt"] !== "active") return
+      delete root.dataset["magicuiThemeVt"]
       root.style.removeProperty("--magicui-theme-toggle-vt-duration")
       root.style.removeProperty("--magicui-theme-vt-clip-from")
     }
@@ -204,7 +204,7 @@ export const AnimatedThemeToggler = ({
     if (
       !button ||
       isTransitioningRef.current ||
-      document.documentElement.dataset.magicuiThemeVt === "active"
+      document.documentElement.dataset["magicuiThemeVt"] === "active"
     )
       return
 
@@ -257,7 +257,7 @@ export const AnimatedThemeToggler = ({
     )
 
     const root = document.documentElement
-    root.dataset.magicuiThemeVt = "active"
+    root.dataset["magicuiThemeVt"] = "active"
     root.style.setProperty(
       "--magicui-theme-toggle-vt-duration",
       `${duration}ms`
@@ -267,7 +267,7 @@ export const AnimatedThemeToggler = ({
     root.style.setProperty("--magicui-theme-vt-clip-from", clipPath[0])
     const cleanup = () => {
       isTransitioningRef.current = false
-      delete root.dataset.magicuiThemeVt
+      delete root.dataset["magicuiThemeVt"]
       root.style.removeProperty("--magicui-theme-toggle-vt-duration")
       root.style.removeProperty("--magicui-theme-vt-clip-from")
       cancelAnim()

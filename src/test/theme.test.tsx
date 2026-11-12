@@ -80,7 +80,8 @@ describe("Night mode theme choice", () => {
       const found = new Set<string>();
       let match: RegExpExecArray | null;
       while ((match = pattern.exec(css)) !== null) {
-        for (const declaration of match[2].split(";")) {
+        const body = match[2] ?? "";
+        for (const declaration of body.split(";")) {
           const trimmed = declaration.trim();
           if (trimmed.startsWith("--")) {
             found.add(trimmed.slice(0, trimmed.indexOf(":")).trim());
