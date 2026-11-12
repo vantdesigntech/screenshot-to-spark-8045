@@ -7,6 +7,7 @@ import { countActiveFilters } from "@/lib/filter-count";
 import { AurikNavbar } from "@/components/AurikNavbar";
 import { AurikPartCard } from "@/components/AurikPartCard";
 import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
+import { RippleButton } from "@/registry/magicui/ripple-button";
 import heroWatch from "@/assets/watch_movement_hero.jpg.asset.json";
 import {
   CATEGORIES,
