@@ -34,7 +34,7 @@ describe("Night mode theme choice", () => {
     expect(root.classList.contains("dark")).toBe(false);
   });
 
-  it("the pre-paint script restores night mode and otherwise leaves the cream theme", () => {
+  it("the pre-paint script opens in night mode unless the visitor chose the light theme", () => {
     localStorage.setItem(THEME_STORAGE_KEY, "dark");
     new Function(THEME_BOOTSTRAP_SCRIPT)();
     expect(root.classList.contains("dark")).toBe(true);
@@ -47,7 +47,7 @@ describe("Night mode theme choice", () => {
     root.classList.remove("dark");
     localStorage.clear();
     new Function(THEME_BOOTSTRAP_SCRIPT)();
-    expect(root.classList.contains("dark")).toBe(false);
+    expect(root.classList.contains("dark")).toBe(true);
   });
 
   it("the toggler flips the site to night mode and remembers it", async () => {
