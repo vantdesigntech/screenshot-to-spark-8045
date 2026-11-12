@@ -16,6 +16,9 @@
   --font-serif: "Gloock", "Times New Roman", serif;
   --font-mono: "Lexend Exa", Arial, sans-serif;
 
+  /* Click ripple on the search buttons: timed by the inline --duration var. */
+  --animate-rippling: rippling var(--duration) ease-out;
+
   /* Strict 0px Sharp Swiss Grid Border Radius Scale */
   --radius-none: 0px;
   --radius-xs: 0px;
