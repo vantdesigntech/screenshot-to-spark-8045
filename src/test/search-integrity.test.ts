@@ -68,7 +68,13 @@ describe("Search integrity", () => {
   it("bounds source timeouts to 8 seconds", async () => {
     vi.useFakeTimers();
     vi.stubGlobal("window", undefined);
-    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+    // A fetch that only settles when its abort signal fires, like a hung source.
+    vi.stubGlobal("fetch", vi.fn((_url: string, init?: { signal?: AbortSignal }) =>
+      new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () =>
+          reject(new DOMException("Source timeout", "AbortError")), { once: true });
+      }),
+    ));
     const pending = searchLiveWatchPartsCloud("Rolex crystal");
     // The engine probe gives up at 4.5s, then each fallback source gets its own
     // 8s deadline, so the fake clock has to pass both before anything resolves.
