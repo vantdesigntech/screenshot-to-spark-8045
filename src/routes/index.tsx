@@ -7,6 +7,7 @@ import { countActiveFilters } from "@/lib/filter-count";
 import { AurikNavbar } from "@/components/AurikNavbar";
 import { AurikPartCard } from "@/components/AurikPartCard";
 import { buildChronoPartsHeadMeta } from "@/lib/seo-blog";
+import heroWatch from "@/assets/watch_movement_hero.jpg.asset.json";
 import {
   CATEGORIES,
   MAX_PRICE,
@@ -295,10 +296,13 @@ function Index() {
         {/* =========================================================
             1. HERO SECTION
            ========================================================= */}
-        <section className="mx-auto max-w-[1240px] border-b border-border bg-background px-4 pt-10 pb-8 sm:px-8 sm:pt-14 sm:pb-12">
+        <section className="relative isolate flex min-h-[78svh] items-center overflow-hidden border-b border-border px-4 py-16 sm:px-8">
+          <img src={heroWatch.url} alt="" aria-hidden className="absolute inset-0 -z-20 h-full w-full object-cover object-[60%_40%]" />
+          <div aria-hidden className="hero-photo-shade absolute inset-0 -z-10" />
+          <div className="mx-auto w-full max-w-[1240px]">
           {/* Main Headline using the special display/stencil font */}
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="aurik-hero-title text-[44px] sm:text-[80px] md:text-[104px]">
+            <h1 className="aurik-hero-title text-hero-foreground text-[44px] sm:text-[80px] md:text-[104px]">
               Recambios para
               <br /> tu reloj
             </h1>
@@ -320,13 +324,13 @@ function Index() {
               <ChevronDown className="h-5 w-5" strokeWidth={2} />
             </button>
 
-            <p className="order-1 text-sm leading-relaxed text-muted-foreground sm:order-2">
+            <p className="order-1 text-sm leading-relaxed text-hero-foreground/85 sm:order-2">
               Encuentra al instante cristales de zafiro, calibres automáticos,
               biseles, agujas, coronas y brazaletes OEM o Aftermarket
               compatibles con tu modelo exacto.
             </p>
           </div>
-
+          </div>
         </section>
 
         {/* =========================================================
