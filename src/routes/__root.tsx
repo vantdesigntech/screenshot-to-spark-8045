@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { buildChronoPartsHeadMeta } from "../lib/seo-blog";
 import { AccountProvider } from "@/components/AccountProvider";
+import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
 
 function NotFoundComponent() {
   return (
@@ -112,9 +113,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
       <body>
         {children}

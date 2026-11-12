@@ -2,6 +2,8 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Search, User, X } from "lucide-react";
 import { useState } from "react";
 
+import { AnimatedThemeToggler } from "@/registry/magicui/animated-theme-toggler";
+
 interface AurikNavbarProps {
   savedCount?: number;
   onOpenWatchbox?: () => void;
@@ -75,6 +77,12 @@ export function AurikNavbar({
 
           {/* Search & User/Watchbox Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <AnimatedThemeToggler
+              variant="square"
+              duration={450}
+              aria-label="Cambiar entre modo claro y modo noche"
+              className="flex h-9 w-9 items-center justify-center border border-border bg-background text-foreground transition-colors hover:bg-muted [&_svg]:h-[17px] [&_svg]:w-[17px]"
+            />
             {onFocusSearch ? (
               <button
                 type="button"
