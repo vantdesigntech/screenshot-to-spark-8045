@@ -385,11 +385,11 @@ function Index() {
                   )}
                 </div>
 
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:w-auto sm:min-w-[320px]">
                   <button
                     type="button"
                     onClick={() => setShowFiltersSheet(true)}
-                    className="aurik-btn-gray h-13 flex-1 justify-center px-5 sm:flex-initial"
+                    className="aurik-btn-gray h-13 w-full justify-center gap-2 px-4"
                   >
                     <SlidersHorizontal className="h-4 w-4" />
                     <span>
@@ -400,10 +400,10 @@ function Index() {
                   <RippleButton
                     type="submit"
                     rippleColor="var(--background)"
-                    className="aurik-btn-red h-13 flex-1 justify-between rounded-none bg-primary px-7 py-[0.55rem] text-background sm:flex-initial"
+                    className="aurik-btn-red h-13 w-full justify-center gap-2 rounded-none bg-primary px-4 py-[0.55rem] text-background"
                   >
                     <span>BUSCAR</span>
-                    <span>&gt;</span>
+                    <span aria-hidden>&gt;</span>
                   </RippleButton>
                 </div>
               </div>
@@ -429,20 +429,22 @@ function Index() {
             </form>
 
             {/* Quick Search Triggers */}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+            <div className="mt-5">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
                 BÚSQUEDAS RÁPIDAS:
-              </span>
+              </p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
               {QUICK_SEARCHES.map((term) => (
                 <button
                   key={term}
                   type="button"
                   onClick={() => void executeSearch(term)}
-                  className="border border-border bg-background px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.05em] text-foreground transition-colors hover:border-foreground hover:bg-muted"
+                  className="flex min-h-10 min-w-0 items-center justify-center border border-border bg-background px-2 py-2 text-center font-mono text-[11px] uppercase leading-tight tracking-[0.05em] text-foreground transition-colors hover:border-foreground hover:bg-muted"
                 >
                   {term} &gt;
                 </button>
               ))}
+              </div>
             </div>
           </div>
         </section>
