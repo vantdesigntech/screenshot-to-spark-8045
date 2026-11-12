@@ -1,6 +1,7 @@
 import strap from "@/assets/strap.jpg";
 import bracelet from "@/assets/bracelet.jpg";
 import crystal from "@/assets/crystal.jpg";
+import { normalizeHorologicalSearchText } from "./search-query";
 import movement from "@/assets/movement.jpg";
 
 export type Store =
@@ -834,7 +835,7 @@ export function getStoreSearchUrl(store: Store, query: string): string {
 }
 
 export function filterParts(parts: Part[], f: Filters): Part[] {
-  const words = f.query.toLowerCase().split(/\s+/).filter(Boolean);
+  const words = normalizeHorologicalSearchText(f.query).split(/[^a-z0-9]+/).filter((word) => word.length >= 2);
   const brands = ["rolex", "seiko", "omega", "tissot", "citizen", "casio", "tudor", "cartier", "breitling", "hamilton", "longines", "orient"];
   const queriedBrands = brands.filter((brand) => new RegExp(`\\b${brand}\\b`, "i").test(f.query));
   return parts.filter((p) => {
@@ -842,7 +843,19 @@ export function filterParts(parts: Part[], f: Filters): Part[] {
     if (f.origin !== "all" && p.origin !== f.origin) return false;
     if (f.categories.length && !f.categories.includes(p.category)) return false;
     if (p.priceEur > f.maxPrice) return false;
-    const hay = `${p.title} ${p.brand} ${p.spec} ${p.store} ${p.oemRef ?? ""} ${p.compatibleWith.join(" ")}`.toLowerCase();
+    const hay = normalizeHorologicalSearchText([
+      p.title,
+      p.brand,
+      p.spec,
+      p.store,
+      p.oemRef,
+      p.model,
+      p.reference,
+      p.calibre,
+      p.materialSpec,
+      p.toleranceSpec,
+      ...p.compatibleWith,
+    ].filter(Boolean).join(" "));
     return words.every((w) => hay.includes(w));
   });
 }
@@ -872,7 +885,7 @@ export interface LiveSearchResponse {
   items: Part[];
   sources: SearchSource[];
 }
-export const SEARCH_CLIENT_TIMEOUT_MS = 12000;
+export const SEARCH_CLIENT_TIMEOUT_MS = 15000;
 export const ALSO_SEARCH_STORES: Store[] = ["eBay", "Wallapop", "Chrono24", "CousinsUK", "Alibaba", "AliExpress"];
 
 export async function fetchLivePartsFromApi(query: string): Promise<LiveSearchResponse> {

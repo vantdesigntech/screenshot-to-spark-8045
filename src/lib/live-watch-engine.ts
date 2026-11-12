@@ -17,6 +17,9 @@ import {
   type Store,
 } from "./parts";
 import { resolveCholloFallbackImage, type CholloDeal } from "./chollos";
+import { translateHorologicalQuery } from "./search-query";
+
+export { translateHorologicalQuery } from "./search-query";
 
 const MEMORY_CACHE = new Map<string, { ts: number; data: unknown }>();
 export const CHOLLOS_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours for daily chollos
@@ -26,44 +29,6 @@ const BROWSER_HEADERS: Record<string, string> = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
   "Accept-Language": "es-ES,es;q=0.9,en-US;q=0.8,en;q=0.7",
 };
-
-const SPANISH_TO_ENGLISH_PARTS: Array<[RegExp, string]> = [
-  [/\bbisel\b/gi, "bezel"],
-  [/\binserto\b/gi, "bezel insert"],
-  [/\besfera\b/gi, "dial"],
-  [/\bagujas\b/gi, "hands"],
-  [/\bmanecillas\b/gi, "hands"],
-  [/\bcristal\b/gi, "crystal"],
-  [/\bzafiro\b/gi, "sapphire crystal"],
-  [/\bcorrea\b/gi, "strap"],
-  [/\bbrazalete\b/gi, "bracelet"],
-  [/\barmis\b/gi, "steel bracelet"],
-  [/\bcaucho\b/gi, "rubber strap"],
-  [/\bcuero\b/gi, "leather strap"],
-  [/\bpiel\b/gi, "leather strap"],
-  [/\bcorona\b/gi, "crown"],
-  [/\btija\b/gi, "stem"],
-  [/\btije\b/gi, "stem"],
-  [/\bmovimiento\b/gi, "movement"],
-  [/\bcalibre\b/gi, "movement"],
-  [/\bjunta\b/gi, "gasket"],
-  [/\bcierre\b/gi, "clasp"],
-  [/\bhebilla\b/gi, "buckle"],
-  [/\bpulsador\b/gi, "pusher"],
-  [/\beslab[oó]n\b/gi, "link"],
-];
-
-/**
- * Translates Spanish horological terms to international English watchmaking terms
- * so global APIs (eBay/PicClick, WatchPlaza, NamokiMods, AliExpress) return 100% accurate parts.
- */
-export function translateHorologicalQuery(query: string): string {
-  let translated = query.trim();
-  for (const [pattern, replacement] of SPANISH_TO_ENGLISH_PARTS) {
-    translated = translated.replace(pattern, replacement);
-  }
-  return translated.replace(/\s+/g, " ").trim();
-}
 
 export function buildAliExpressCompatibleQuery(query: string, _cat: Category): string {
   return translateHorologicalQuery(query);
@@ -146,7 +111,7 @@ export function isShopifyProductRelevant(query: string, productTitle: string): b
     .split(/[^a-z0-9]+/)
     .filter((t) => t.length >= 3 && !stopWords.has(t));
   if (tokens.length === 0) return true;
-  return tokens.some((t) => titleLower.includes(t));
+  return tokens.every((t) => titleLower.includes(t));
 }
 
 export function detectWatchPartCategory(title: string): Category {
@@ -311,22 +276,32 @@ export async function searchLiveWatchPartsCloud(query: string): Promise<import("
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4500);
-    const res = await fetch(`${engineBaseUrl}/api/parts?q=${encodeURIComponent(q)}`, {
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
-    });
-    clearTimeout(timer);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data.items) && data.items.length > 0) {
-        return {
-          items: data.items,
-          sources: data.sources || [
-            { name: "eBay", status: "ok", count: data.items.filter((i: any) => i.store === "eBay").length },
-            { name: "Wallapop", status: "ok", count: data.items.filter((i: any) => i.store === "Wallapop").length },
-          ],
+    try {
+      const res = await fetch(`${engineBaseUrl}/api/parts?q=${encodeURIComponent(q)}`, {
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json() as {
+          items?: Part[];
+          sources?: Array<{ name: string; status: "ok" | "error" | "timeout"; count: number }>;
         };
+        const items = data.items?.filter((item) => isShopifyProductRelevant(q, item.title)) ?? [];
+        if (items.length > 0) {
+          return {
+            items,
+            sources: data.sources?.map((source) => ({
+              ...source,
+              count: items.filter((item) => item.store === source.name).length,
+            })) ?? [
+              { name: "eBay", status: "ok", count: items.filter((item) => item.store === "eBay").length },
+              { name: "Wallapop", status: "ok", count: items.filter((item) => item.store === "Wallapop").length },
+            ],
+          };
+        }
       }
+    } finally {
+      clearTimeout(timer);
     }
   } catch {
     // Continuar con los proveedores de contingencia
