@@ -246,7 +246,7 @@ export function AurikPartCard({
             target="_blank"
             rel="noopener noreferrer"
             title="Compartir este componente por WhatsApp"
-            className="inline-flex flex-1 items-center justify-center gap-1.5 border border-[#25D366]/40 bg-[#25D366]/10 px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#128C7E] transition hover:border-[#25D366] hover:bg-[#25D366] hover:text-primary-foreground"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 border border-[#25D366]/40 bg-[#25D366]/10 px-2.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#128C7E] transition hover:border-[#25D366] hover:bg-[#25D366] hover:text-primary-foreground dark:text-[#7ee0a3]"
           >
             <MessageCircle className="h-3.5 w-3.5 shrink-0" />
             <span>WHATSAPP</span>

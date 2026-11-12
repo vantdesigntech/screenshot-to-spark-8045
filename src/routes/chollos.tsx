@@ -48,6 +48,13 @@ function ChollosPage() {
     () => Date.now() + CHOLLOS_TTL_MS,
   );
   const [copiedDealId, setCopiedDealId] = useState<string | null>(null);
+  // The countdown depends on Date.now(), so it stays hidden until after
+  // hydration: server markup and first client render then match exactly.
+  const [isClockHydrated, setIsClockHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsClockHydrated(true);
+  }, []);
 
   // Automatic 24-hour cycle check & auto-refresh on mount
   useEffect(() => {
@@ -158,8 +165,9 @@ function ChollosPage() {
               <span className="aurik-dot" />
               <span>RADAR DE OPORTUNIDADES // ACTUALIZACIÓN AUTOMÁTICA 24H</span>
               <span className="inline-flex items-center gap-1 border border-foreground bg-foreground px-2 py-0.5 font-mono text-[10px] text-primary-foreground">
-                <Clock className="h-3 w-3 text-[#22c55e]" />
-                PRÓXIMO ESCANEO 24H: {formatRemaining24h(nextRefreshAtMs)}
+                <Clock className="h-3 w-3 text-[#22c55e] dark:text-[#4ade80]" />
+                PRÓXIMO ESCANEO 24H:{" "}
+                {isClockHydrated ? formatRemaining24h(nextRefreshAtMs) : "24h 0m"}
               </span>
             </div>
             <h1 className="aurik-hero-title mt-3 text-2xl sm:text-4xl">
@@ -343,7 +351,7 @@ function ChollosPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Compartir chollo por WhatsApp"
-                        className="inline-flex items-center gap-1 border border-[#16a34a]/40 bg-[#f0fdf4] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#15803d] transition hover:border-[#16a34a] hover:bg-[#dcfce7]"
+                        className="inline-flex items-center gap-1 border border-[#16a34a]/40 bg-[#f0fdf4] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#15803d] transition hover:border-[#16a34a] hover:bg-[#dcfce7] dark:border-[#25D366]/40 dark:bg-[#25D366]/10 dark:text-[#7ee0a3]"
                       >
                         <MessageCircle className="h-3 w-3" />
                         <span>WHATSAPP</span>
@@ -357,8 +365,10 @@ function ChollosPage() {
                       >
                         {copiedDealId === deal.id ? (
                           <>
-                            <Check className="h-3 w-3 text-[#16a34a]" />
-                            <span className="text-[#16a34a]">¡COPIADO!</span>
+                            <Check className="h-3 w-3 text-[#16a34a] dark:text-[#4ade80]" />
+                            <span className="text-[#16a34a] dark:text-[#4ade80]">
+                              ¡COPIADO!
+                            </span>
                           </>
                         ) : (
                           <>

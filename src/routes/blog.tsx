@@ -120,7 +120,7 @@ function BlogPage() {
                 INDEXACIÓN ACTIVA EN &lt;HEAD&gt;
               </span>
             </div>
-            <pre className="mt-4 max-h-60 overflow-auto bg-black p-4 font-mono text-[11px] text-muted">
+            <pre className="mt-4 max-h-60 overflow-auto bg-muted p-4 font-mono text-[11px] text-foreground">
               {JSON.stringify(jsonLdObj, null, 2)}
             </pre>
           </div>

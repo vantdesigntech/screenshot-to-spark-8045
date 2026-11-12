@@ -287,3 +287,58 @@
 :root { --hero-foreground: oklch(0.99 0 0); }
 @theme inline { --color-hero-foreground: var(--hero-foreground); }
 .hero-photo-shade { background: linear-gradient(180deg, oklch(0.12 0.02 230 / 0.55), oklch(0.12 0.02 230 / 0.35) 50%, oklch(0.12 0.02 230 / 0.7)); }
+
+/* ============================================================================
+   NIGHT MODE (modo noche)
+   Same token names as :root with an inverted palette, so every bg-*/text-*
+   utility and .aurik-* rule flips with the .dark class on <html>.
+   ============================================================================ */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0a1315;
+  --foreground: #f2eee2;
+  --card: #111d20;
+  --card-foreground: #f2eee2;
+  --popover: #0f1a1d;
+  --popover-foreground: #f2eee2;
+  --primary: #e9e3d3;
+  --primary-foreground: #0a1315;
+  --secondary: #18262a;
+  --secondary-foreground: #f2eee2;
+  --muted: #142124;
+  --muted-foreground: #92a4a7;
+  --accent: #e9e3d3;
+  --accent-foreground: #0a1315;
+  --destructive: #e0655a;
+  --destructive-foreground: #0a1315;
+  --border: #f2eee226;
+  --input: #f2eee240;
+  --ring: #e9e3d3;
+  --hero-foreground: oklch(0.99 0 0);
+}
+
+/* View Transitions used by the Magic UI animated theme toggler */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(root) {
+  animation-duration: var(--magicui-theme-toggle-vt-duration, 400ms);
+  animation-timing-function: ease-in-out;
+}
+
+html[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  clip-path: var(--magicui-theme-vt-clip-from);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
+    animation-duration: 1ms;
+  }
+}
