@@ -48,6 +48,13 @@ function ChollosPage() {
     () => Date.now() + CHOLLOS_TTL_MS,
   );
   const [copiedDealId, setCopiedDealId] = useState<string | null>(null);
+  // The countdown depends on Date.now(), so it stays hidden until after
+  // hydration: server markup and first client render then match exactly.
+  const [isClockHydrated, setIsClockHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsClockHydrated(true);
+  }, []);
 
   // Automatic 24-hour cycle check & auto-refresh on mount
   useEffect(() => {
@@ -159,7 +166,8 @@ function ChollosPage() {
               <span>RADAR DE OPORTUNIDADES // ACTUALIZACIÓN AUTOMÁTICA 24H</span>
               <span className="inline-flex items-center gap-1 border border-foreground bg-foreground px-2 py-0.5 font-mono text-[10px] text-primary-foreground">
                 <Clock className="h-3 w-3 text-[#22c55e] dark:text-[#4ade80]" />
-                PRÓXIMO ESCANEO 24H: {formatRemaining24h(nextRefreshAtMs)}
+                PRÓXIMO ESCANEO 24H:{" "}
+                {isClockHydrated ? formatRemaining24h(nextRefreshAtMs) : "24h 0m"}
               </span>
             </div>
             <h1 className="aurik-hero-title mt-3 text-2xl sm:text-4xl">
