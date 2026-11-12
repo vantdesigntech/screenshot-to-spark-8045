@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -129,8 +130,30 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AccountProvider>
-        <Outlet />
+        <GatedOutlet />
       </AccountProvider>
     </QueryClientProvider>
+  );
+}
+
+const OPEN_PATHS = ["/", "/chollos"];
+
+function GatedOutlet() {
+  const pathname = useLocation({ select: (l) => l.pathname });
+  const clean = pathname.replace(/\/+$/, "") || "/";
+  if (OPEN_PATHS.includes(clean)) return <Outlet />;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
+      <div className="w-full max-w-md p-8 text-center">
+        <h1 className="aurik-hero-title text-4xl text-foreground">Próximamente</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Esta sección estará disponible muy pronto.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link to="/" className="aurik-btn-red"><span>INICIO</span></Link>
+          <Link to="/chollos" className="aurik-btn-gray"><span>CHOLLOS</span></Link>
+        </div>
+      </div>
+    </div>
   );
 }
