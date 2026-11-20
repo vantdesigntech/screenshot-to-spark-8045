@@ -12,6 +12,7 @@ import heroWatch from "@/assets/watch_movement_hero.jpg.asset.json";
 import heroVideo from "@/assets/videos/cronora_watch_hero.mp4.asset.json";
 import heroVideo2 from "@/assets/videos/cronora_skeleton_hero.mp4.asset.json";
 import { HeroVideoLoop } from "@/components/HeroVideoLoop";
+import { useScrollNavigation } from "@/hooks/useScrollNavigation";
 import {
   CATEGORIES,
   MAX_PRICE,
@@ -79,6 +80,10 @@ function Index() {
   const searchSectionRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const { containerRef, heroRef, curtainRef, goToSearch } = useScrollNavigation({
+    disabled: showFiltersSheet,
+  });
 
   const { user, openAuth } = useAccount();
   useEffect(() => {
@@ -283,8 +288,7 @@ function Index() {
       <AurikNavbar
         savedCount={savedIds.length}
         onFocusSearch={() => {
-          searchSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-          setTimeout(() => searchInputRef.current?.focus(), 200);
+          goToSearch(() => searchInputRef.current?.focus());
         }}
       />
 
@@ -296,56 +300,64 @@ function Index() {
         </div>
       )}
 
-      <main>
+      <main ref={containerRef} className="relative">
         {/* =========================================================
-            1. HERO SECTION
+            1. HERO SECTION (PINNED BEHIND CURTAIN)
            ========================================================= */}
-        <section className="relative isolate flex min-h-[78svh] items-center overflow-hidden border-b border-border px-4 py-16 sm:px-8">
-          <HeroVideoLoop sources={[heroVideo.url, heroVideo2.url]} poster={heroWatch.url} className="absolute inset-0 -z-20 h-full w-full object-cover" />
+        <section
+          ref={heroRef}
+          className="sticky top-[68px] z-0 isolate flex h-[calc(100dvh-68px)] items-center overflow-hidden border-b border-border px-4 py-16 sm:top-[76px] sm:h-[calc(100dvh-76px)] sm:px-8"
+        >
+          <HeroVideoLoop
+            sources={[heroVideo.url, heroVideo2.url]}
+            poster={heroWatch.url}
+            className="absolute inset-0 -z-20 h-full w-full object-cover"
+          />
           <div aria-hidden className="hero-photo-shade absolute inset-0 -z-10" />
           <div className="mx-auto w-full max-w-[1240px]">
-          {/* Main Headline using the special display/stencil font */}
-          <div className="mx-auto max-w-4xl text-center">
-            <h1 className="aurik-hero-title text-hero-foreground text-[44px] sm:text-[80px] md:text-[104px]">
-              Recambios para
-              <br /> tu reloj
-            </h1>
-          </div>
+            {/* Main Headline using the special display/stencil font */}
+            <div className="mx-auto max-w-4xl text-center">
+              <h1 className="aurik-hero-title text-hero-foreground text-[44px] sm:text-[80px] md:text-[104px]">
+                Recambios para
+                <br /> tu reloj
+              </h1>
+            </div>
 
-          {/* Centered Red Circle Badge + Clean Readable Subtitle Row */}
-          <div className="mx-auto mt-5 flex max-w-xl flex-col items-center justify-center gap-4 text-center sm:mt-7 sm:flex-row sm:gap-5 sm:text-left">
-            <button
-              type="button"
-              onClick={() => {
-                searchSectionRef.current?.scrollIntoView({
-                  behavior: "smooth",
-                });
-                setTimeout(() => searchInputRef.current?.focus(), 250);
-              }}
-              aria-label="Ir al buscador"
-              className="order-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105 sm:order-1"
-            >
-              <ChevronDown className="h-5 w-5" strokeWidth={2} />
-            </button>
+            {/* Centered Red Circle Badge + Clean Readable Subtitle Row */}
+            <div className="mx-auto mt-5 flex max-w-xl flex-col items-center justify-center gap-4 text-center sm:mt-7 sm:flex-row sm:gap-5 sm:text-left">
+              <button
+                type="button"
+                onClick={() => {
+                  goToSearch(() => searchInputRef.current?.focus());
+                }}
+                aria-label="Ir al buscador"
+                className="order-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105 sm:order-1"
+              >
+                <ChevronDown className="h-5 w-5" strokeWidth={2} />
+              </button>
 
-            <p className="order-1 text-sm leading-relaxed text-hero-foreground/85 sm:order-2">
-              Encuentra al instante cristales de zafiro, calibres automáticos,
-              biseles, agujas, coronas y brazaletes OEM o Aftermarket
-              compatibles con tu modelo exacto.
-            </p>
-          </div>
+              <p className="order-1 text-sm leading-relaxed text-hero-foreground/85 sm:order-2">
+                Encuentra al instante cristales de zafiro, calibres automáticos,
+                biseles, agujas, coronas y brazaletes OEM o Aftermarket
+                compatibles con tu modelo exacto.
+              </p>
+            </div>
           </div>
         </section>
 
         {/* =========================================================
-            2. SEARCH SECTION DIRECTLY BELOW HERO
+            2. SEARCH SECTION BELOW HERO (RISES AS CURTAIN)
            ========================================================= */}
-        <section
-          ref={searchSectionRef}
-          id="buscador"
-          className="mx-auto max-w-[1000px] px-4 py-12 sm:px-8 sm:py-16"
+        <div
+          ref={curtainRef}
+          className="relative z-10 min-h-[calc(100dvh-68px)] border-t border-border bg-background shadow-[0_-24px_60px_rgba(0,0,0,0.45)] sm:min-h-[calc(100dvh-76px)]"
         >
-          <div className="w-full">
+          <section
+            ref={searchSectionRef}
+            id="buscador"
+            className="mx-auto max-w-[1000px] px-4 py-12 sm:px-8 sm:py-16"
+          >
+            <div className="w-full">
             <div className="aurik-section-tag mb-3">
               <span className="aurik-dot" />
               <span>BUSCADOR DE RECAMBIOS Y CALIBRES</span>
@@ -590,8 +602,9 @@ function Index() {
                 </div>
               </div>
             )}
-          </section>
-        )}
+                  </section>
+                )}
+        </div>
       </main>
 
       {/* =========================================================
