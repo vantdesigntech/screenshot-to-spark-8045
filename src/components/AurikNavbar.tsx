@@ -81,7 +81,7 @@ export function AurikNavbar({
               variant="square"
               duration={450}
               aria-label="Cambiar entre modo claro y modo noche"
-              className="flex h-9 w-9 items-center justify-center border border-border bg-background text-foreground transition-colors hover:bg-muted [&_svg]:h-[17px] [&_svg]:w-[17px]"
+              className="flex h-9 w-9 items-center justify-center border-0 bg-transparent text-foreground transition-colors hover:text-primary focus-visible:outline-none [&_svg]:h-[17px] [&_svg]:w-[17px]"
             />
             {onFocusSearch ? (
               <button
