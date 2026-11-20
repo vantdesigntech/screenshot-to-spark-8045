@@ -109,7 +109,7 @@ async function withPhotos(rows: Omit<PublicListing, "photoUrl">[]): Promise<Publ
   const first = new Map<string, string>();
   for (const im of imgs ?? []) if (!first.has(im.listing_id)) first.set(im.listing_id, im.storage_path);
   const paths = [...first.values()];
-  const signed = paths.length ? (await supabase.storage.from(LISTING_PHOTO_BUCKET).createSignedUrls(paths, 3600)).data ?? [] : [];
+  const signed = paths.length ? (await supabase.storage.from(LISTING_PHOTO_BUCKET).createSignedUrls(paths, 60)).data ?? [] : [];
   const urlByPath = new Map(signed.map((s) => [s.path, s.signedUrl]));
   return rows.map((r) => ({ ...r, photoUrl: urlByPath.get(first.get(r.id) ?? "") ?? null }));
 }
