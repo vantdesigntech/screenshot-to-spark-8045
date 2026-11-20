@@ -2,7 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { createRouter, rootRouteId } from "@tanstack/react-router";
 import { describe, expect, it } from "vitest";
 
-import { CHOLLOS_TTL_MS, DAILY_CHOLLOS } from "@/lib/chollos";
+import { CHOLLOS_TTL_MS } from "@/lib/chollos";
 import {
   buildAliExpressCompatibleQuery,
   isShopifyProductRelevant,
@@ -34,9 +34,12 @@ describe("App routing", () => {
     expect(translateHorologicalQuery("Rolex Submariner bisel zafiro")).toBe(
       "Rolex Submariner bezel sapphire crystal",
     );
-    expect(
-      isShopifyProductRelevant("Rolex Submariner bezel", "Seiko SKX007 Bezel Insert"),
-    ).toBe(false);
+    expect(translateHorologicalQuery("Seiko luneta cristal plexi pasador")).toBe(
+      "Seiko bezel crystal acrylic crystal spring bar",
+    );
+    expect(isShopifyProductRelevant("Rolex Submariner bezel", "Seiko SKX007 Bezel Insert")).toBe(
+      false,
+    );
     expect(
       isShopifyProductRelevant("Seiko SKX007 bisel", "Seiko SKX007 Ceramic Bezel Insert"),
     ).toBe(true);
@@ -45,14 +48,7 @@ describe("App routing", () => {
     );
   });
 
-  it("verifies 24h chollos TTL and 100% canonical eBay item links", () => {
+  it("keeps the chollos cache on its 24h cycle", () => {
     expect(CHOLLOS_TTL_MS).toBe(24 * 60 * 60 * 1000);
-    expect(DAILY_CHOLLOS.length).toBeGreaterThanOrEqual(10);
-    for (const deal of DAILY_CHOLLOS) {
-      expect(deal.url).toMatch(/^https:\/\/www\.ebay\.es\/itm\/[1234]\d{11}$/);
-      expect(deal.image).toMatch(/^https:\/\/www\.picclickimg\.com\//);
-      expect(deal.savingsPct).toBeGreaterThanOrEqual(15);
-      expect(deal.savingsPct).toBeLessThanOrEqual(65);
-    }
   });
 });

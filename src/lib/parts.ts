@@ -1,7 +1,7 @@
 import strap from "@/assets/strap.jpg";
 import bracelet from "@/assets/bracelet.jpg";
 import crystal from "@/assets/crystal.jpg";
-import { normalizeHorologicalSearchText } from "./search-query";
+import { matchesHorologicalSearchTokens } from "./search-query";
 import movement from "@/assets/movement.jpg";
 
 export type Store =
@@ -835,7 +835,6 @@ export function getStoreSearchUrl(store: Store, query: string): string {
 }
 
 export function filterParts(parts: Part[], f: Filters): Part[] {
-  const words = normalizeHorologicalSearchText(f.query).split(/[^a-z0-9]+/).filter((word) => word.length >= 2);
   const brands = ["rolex", "seiko", "omega", "tissot", "citizen", "casio", "tudor", "cartier", "breitling", "hamilton", "longines", "orient"];
   const queriedBrands = brands.filter((brand) => new RegExp(`\\b${brand}\\b`, "i").test(f.query));
   return parts.filter((p) => {
@@ -843,7 +842,7 @@ export function filterParts(parts: Part[], f: Filters): Part[] {
     if (f.origin !== "all" && p.origin !== f.origin) return false;
     if (f.categories.length && !f.categories.includes(p.category)) return false;
     if (p.priceEur > f.maxPrice) return false;
-    const hay = normalizeHorologicalSearchText([
+    const hay = [
       p.title,
       p.brand,
       p.spec,
@@ -855,8 +854,10 @@ export function filterParts(parts: Part[], f: Filters): Part[] {
       p.materialSpec,
       p.toleranceSpec,
       ...p.compatibleWith,
-    ].filter(Boolean).join(" "));
-    return words.every((w) => hay.includes(w));
+    ]
+      .filter(Boolean)
+      .join(" ");
+    return matchesHorologicalSearchTokens(f.query, hay, true);
   });
 }
 

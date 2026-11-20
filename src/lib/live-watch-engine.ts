@@ -11,13 +11,14 @@
  * - Alibaba B2B & CousinsUK professional trade calculation
  */
 
+import { type Category, type Part, type Store } from "./parts";
+import { type CholloDeal, type CholloPlatform } from "./chollos";
 import {
-  type Category,
-  type Part,
-  type Store,
-} from "./parts";
-import { resolveCholloFallbackImage, type CholloDeal } from "./chollos";
-import { isLikelyWatchPartListing, translateHorologicalQuery } from "./search-query";
+  isLikelyWatchPartListing,
+  matchesHorologicalSearchTokens,
+  isWatchDealQueryRelevant,
+  translateHorologicalQuery,
+} from "./search-query";
 
 export { isLikelyWatchPartListing, translateHorologicalQuery } from "./search-query";
 
@@ -82,23 +83,35 @@ export const KNOWN_WATCH_BRANDS = [
 export function isShopifyProductRelevant(query: string, productTitle: string): boolean {
   if (!isLikelyWatchPartListing(productTitle)) return false;
   const qLower = translateHorologicalQuery(query).toLowerCase();
-  const titleLower = productTitle.toLowerCase();
+  const titleTokens = new Set(
+    productTitle
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean),
+  );
 
   const queriedBrands = KNOWN_WATCH_BRANDS.filter((b) =>
     new RegExp(`\\b${b}\\b`, "i").test(qLower),
   );
   if (queriedBrands.length > 0) {
-    if (!queriedBrands.every((b) => new RegExp(`\\b${b}\\b`, "i").test(titleLower)) ||
-        KNOWN_WATCH_BRANDS.some((b) => !queriedBrands.includes(b) && new RegExp(`\\b${b}\\b`, "i").test(titleLower))) {
+    if (
+      !queriedBrands.every((b) => titleTokens.has(b)) ||
+      KNOWN_WATCH_BRANDS.some((b) => !queriedBrands.includes(b) && titleTokens.has(b))
+    ) {
       return false;
     }
   }
 
+  const queriedBrandSet = new Set(queriedBrands);
   const stopWords = new Set([
     "watch",
+    "wristwatch",
     "parts",
     "part",
     "reloj",
+    "relojes",
     "para",
     "for",
     "with",
@@ -107,12 +120,14 @@ export function isShopifyProductRelevant(query: string, productTitle: string): b
     "oem",
     "genuine",
     "original",
+    "replacement",
+    "spare",
   ]);
   const tokens = qLower
     .split(/[^a-z0-9]+/)
-    .filter((t) => t.length >= 3 && !stopWords.has(t));
+    .filter((t) => t.length >= 3 && !stopWords.has(t) && !queriedBrandSet.has(t));
   if (tokens.length === 0) return true;
-  return tokens.every((t) => titleLower.includes(t));
+  return matchesHorologicalSearchTokens(tokens.join(" "), productTitle, true);
 }
 
 export function detectWatchPartCategory(title: string): Category {
@@ -123,7 +138,12 @@ export function detectWatchPartCategory(title: string): Category {
   if (/\b(crown|corona|coronas|stem|tije|tija|pusher|pulsador)\b/.test(q)) return "crowns";
   if (/\b(dial|esfera|esferas|hands|agujas|manecillas)\b/.test(q)) return "dials";
   if (/\b(strap|straps|band|correa|correas|bracelet|brazalete|armis)\b/.test(q)) return "straps";
-  if (/\b(movement|movimiento|calibre|nh35|nh36|2824|3230|1861|9015|rotor|miyota|7s26|4r35|6r15|valjoux|7750)\b/.test(q)) return "movements";
+  if (
+    /\b(movement|movimiento|calibre|nh35|nh36|2824|3230|1861|9015|rotor|miyota|7s26|4r35|6r15|valjoux|7750)\b/.test(
+      q,
+    )
+  )
+    return "movements";
   if (/\b(sapphire|zafiro|plexi|hesalite|mineral)\b/.test(q)) return "crystals";
   if (/\b(gasket|junta)\b/.test(q)) return "crowns";
   return "straps";
@@ -137,14 +157,22 @@ export function detectListingBrand(title: string): string {
 // Indicative conversion, never a listing price: preserve the quoted amount and currency.
 export const PRICE_TO_EUR = { EUR: 1, USD: 0.92, GBP: 1.18 } as const;
 export function parseListingPrice(text: unknown): {
-  priceEur: number; listedPrice: number; listedCurrency: keyof typeof PRICE_TO_EUR;
+  priceEur: number;
+  listedPrice: number;
+  listedCurrency: keyof typeof PRICE_TO_EUR;
 } | null {
   if (typeof text !== "string") return null;
-  const match = text.match(/(€|US\s*\$|\$|£|EUR|USD|GBP)\s*([0-9][0-9.,]*(?:\s[0-9]{3})*(?:[.,][0-9]{1,2})?)|([0-9][0-9.,]*(?:\s[0-9]{3})*(?:[.,][0-9]{1,2})?)\s*(€|US\s*\$|\$|£|EUR|USD|GBP)/i);
+  const match = text.match(
+    /(€|US\s*\$|\$|£|EUR|USD|GBP)\s*([0-9][0-9.,]*(?:\s[0-9]{3})*(?:[.,][0-9]{1,2})?)|([0-9][0-9.,]*(?:\s[0-9]{3})*(?:[.,][0-9]{1,2})?)\s*(€|US\s*\$|\$|£|EUR|USD|GBP)/i,
+  );
   if (!match) return null;
   const symbol = (match[1] || match[4] || "").replace(/\s/g, "").toUpperCase();
   // Only an unambiguous currency attached to this amount is accepted.
-  const listedCurrency = /^(€|EUR)$/.test(symbol) ? "EUR" : /^(£|GBP)$/.test(symbol) ? "GBP" : "USD";
+  const listedCurrency = /^(€|EUR)$/.test(symbol)
+    ? "EUR"
+    : /^(£|GBP)$/.test(symbol)
+      ? "GBP"
+      : "USD";
   let amount = (match[2] || match[3] || "").replace(/\s/g, "");
   const decimal = amount.match(/[.,](\d{1,2})$/);
   if (decimal) {
@@ -153,7 +181,11 @@ export function parseListingPrice(text: unknown): {
   } else amount = amount.replace(/[.,]/g, "");
   const listedPrice = Number(amount);
   if (!Number.isFinite(listedPrice) || listedPrice <= 0 || listedPrice > 25000) return null;
-  return { listedPrice, listedCurrency, priceEur: Math.round(listedPrice * PRICE_TO_EUR[listedCurrency] * 100) / 100 };
+  return {
+    listedPrice,
+    listedCurrency,
+    priceEur: Math.round(listedPrice * PRICE_TO_EUR[listedCurrency] * 100) / 100,
+  };
 }
 
 export function normalizeImageUrl(rawUrl: string | undefined): string {
@@ -187,7 +219,11 @@ export function normalizeImageUrl(rawUrl: string | undefined): string {
 
 export const SEARCH_SERVER_TIMEOUT_MS = 8000;
 
-async function fetchLiveUrlText(targetUrl: string, timeoutMs = SEARCH_SERVER_TIMEOUT_MS, signal?: AbortSignal): Promise<string> {
+async function fetchLiveUrlText(
+  targetUrl: string,
+  timeoutMs = SEARCH_SERVER_TIMEOUT_MS,
+  signal?: AbortSignal,
+): Promise<string> {
   if (typeof window !== "undefined") throw new Error("Live sources are server-only");
   const response = await fetch(targetUrl, {
     headers: BROWSER_HEADERS,
@@ -197,9 +233,19 @@ async function fetchLiveUrlText(targetUrl: string, timeoutMs = SEARCH_SERVER_TIM
   return response.text();
 }
 
-function listingPart(id: string, title: string, store: Store, price: NonNullable<ReturnType<typeof parseListingPrice>>, image: string, url: string): Part {
+function listingPart(
+  id: string,
+  title: string,
+  store: Store,
+  price: NonNullable<ReturnType<typeof parseListingPrice>>,
+  image: string,
+  url: string,
+): Part {
   return {
-    id, title, store, ...price,
+    id,
+    title,
+    store,
+    ...price,
     brand: detectListingBrand(title),
     origin: "generic",
     category: detectWatchPartCategory(title),
@@ -218,53 +264,133 @@ export function parseEbayListings(html: string, query: string): Part[] {
   for (const block of html.split(/<li[^>]+id="item-/i).slice(1, 20)) {
     const itemId = block.match(/^(\d+)"/)?.[1];
     if (!itemId || !/^[1234]\d{11}$/.test(itemId)) continue;
-    const rawTitle = block.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i)?.[1] ?? block.match(/alt="([^"]+)"/i)?.[1];
+    const rawTitle =
+      block.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i)?.[1] ?? block.match(/alt="([^"]+)"/i)?.[1];
     if (!rawTitle) continue;
-    const title = rawTitle.replace(/<[^>]+>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&#39;/g, "'").trim();
+    const title = rawTitle
+      .replace(/<[^>]+>/g, "")
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, "&")
+      .replace(/&#39;/g, "'")
+      .trim();
     if (!title || !isShopifyProductRelevant(query, title)) continue;
     // Limit price extraction to the listing's price element, never shipping or neighbouring items.
-    const priceText = block.match(/<(?:span|div)[^>]*class="[^"]*\bprice\b[^"]*"[^>]*>([\s\S]*?)<\/(?:span|div)>/i)?.[1];
+    const priceText = block.match(
+      /<(?:span|div)[^>]*class="[^"]*\bprice\b[^"]*"[^>]*>([\s\S]*?)<\/(?:span|div)>/i,
+    )?.[1];
     const price = parseListingPrice(priceText?.replace(/<[^>]+>/g, ""));
-    const image = normalizeImageUrl(block.match(/data-src="([^"]+)"/i)?.[1] ?? block.match(/src="([^"]+)"/i)?.[1]);
+    const image = normalizeImageUrl(
+      block.match(/data-src="([^"]+)"/i)?.[1] ?? block.match(/src="([^"]+)"/i)?.[1],
+    );
     if (!price || !image || image.includes("pixel") || image.startsWith("data:")) continue;
-    results.push(listingPart(`live-ebay-${itemId}`, title, "eBay", price, image, `https://www.ebay.es/itm/${itemId}`));
+    results.push(
+      listingPart(
+        `live-ebay-${itemId}`,
+        title,
+        "eBay",
+        price,
+        image,
+        `https://www.ebay.es/itm/${itemId}`,
+      ),
+    );
     if (results.length >= 5) break;
   }
   return results;
 }
 
 async function fetchAliExpressLive(query: string, signal: AbortSignal): Promise<Part[]> {
-  const slug = translateHorologicalQuery(query).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const html = await fetchLiveUrlText(`https://es.aliexpress.com/w/wholesale-${slug}.html`, SEARCH_SERVER_TIMEOUT_MS, signal);
+  const slug = translateHorologicalQuery(query)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  const html = await fetchLiveUrlText(
+    `https://es.aliexpress.com/w/wholesale-${slug}.html`,
+    SEARCH_SERVER_TIMEOUT_MS,
+    signal,
+  );
   const results: Part[] = [];
   // Only accept fields contained in the same product anchor, not arbitrary neighbouring snippets.
-  const anchors = html.matchAll(/<a\b[^>]*href="((?:https?:)?\/\/(?:es|www)\.aliexpress\.com\/item\/(\d+)\.html[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi);
+  const anchors = html.matchAll(
+    /<a\b[^>]*href="((?:https?:)?\/\/(?:es|www)\.aliexpress\.com\/item\/(\d+)\.html[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
+  );
   for (const match of anchors) {
     const body = match[3] ?? "";
-    const title = body.match(/alt="([^"]+)"/i)?.[1]?.replace(/&amp;/g, "&").trim();
+    const title = body
+      .match(/alt="([^"]+)"/i)?.[1]
+      ?.replace(/&amp;/g, "&")
+      .trim();
     const image = normalizeImageUrl(body.match(/(?:src|data-src)="([^"]+)"/i)?.[1]);
     const price = parseListingPrice(body.replace(/<[^>]+>/g, " "));
     if (!title || !image || !price || !isShopifyProductRelevant(query, title)) continue;
-    results.push(listingPart(`live-ali-${match[2]}`, title, "AliExpress", price, image, `https://es.aliexpress.com/item/${match[2]}.html`));
+    results.push(
+      listingPart(
+        `live-ali-${match[2]}`,
+        title,
+        "AliExpress",
+        price,
+        image,
+        `https://es.aliexpress.com/item/${match[2]}.html`,
+      ),
+    );
   }
   return results.slice(0, 2);
 }
 
-async function fetchShopifyNicheStore(query: string, baseUrl: string, store: Store, signal: AbortSignal): Promise<Part[]> {
-  const raw = await fetchLiveUrlText(`${baseUrl}/search/suggest.json?q=${encodeURIComponent(translateHorologicalQuery(query))}&resources[type]=product&resources[limit]=5`, SEARCH_SERVER_TIMEOUT_MS, signal);
-  const data = JSON.parse(raw) as { resources?: { results?: { products?: Array<{ id?: number | string; title?: string; url?: string; image?: string; price?: string | number }> } } };
+async function fetchShopifyNicheStore(
+  query: string,
+  baseUrl: string,
+  store: Store,
+  signal: AbortSignal,
+): Promise<Part[]> {
+  const raw = await fetchLiveUrlText(
+    `${baseUrl}/search/suggest.json?q=${encodeURIComponent(translateHorologicalQuery(query))}&resources[type]=product&resources[limit]=5`,
+    SEARCH_SERVER_TIMEOUT_MS,
+    signal,
+  );
+  const data = JSON.parse(raw) as {
+    resources?: {
+      results?: {
+        products?: Array<{
+          id?: number | string;
+          title?: string;
+          url?: string;
+          image?: string;
+          price?: string | number;
+        }>;
+      };
+    };
+  };
   const results: Part[] = [];
   for (const product of data.resources?.results?.products ?? []) {
     const title = product.title?.trim();
     const price = parseListingPrice(product.price);
     const image = normalizeImageUrl(product.image);
-    if (!title || !product.id || !product.url || !image || !price || !isShopifyProductRelevant(query, title)) continue;
-    results.push(listingPart(`live-${store}-${product.id}`, title, store, price, image, new URL(product.url, baseUrl).href));
+    if (
+      !title ||
+      !product.id ||
+      !product.url ||
+      !image ||
+      !price ||
+      !isShopifyProductRelevant(query, title)
+    )
+      continue;
+    results.push(
+      listingPart(
+        `live-${store}-${product.id}`,
+        title,
+        store,
+        price,
+        image,
+        new URL(product.url, baseUrl).href,
+      ),
+    );
   }
   return results.slice(0, 2);
 }
 
-export async function searchLiveWatchPartsCloud(query: string): Promise<import("./parts").LiveSearchResponse> {
+export async function searchLiveWatchPartsCloud(
+  query: string,
+): Promise<import("./parts").LiveSearchResponse> {
   const q = query.trim();
   if (!q) return { items: [], sources: [] };
 
@@ -283,7 +409,7 @@ export async function searchLiveWatchPartsCloud(query: string): Promise<import("
         headers: { Accept: "application/json" },
       });
       if (res.ok) {
-        const data = await res.json() as {
+        const data = (await res.json()) as {
           items?: Part[];
           sources?: Array<{ name: string; status: "ok" | "error" | "timeout"; count: number }>;
         };
@@ -295,8 +421,16 @@ export async function searchLiveWatchPartsCloud(query: string): Promise<import("
               ...source,
               count: items.filter((item) => item.store === source.name).length,
             })) ?? [
-              { name: "eBay", status: "ok", count: items.filter((item) => item.store === "eBay").length },
-              { name: "Wallapop", status: "ok", count: items.filter((item) => item.store === "Wallapop").length },
+              {
+                name: "eBay",
+                status: "ok",
+                count: items.filter((item) => item.store === "eBay").length,
+              },
+              {
+                name: "Wallapop",
+                status: "ok",
+                count: items.filter((item) => item.store === "Wallapop").length,
+              },
             ],
           };
         }
@@ -312,26 +446,65 @@ export async function searchLiveWatchPartsCloud(query: string): Promise<import("
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SEARCH_SERVER_TIMEOUT_MS);
   const providers = [
-    { name: "eBay", run: async () => parseEbayListings(await fetchLiveUrlText(`https://picclick.com/?q=${encodeURIComponent(translateHorologicalQuery(q))}`, SEARCH_SERVER_TIMEOUT_MS, controller.signal), q) },
+    {
+      name: "eBay",
+      run: async () =>
+        parseEbayListings(
+          await fetchLiveUrlText(
+            `https://picclick.com/?q=${encodeURIComponent(translateHorologicalQuery(q))}`,
+            SEARCH_SERVER_TIMEOUT_MS,
+            controller.signal,
+          ),
+          q,
+        ),
+    },
     { name: "AliExpress", run: () => fetchAliExpressLive(q, controller.signal) },
-    { name: "WatchPlaza", run: () => fetchShopifyNicheStore(q, "https://www.watchplaza.com", "WatchPlaza", controller.signal) },
-    { name: "NamokiMods", run: () => fetchShopifyNicheStore(q, "https://www.namokimods.com", "NamokiMods", controller.signal) },
+    {
+      name: "WatchPlaza",
+      run: () =>
+        fetchShopifyNicheStore(q, "https://www.watchplaza.com", "WatchPlaza", controller.signal),
+    },
+    {
+      name: "NamokiMods",
+      run: () =>
+        fetchShopifyNicheStore(q, "https://www.namokimods.com", "NamokiMods", controller.signal),
+    },
   ];
   try {
-    const responses = await Promise.all(providers.map(async (provider) => {
-      try {
-        // Race also bounds a source that ignores cancellation.
-        const items = await Promise.race([
-          provider.run(),
-          new Promise<never>((_, reject) => controller.signal.addEventListener("abort", () => reject(new DOMException("Source timeout", "AbortError")), { once: true })),
-        ]);
-        return { items, source: { name: provider.name, status: "ok" as const, count: items.length } };
-      } catch {
-        return { items: [], source: { name: provider.name, status: controller.signal.aborted ? "timeout" as const : "error" as const, count: 0 } };
-      }
-    }));
+    const responses = await Promise.all(
+      providers.map(async (provider) => {
+        try {
+          // Race also bounds a source that ignores cancellation.
+          const items = await Promise.race([
+            provider.run(),
+            new Promise<never>((_, reject) =>
+              controller.signal.addEventListener(
+                "abort",
+                () => reject(new DOMException("Source timeout", "AbortError")),
+                { once: true },
+              ),
+            ),
+          ]);
+          return {
+            items,
+            source: { name: provider.name, status: "ok" as const, count: items.length },
+          };
+        } catch {
+          return {
+            items: [],
+            source: {
+              name: provider.name,
+              status: controller.signal.aborted ? ("timeout" as const) : ("error" as const),
+              count: 0,
+            },
+          };
+        }
+      }),
+    );
     return { items: responses.flatMap((r) => r.items), sources: responses.map((r) => r.source) };
-  } finally { clearTimeout(timer); }
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 interface WatchBenchmarkSpec {
@@ -344,33 +517,174 @@ interface WatchBenchmarkSpec {
 }
 
 const WATCH_MARKET_BENCHMARKS: WatchBenchmarkSpec[] = [
-  { pattern: /\bskx00[79]\b/i, brand: "Seiko", model: "SKX007 / SKX009 Diver 200m", minWatchPriceEur: 95, marketValueEur: 340, dealType: "Para Restaurar / Flip" },
-  { pattern: /\bsrpd\d*\b|\b5 sports\b/i, brand: "Seiko", model: "Seiko 5 Sports Automático", minWatchPriceEur: 85, marketValueEur: 250, dealType: "Rebaja Directa" },
-  { pattern: /\bssk00[135]\b/i, brand: "Seiko", model: "Seiko 5 Sports GMT", minWatchPriceEur: 140, marketValueEur: 360, dealType: "Rebaja Directa" },
-  { pattern: /\bsarp\w*\b|\balpinist\b/i, brand: "Seiko", model: "Seiko Prospex Alpinist", minWatchPriceEur: 220, marketValueEur: 580, dealType: "Rebaja Directa" },
-  { pattern: /\bpresage\b|\bcocktail\b/i, brand: "Seiko", model: "Seiko Presage Automático", minWatchPriceEur: 140, marketValueEur: 380, dealType: "Rebaja Directa" },
-  { pattern: /\bseiko 5\b/i, brand: "Seiko", model: "Seiko 5 Automatic Day-Date", minWatchPriceEur: 55, marketValueEur: 165, dealType: "Para Restaurar / Flip" },
-  { pattern: /\bseiko\b/i, brand: "Seiko", model: "Seiko Automatic / Chronograph", minWatchPriceEur: 75, marketValueEur: 240, dealType: "Rebaja Directa" },
-  { pattern: /\bprx\b.*\bpowermatic\b/i, brand: "Tissot", model: "Tissot PRX Powermatic 80", minWatchPriceEur: 240, marketValueEur: 620, dealType: "Rebaja Directa" },
-  { pattern: /\bprx\b/i, brand: "Tissot", model: "Tissot PRX Swiss Edition", minWatchPriceEur: 120, marketValueEur: 395, dealType: "Rebaja Directa" },
-  { pattern: /\bseastar\b/i, brand: "Tissot", model: "Tissot Seastar 1000/2000 Diver", minWatchPriceEur: 170, marketValueEur: 490, dealType: "Rebaja Directa" },
-  { pattern: /\ble locle\b|\bvisodate\b/i, brand: "Tissot", model: "Tissot Heritage / Le Locle", minWatchPriceEur: 140, marketValueEur: 420, dealType: "Rebaja Directa" },
-  { pattern: /\btissot\b/i, brand: "Tissot", model: "Tissot Swiss Made", minWatchPriceEur: 105, marketValueEur: 330, dealType: "Rebaja Directa" },
-  { pattern: /\bgeneve\b|\bgenève\b/i, brand: "Omega", model: "Omega Genève Swiss Vintage", minWatchPriceEur: 230, marketValueEur: 690, dealType: "Subasta sin Reserva" },
-  { pattern: /\bde ville\b|\bdeville\b/i, brand: "Omega", model: "Omega De Ville Swiss", minWatchPriceEur: 240, marketValueEur: 720, dealType: "Subasta sin Reserva" },
-  { pattern: /\bseamaster\b/i, brand: "Omega", model: "Omega Seamaster Swiss", minWatchPriceEur: 320, marketValueEur: 950, dealType: "Para Restaurar / Flip" },
-  { pattern: /\bspeedmaster\b/i, brand: "Omega", model: "Omega Speedmaster Chronograph", minWatchPriceEur: 950, marketValueEur: 2450, dealType: "Para Restaurar / Flip" },
-  { pattern: /\bconstellation\b/i, brand: "Omega", model: "Omega Constellation Chronometer", minWatchPriceEur: 320, marketValueEur: 890, dealType: "Subasta sin Reserva" },
-  { pattern: /\bomega\b/i, brand: "Omega", model: "Omega Swiss Vintage", minWatchPriceEur: 240, marketValueEur: 680, dealType: "Subasta sin Reserva" },
-  { pattern: /\bpromaster\b|\bny0040\b|\baqualand\b|\bfugu\b/i, brand: "Citizen", model: "Citizen Promaster Diver ISO 200m", minWatchPriceEur: 85, marketValueEur: 250, dealType: "Rebaja Directa" },
-  { pattern: /\btsuyosa\b/i, brand: "Citizen", model: "Citizen Tsuyosa Automático", minWatchPriceEur: 110, marketValueEur: 280, dealType: "Rebaja Directa" },
-  { pattern: /\bcitizen\b/i, brand: "Citizen", model: "Citizen Automatic / Eco-Drive", minWatchPriceEur: 75, marketValueEur: 220, dealType: "Rebaja Directa" },
-  { pattern: /\bkamasu\b|\bmako\b|\bbambino\b|\borient\b/i, brand: "Orient", model: "Orient Automatic In-House", minWatchPriceEur: 75, marketValueEur: 225, dealType: "Rebaja Directa" },
-  { pattern: /\bkhaki\b|\bhamilton\b/i, brand: "Hamilton", model: "Hamilton Khaki Field Swiss", minWatchPriceEur: 190, marketValueEur: 520, dealType: "Rebaja Directa" },
-  { pattern: /\bhydroconquest\b|\bconquest\b|\blongines\b/i, brand: "Longines", model: "Longines Conquest / Flagship Swiss", minWatchPriceEur: 240, marketValueEur: 780, dealType: "Rebaja Directa" },
-  { pattern: /\bcertina\b/i, brand: "Certina", model: "Certina DS Action / Caimano Swiss", minWatchPriceEur: 130, marketValueEur: 440, dealType: "Rebaja Directa" },
-  { pattern: /\btag heuer\b|\baquaracer\b|\bformula 1\b/i, brand: "TAG Heuer", model: "TAG Heuer Swiss", minWatchPriceEur: 290, marketValueEur: 850, dealType: "Rebaja Directa" },
-  { pattern: /\boris\b/i, brand: "Oris", model: "Oris Swiss Automatic", minWatchPriceEur: 280, marketValueEur: 820, dealType: "Rebaja Directa" },
+  {
+    pattern: /\bskx00[79]\b/i,
+    brand: "Seiko",
+    model: "SKX007 / SKX009 Diver 200m",
+    minWatchPriceEur: 95,
+    marketValueEur: 340,
+    dealType: "Para Restaurar / Flip",
+  },
+  {
+    pattern: /\bsrpd\d*\b|\b5 sports\b/i,
+    brand: "Seiko",
+    model: "Seiko 5 Sports Automático",
+    minWatchPriceEur: 85,
+    marketValueEur: 250,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bssk00[135]\b/i,
+    brand: "Seiko",
+    model: "Seiko 5 Sports GMT",
+    minWatchPriceEur: 140,
+    marketValueEur: 360,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bsarp\w*\b|\balpinist\b/i,
+    brand: "Seiko",
+    model: "Seiko Prospex Alpinist",
+    minWatchPriceEur: 220,
+    marketValueEur: 580,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bpresage\b|\bcocktail\b/i,
+    brand: "Seiko",
+    model: "Seiko Presage Automático",
+    minWatchPriceEur: 140,
+    marketValueEur: 380,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bprx\b.*\bpowermatic\b/i,
+    brand: "Tissot",
+    model: "Tissot PRX Powermatic 80",
+    minWatchPriceEur: 240,
+    marketValueEur: 620,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bprx\b/i,
+    brand: "Tissot",
+    model: "Tissot PRX Swiss Edition",
+    minWatchPriceEur: 120,
+    marketValueEur: 395,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bseastar\b/i,
+    brand: "Tissot",
+    model: "Tissot Seastar 1000/2000 Diver",
+    minWatchPriceEur: 170,
+    marketValueEur: 490,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\ble locle\b|\bvisodate\b/i,
+    brand: "Tissot",
+    model: "Tissot Heritage / Le Locle",
+    minWatchPriceEur: 140,
+    marketValueEur: 420,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bgeneve\b|\bgenève\b/i,
+    brand: "Omega",
+    model: "Omega Genève Swiss Vintage",
+    minWatchPriceEur: 230,
+    marketValueEur: 690,
+    dealType: "Subasta sin Reserva",
+  },
+  {
+    pattern: /\bde ville\b|\bdeville\b/i,
+    brand: "Omega",
+    model: "Omega De Ville Swiss",
+    minWatchPriceEur: 240,
+    marketValueEur: 720,
+    dealType: "Subasta sin Reserva",
+  },
+  {
+    pattern: /\bseamaster\b/i,
+    brand: "Omega",
+    model: "Omega Seamaster Swiss",
+    minWatchPriceEur: 320,
+    marketValueEur: 950,
+    dealType: "Para Restaurar / Flip",
+  },
+  {
+    pattern: /\bspeedmaster\b/i,
+    brand: "Omega",
+    model: "Omega Speedmaster Chronograph",
+    minWatchPriceEur: 950,
+    marketValueEur: 2450,
+    dealType: "Para Restaurar / Flip",
+  },
+  {
+    pattern: /\bconstellation\b/i,
+    brand: "Omega",
+    model: "Omega Constellation Chronometer",
+    minWatchPriceEur: 320,
+    marketValueEur: 890,
+    dealType: "Subasta sin Reserva",
+  },
+  {
+    pattern: /\bpromaster\b|\bny0040\b|\baqualand\b|\bfugu\b/i,
+    brand: "Citizen",
+    model: "Citizen Promaster Diver ISO 200m",
+    minWatchPriceEur: 85,
+    marketValueEur: 250,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\btsuyosa\b/i,
+    brand: "Citizen",
+    model: "Citizen Tsuyosa Automático",
+    minWatchPriceEur: 110,
+    marketValueEur: 280,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bkamasu\b|\bmako\b|\bbambino\b/i,
+    brand: "Orient",
+    model: "Orient Automatic In-House",
+    minWatchPriceEur: 75,
+    marketValueEur: 225,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bkhaki\b/i,
+    brand: "Hamilton",
+    model: "Hamilton Khaki Field Swiss",
+    minWatchPriceEur: 190,
+    marketValueEur: 520,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bhydroconquest\b|\bconquest\b/i,
+    brand: "Longines",
+    model: "Longines Conquest / Flagship Swiss",
+    minWatchPriceEur: 240,
+    marketValueEur: 780,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\bds action\b|\bcaimano\b/i,
+    brand: "Certina",
+    model: "Certina DS Action / Caimano Swiss",
+    minWatchPriceEur: 130,
+    marketValueEur: 440,
+    dealType: "Rebaja Directa",
+  },
+  {
+    pattern: /\baquaracer\b|\bformula 1\b/i,
+    brand: "TAG Heuer",
+    model: "TAG Heuer Swiss",
+    minWatchPriceEur: 290,
+    marketValueEur: 850,
+    dealType: "Rebaja Directa",
+  },
 ];
 
 const CHOLLO_EXCLUDE_REGEX =
@@ -385,6 +699,65 @@ function matchWatchBenchmark(title: string): WatchBenchmarkSpec | null {
   return null;
 }
 
+function normalizeExternalChollo(raw: unknown, query: string): CholloDeal | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const item = raw as Record<string, unknown>;
+  const id = typeof item["id"] === "string" ? item["id"].trim() : "";
+  const title = typeof item["title"] === "string" ? item["title"].trim() : "";
+  const platform = item["platform"] as CholloPlatform;
+  const priceEur = Number(item["priceEur"]);
+  const image = typeof item["image"] === "string" ? item["image"].trim() : "";
+  const url = typeof item["url"] === "string" ? item["url"].trim() : "";
+  if (
+    !id ||
+    !title ||
+    !["Wallapop", "eBay", "Chrono24", "Todocolección"].includes(platform) ||
+    !Number.isFinite(priceEur) ||
+    !isWatchDealQueryRelevant(query, title) ||
+    CHOLLO_EXCLUDE_REGEX.test(title)
+  ) {
+    return null;
+  }
+
+  let parsedImage: URL;
+  let parsedUrl: URL;
+  try {
+    parsedImage = new URL(image);
+    parsedUrl = new URL(url);
+  } catch {
+    return null;
+  }
+  if (parsedImage.protocol !== "https:" || parsedUrl.protocol !== "https:") return null;
+
+  const bench = matchWatchBenchmark(title);
+  const metrics = computeAiCholloMetricsCloud(title, priceEur, platform);
+  if (!bench || !metrics) return null;
+
+  return {
+    id,
+    title: title.slice(0, 95),
+    brand: bench.brand,
+    platform,
+    dealType: metrics.dealType,
+    priceEur,
+    marketValueEur: metrics.marketValueEur,
+    savingsPct: metrics.savingsPct,
+    profitMarginEur: metrics.profitMarginEur,
+    cholloScore: metrics.cholloScore,
+    aiVerdict: metrics.aiVerdict,
+    condition: typeof item["condition"] === "string" ? item["condition"] : "Estado no indicado",
+    location: typeof item["location"] === "string" ? item["location"] : "Ubicación no indicada",
+    timeLeft:
+      typeof item["timeLeft"] === "string" ? item["timeLeft"] : "Disponibilidad no comprobada",
+    image,
+    url,
+    ...(typeof item["proEarlyAccess"] === "boolean"
+      ? { proEarlyAccess: item["proEarlyAccess"] }
+      : {}),
+    calibreRef: `${bench.model} · ${platform}`,
+  };
+}
+
 /**
  * Deterministic AI Horological Valuation & Flip Margin Calculator for Live Chollos
  */
@@ -395,46 +768,45 @@ export function computeAiCholloMetricsCloud(
 ): Pick<
   CholloDeal,
   "marketValueEur" | "savingsPct" | "profitMarginEur" | "cholloScore" | "dealType" | "aiVerdict"
-> {
+> | null {
   const bench = matchWatchBenchmark(title);
-  if (bench && priceEur < bench.marketValueEur * 0.9) {
-    const marketValueEur = bench.marketValueEur;
-    const profitMarginEur = Math.round(marketValueEur - priceEur);
-    const savingsPct = Math.round((profitMarginEur / marketValueEur) * 100);
-    const cholloScore = Math.min(9.9, Math.max(8.6, Math.round((8.4 + savingsPct / 38) * 10) / 10));
-    return {
-      marketValueEur,
-      savingsPct,
-      profitMarginEur,
-      cholloScore,
-      dealType: bench.dealType,
-      aiVerdict: `Anuncio real verificado en ${platform} (${priceEur} €) un ${savingsPct}% por debajo de la cotización media de mercado (${marketValueEur} €) para ${bench.model}.`,
-    };
+  if (
+    !bench ||
+    !Number.isFinite(priceEur) ||
+    priceEur <= 0 ||
+    priceEur < bench.minWatchPriceEur ||
+    priceEur < bench.marketValueEur * 0.35 ||
+    priceEur > bench.marketValueEur * 0.85
+  ) {
+    return null;
   }
 
-  const marketValueEur = Math.round(Math.max(priceEur + 55, priceEur * 1.48));
+  const marketValueEur = bench.marketValueEur;
   const profitMarginEur = Math.round(marketValueEur - priceEur);
   const savingsPct = Math.round((profitMarginEur / marketValueEur) * 100);
-  const cholloScore = Math.min(9.8, Math.max(8.6, Math.round((8.4 + savingsPct / 40) * 10) / 10));
+  const cholloScore = Math.min(9.9, Math.max(0, Math.round((savingsPct / 10) * 10) / 10));
 
   return {
     marketValueEur,
     savingsPct,
     profitMarginEur,
     cholloScore,
-    dealType: "Rebaja Directa",
-    aiVerdict: `Anuncio real verificado en ${platform} (${priceEur} €) un ${savingsPct}% por debajo del precio medio de cierre en mercado secundario.`,
+    dealType: bench.dealType,
+    aiVerdict: `Anuncio localizado en ${platform} por ${priceEur} €. La referencia interna orientativa para ${bench.model} es ${marketValueEur} € (diferencia: ${savingsPct}%).`,
   };
 }
 
 /**
  * Cloud Live Chollos Scanner — 24h Auto-Refresh & 100% Legitimate Complete Watch Filter
  */
-export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> {
+export async function searchLiveChollosCloud(
+  query = "",
+  forceRefresh = false,
+): Promise<CholloDeal[]> {
   const q = query.trim();
   const cacheKey = `chollos24h::${q.toLowerCase() || "daily-default"}`;
   const cached = MEMORY_CACHE.get(cacheKey);
-  if (cached && Date.now() - cached.ts < CHOLLOS_CACHE_TTL_MS) {
+  if (!forceRefresh && cached && Date.now() - cached.ts < CHOLLOS_CACHE_TTL_MS) {
     return cached.data as CholloDeal[];
   }
 
@@ -447,16 +819,26 @@ export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> 
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4500);
-    const res = await fetch(`${engineBaseUrl}/api/chollos?q=${encodeURIComponent(q)}`, {
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
-    });
+    const refreshParam = forceRefresh ? "&refresh=1" : "";
+    const res = await fetch(
+      `${engineBaseUrl}/api/chollos?q=${encodeURIComponent(q)}${refreshParam}`,
+      {
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      },
+    );
     clearTimeout(timer);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.items) && data.items.length > 0) {
-        MEMORY_CACHE.set(cacheKey, { ts: Date.now(), data: data.items });
-        return data.items as CholloDeal[];
+        const items = data.items.flatMap((item: unknown) => {
+          const deal = normalizeExternalChollo(item, q);
+          return deal ? [deal] : [];
+        });
+        if (items.length > 0) {
+          MEMORY_CACHE.set(cacheKey, { ts: Date.now(), data: items });
+          return items;
+        }
       }
     }
   } catch {
@@ -516,32 +898,22 @@ export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> 
 
         if (!title || title.length < 10) continue;
         if (CHOLLO_EXCLUDE_REGEX.test(title)) continue;
+        if (!isWatchDealQueryRelevant(q, title)) continue;
+        const bench = matchWatchBenchmark(title);
+        if (!bench) continue;
 
-        const priceMatch = block.match(/[$€£]\s*(\d+(?:[.,]\d{1,2})?)/);
-        if (!priceMatch) continue;
-        const price = parseListingPrice(priceMatch[0]);
+        const priceText = block.match(
+          /<(?:span|div)[^>]*class="[^"]*\bprice\b[^"]*"[^>]*>([\s\S]*?)<\/(?:span|div)>/i,
+        )?.[1];
+        const price = parseListingPrice(priceText?.replace(/<[^>]+>/g, " "));
         if (!price) continue;
         const priceEur = price.priceEur;
 
-        const bench = matchWatchBenchmark(title);
-        if (bench) {
-          if (
-            priceEur < bench.minWatchPriceEur ||
-            priceEur > bench.marketValueEur * 0.85 ||
-            priceEur < bench.marketValueEur * 0.35
-          ) {
-            continue;
-          }
-        } else if (priceEur < 65 || priceEur > 2200) {
-          continue;
-        }
+        const metrics = computeAiCholloMetricsCloud(title, priceEur, "eBay");
+        if (!metrics) continue;
 
         seenIds.add(itemId);
-        const metrics = computeAiCholloMetricsCloud(title, priceEur, "eBay");
-        const brandName =
-          bench?.brand ||
-          (title.split(/\s+/)[0] || "Swiss").replace(/[^a-zA-Z]/g, "") ||
-          "Swiss";
+        const brandName = bench.brand;
 
         results.push({
           id: `live-ebay-${itemId}`,
@@ -558,10 +930,10 @@ export async function searchLiveChollosCloud(query = ""): Promise<CholloDeal[]> 
           condition: `Anuncio Real #${itemId.slice(-6)} · Foto 1:1`,
           location: "Envío con Garantía eBay",
           timeLeft: "Actualizado hoy (Ciclo 24h)",
-          image: imgUrl || resolveCholloFallbackImage(brandName, results.length),
+          image: imgUrl,
           url: `https://www.ebay.es/itm/${itemId}`,
           proEarlyAccess: results.length % 4 === 3,
-          calibreRef: `${bench?.model || brandName} · eBay #${itemId}`,
+          calibreRef: `${bench.model} · eBay #${itemId}`,
         });
 
         if (results.length >= (q ? 9 : 12)) break;

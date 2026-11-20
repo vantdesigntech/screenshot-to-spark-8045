@@ -2,10 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import {
-  searchLiveChollosCloud,
-  searchLiveWatchPartsCloud,
-} from "./lib/live-watch-engine";
+import { searchLiveChollosCloud, searchLiveWatchPartsCloud } from "./lib/live-watch-engine";
 
 const API_CORS_HEADERS: Record<string, string> = {
   "content-type": "application/json; charset=utf-8",
@@ -80,26 +77,24 @@ export default {
         if (url.pathname === "/api/search" || url.pathname === "/api/parts") {
           const q = (url.searchParams.get("q") || "").trim();
           const result = await searchLiveWatchPartsCloud(q);
-          return new Response(
-            JSON.stringify(result),
-            { status: 200, headers: API_CORS_HEADERS },
-          );
+          return new Response(JSON.stringify(result), { status: 200, headers: API_CORS_HEADERS });
         }
 
         if (url.pathname === "/api/chollos") {
           const q = (url.searchParams.get("q") || "").trim();
-          const items = await searchLiveChollosCloud(q);
-          return new Response(
-            JSON.stringify({ query: q, count: items.length, items }),
-            { status: 200, headers: API_CORS_HEADERS },
-          );
+          const forceRefresh = url.searchParams.get("refresh") === "1";
+          const items = await searchLiveChollosCloud(q, forceRefresh);
+          return new Response(JSON.stringify({ query: q, count: items.length, items }), {
+            status: 200,
+            headers: API_CORS_HEADERS,
+          });
         }
 
         if (url.pathname.startsWith("/api/marketplace")) {
-          return new Response(
-            JSON.stringify({ status: "synced", mode: "cloud-production" }),
-            { status: 200, headers: API_CORS_HEADERS },
-          );
+          return new Response(JSON.stringify({ status: "synced", mode: "cloud-production" }), {
+            status: 200,
+            headers: API_CORS_HEADERS,
+          });
         }
       }
 

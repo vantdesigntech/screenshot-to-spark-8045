@@ -6,10 +6,8 @@ import { fmtPrice } from "@/components/AurikPartCard";
 import {
   CHOLLO_PLATFORMS,
   CHOLLOS_TTL_MS,
-  DAILY_CHOLLOS,
   fetchLiveChollosFromApi,
   getDailyChollosSyncState,
-  resolveCholloFallbackImage,
   saveDailyChollosSyncState,
   type CholloDeal,
   type CholloPlatform,
@@ -19,12 +17,12 @@ export const Route = createFileRoute("/chollos")({
   head: () => ({
     meta: [
       {
-        title: "Chollos de Relojería & Oportunidades Verificadas (Ciclo 24h) — Cronora",
+        title: "Ofertas de Relojes con Referencia de Precio — Cronora",
       },
       {
         name: "description",
         content:
-          "Radar diario con actualización automática cada 24 horas de chollos 100% legítimos en relojes completos por debajo de mercado con enlaces directos verificados.",
+          "Búsqueda de anuncios de relojes completos con precio y referencia comparativa orientativa.",
       },
     ],
   }),
@@ -44,9 +42,7 @@ function ChollosPage() {
   const [liveChollos, setLiveChollos] = useState<CholloDeal[]>([]);
   const [isScanningChollos, setIsScanningChollos] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [nextRefreshAtMs, setNextRefreshAtMs] = useState<number>(
-    () => Date.now() + CHOLLOS_TTL_MS,
-  );
+  const [nextRefreshAtMs, setNextRefreshAtMs] = useState<number>(() => Date.now() + CHOLLOS_TTL_MS);
   const [copiedDealId, setCopiedDealId] = useState<string | null>(null);
   // The countdown depends on Date.now(), so it stays hidden until after
   // hydration: server markup and first client render then match exactly.
@@ -63,7 +59,7 @@ function ChollosPage() {
       setLiveChollos(syncState.items);
       setNextRefreshAtMs(syncState.nextRefreshAtMs);
       setStatusMessage(
-        `${syncState.items.length} OFERTAS REALES VERIFICADAS · CICLO 24H ACTIVO`,
+        `${syncState.items.length} ANUNCIOS GUARDADOS · DISPONIBILIDAD POR CONFIRMAR`,
       );
       return;
     }
@@ -74,14 +70,15 @@ function ChollosPage() {
     fetchLiveChollosFromApi("", true)
       .then((freshDeals) => {
         if (!active) return;
-        const saved = saveDailyChollosSyncState(
-          freshDeals.length > 0 ? freshDeals : DAILY_CHOLLOS,
-        );
-        setLiveChollos(saved.items);
-        setNextRefreshAtMs(saved.nextRefreshAtMs);
-        setStatusMessage(
-          `ACTUALIZADO HOY (${saved.items.length} ANUNCIOS REALES VERIFICADOS)`,
-        );
+        if (freshDeals.length > 0) {
+          const saved = saveDailyChollosSyncState(freshDeals);
+          setLiveChollos(saved.items);
+          setNextRefreshAtMs(saved.nextRefreshAtMs);
+          setStatusMessage(`${saved.items.length} ANUNCIOS LOCALIZADOS · REFERENCIA ORIENTATIVA`);
+        } else {
+          setLiveChollos([]);
+          setStatusMessage("SIN RESULTADOS COMPARABLES O FUENTES NO DISPONIBLES");
+        }
       })
       .finally(() => {
         if (active) setIsScanningChollos(false);
@@ -93,18 +90,10 @@ function ChollosPage() {
   }, []);
 
   const displayedChollos = useMemo(() => {
-    const seen = new Set<string>();
-    const merged: CholloDeal[] = [];
-    for (const item of [...liveChollos, ...DAILY_CHOLLOS]) {
-      if (!seen.has(item.id)) {
-        seen.add(item.id);
-        merged.push(item);
-      }
-    }
     const filteredByPlatform =
       cholloPlatform === "all"
-        ? merged
-        : merged.filter((c) => c.platform === cholloPlatform);
+        ? liveChollos
+        : liveChollos.filter((c) => c.platform === cholloPlatform);
     const trimmed = cholloQuery.trim().toLowerCase();
     if (!trimmed) return filteredByPlatform;
     return filteredByPlatform.filter((c) =>
@@ -128,12 +117,13 @@ function ChollosPage() {
       }
       setStatusMessage(
         q
-          ? `${scanned.length} CHOLLOS REALES VERIFICADOS PARA "${q.toUpperCase()}"`
-          : `CICLO 24H SINCRONIZADO: ${scanned.length} OFERTAS REALES VERIFICADAS`,
+          ? `${scanned.length} ANUNCIOS LOCALIZADOS PARA "${q.toUpperCase()}" · REFERENCIA ORIENTATIVA`
+          : `ESCANEO COMPLETADO: ${scanned.length} ANUNCIOS CON REFERENCIA COMPARABLE`,
       );
     } else {
+      setLiveChollos([]);
       setStatusMessage(
-        `MOSTRANDO SELECCIÓN VERIFICADA DEL DÍA${q ? ` PARA "${q.toUpperCase()}"` : ""}`,
+        `SIN RESULTADOS COMPARABLES O FUENTES NO DISPONIBLES${q ? ` PARA "${q.toUpperCase()}"` : ""}`,
       );
     }
   };
@@ -163,7 +153,7 @@ function ChollosPage() {
           <div>
             <div className="aurik-section-tag flex flex-wrap items-center gap-2">
               <span className="aurik-dot" />
-              <span>RADAR DE OPORTUNIDADES // ACTUALIZACIÓN AUTOMÁTICA 24H</span>
+              <span>RADAR DE OPORTUNIDADES // CACHÉ 24H · BÚSQUEDA MANUAL DISPONIBLE</span>
               <span className="inline-flex items-center gap-1 border border-foreground bg-foreground px-2 py-0.5 font-mono text-[10px] text-primary-foreground">
                 <Clock className="h-3 w-3 text-[#22c55e] dark:text-[#4ade80]" />
                 PRÓXIMO ESCANEO 24H:{" "}
@@ -171,13 +161,12 @@ function ChollosPage() {
               </span>
             </div>
             <h1 className="aurik-hero-title mt-3 text-2xl sm:text-4xl">
-              Relojes completos verificados bajo mercado
+              Anuncios de relojes con referencia de precio
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Escáner diario sincronizado cada 24 horas que filtra únicamente
-              anuncios reales activos de relojes completos (excluyendo cajas
-              vacías, correas o piezas rotas) con descuento legítimo de entre el
-              15% y el 65% frente a su valor de mercado.
+              Localiza anuncios de relojes completos y muestra una comparación orientativa solo
+              cuando hay una referencia para ese modelo. La disponibilidad y el estado deben
+              confirmarse en la tienda.
             </p>
           </div>
 
@@ -216,7 +205,7 @@ function ChollosPage() {
                 ) : (
                   <Sparkles className="h-3.5 w-3.5" />
                 )}
-                {isScanningChollos ? "ESCANEANDO EN VIVO..." : "ACTUALIZAR CHOLLOS (24H)"}
+                {isScanningChollos ? "ESCANEANDO EN VIVO..." : "BUSCAR OFERTAS"}
               </span>
               <span>&gt;</span>
             </button>
@@ -263,8 +252,8 @@ function ChollosPage() {
 
         {/* Chollos Grid */}
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {displayedChollos.map((deal, idx) => {
-            const whatsappText = `⌚ *Chollo Verificado en Cronora*\n• *${deal.title}*\n• Marca: ${deal.brand}\n• Precio: ${fmtPrice(deal.priceEur, "EUR")} (Mercado: ${fmtPrice(deal.marketValueEur, "EUR")} · -${deal.savingsPct}%)\n• Enlace directo al anuncio: ${deal.url}`;
+          {displayedChollos.map((deal) => {
+            const whatsappText = `⌚ *Anuncio localizado en Cronora*\n• *${deal.title}*\n• Marca: ${deal.brand}\n• Precio: ${fmtPrice(deal.priceEur, "EUR")} (referencia orientativa: ${fmtPrice(deal.marketValueEur, "EUR")} · -${deal.savingsPct}%)\n• Enlace al anuncio: ${deal.url}`;
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
 
             return (
@@ -276,26 +265,22 @@ function ChollosPage() {
                   {/* Light Gray Product Image Container (#f4f4f5) */}
                   <div className="relative aspect-square overflow-hidden bg-muted p-5 sm:p-6">
                     <img
-                      src={deal.image || resolveCholloFallbackImage(deal.brand, idx)}
+                      src={deal.image}
                       alt={deal.title}
                       loading="lazy"
                       onError={(e) => {
-                        const target = e.currentTarget;
-                        const fb = resolveCholloFallbackImage(deal.brand, idx);
-                        if (!target.src.endsWith(fb)) {
-                          target.src = fb;
-                        }
+                        e.currentTarget.style.visibility = "hidden";
                       }}
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                     <div className="absolute left-3 top-3 flex items-center gap-1.5">
                       <span className="bg-foreground px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-primary-foreground">
-                        {deal.platform} · VERIFICADO
+                        {deal.platform} · ANUNCIO LOCALIZADO
                       </span>
                     </div>
                     <div className="absolute right-3 top-3">
                       <span className="bg-primary px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-primary-foreground">
-                        -{deal.savingsPct}% CHOLLO
+                        -{deal.savingsPct}% VS. REFERENCIA
                       </span>
                     </div>
                   </div>
@@ -324,7 +309,7 @@ function ChollosPage() {
 
                   {/* 1px Hairline Spec Rows */}
                   <div className="aurik-spec-row">
-                    <span className="aurik-spec-label">PRECIO DETECTADO</span>
+                    <span className="aurik-spec-label">PRECIO / REFERENCIA</span>
                     <span className="aurik-spec-value font-semibold text-foreground">
                       {fmtPrice(deal.priceEur, "EUR")}{" "}
                       <span className="ml-1.5 text-[10px] font-normal text-muted-foreground line-through">
@@ -334,11 +319,11 @@ function ChollosPage() {
                   </div>
 
                   <div className="aurik-spec-row">
-                    <span className="aurik-spec-label">REFERENCIA / AHORRO</span>
+                    <span className="aurik-spec-label">DIFERENCIA ORIENTATIVA</span>
                     <span className="aurik-spec-value">
                       {deal.calibreRef ?? deal.aiVerdict} ·{" "}
                       <strong className="text-primary">
-                        AHORRO -{fmtPrice(deal.profitMarginEur, "EUR")}
+                        -{fmtPrice(deal.profitMarginEur, "EUR")}
                       </strong>
                     </span>
                   </div>
@@ -366,9 +351,7 @@ function ChollosPage() {
                         {copiedDealId === deal.id ? (
                           <>
                             <Check className="h-3 w-3 text-[#16a34a] dark:text-[#4ade80]" />
-                            <span className="text-[#16a34a] dark:text-[#4ade80]">
-                              ¡COPIADO!
-                            </span>
+                            <span className="text-[#16a34a] dark:text-[#4ade80]">¡COPIADO!</span>
                           </>
                         ) : (
                           <>
@@ -388,6 +371,15 @@ function ChollosPage() {
             );
           })}
         </div>
+        {displayedChollos.length === 0 && !isScanningChollos && (
+          <div className="mt-10 border border-dashed border-border px-6 py-12 text-center">
+            <p className="font-semibold">No hay anuncios comparables que mostrar.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Puede que no haya coincidencias o que las fuentes no respondan. No mostraremos ofertas
+              de relleno.
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

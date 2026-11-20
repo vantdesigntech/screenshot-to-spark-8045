@@ -1,9 +1,8 @@
+import { isWatchDealQueryRelevant } from "./search-query";
+
 export type CholloPlatform = "Wallapop" | "eBay" | "Chrono24" | "Todocolección";
 export type CholloDealType =
-  | "Subasta sin Reserva"
-  | "Rebaja Directa"
-  | "Lote Relojero"
-  | "Para Restaurar / Flip";
+  "Subasta sin Reserva" | "Rebaja Directa" | "Lote Relojero" | "Para Restaurar / Flip";
 
 export interface CholloDeal {
   id: string;
@@ -17,7 +16,7 @@ export interface CholloDeal {
   marketValueEur: number;
   savingsPct: number;
   profitMarginEur: number;
-  cholloScore: number;
+  cholloScore?: number | undefined;
   aiVerdict: string;
   condition: string;
   location: string;
@@ -33,14 +32,9 @@ export interface CholloDeal {
   dealReasons?: string[] | undefined;
 }
 
-export const CHOLLO_PLATFORMS: CholloPlatform[] = [
-  "eBay",
-  "Wallapop",
-  "Chrono24",
-  "Todocolección",
-];
+export const CHOLLO_PLATFORMS: CholloPlatform[] = ["eBay", "Wallapop", "Chrono24", "Todocolección"];
 
-export const CHOLLOS_STORAGE_KEY = "chronoparts_chollos_24h_v2";
+export const CHOLLOS_STORAGE_KEY = "chronoparts_chollos_24h_v3";
 export const CHOLLOS_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours (86,400,000 ms)
 
 export interface ChollosSyncState {
@@ -49,9 +43,7 @@ export interface ChollosSyncState {
   items: CholloDeal[];
 }
 
-/**
- * 100% Legitimate Verified Complete Watch Deals (Canonical 12-digit eBay Item IDs & Real 1:1 Listing Photos)
- */
+/** Legacy sample listings; live search results are not populated from this array. */
 export const DAILY_CHOLLOS: CholloDeal[] = [
   {
     id: "live-ebay-227582987679",
@@ -287,54 +279,76 @@ export const DAILY_CHOLLOS: CholloDeal[] = [
   },
 ];
 
-export function resolveCholloFallbackImage(brand: string, idx = 0): string {
-  const b = brand.toLowerCase();
-  if (b.includes("tissot")) return "/chollos/chollo-2.jpg";
-  if (b.includes("omega") && idx % 2 === 1) return "/chollos/chollo-8.jpg";
-  if (b.includes("omega")) return "/chollos/chollo-4.jpg";
-  if (b.includes("rolex")) return "/chollos/chollo-5.jpg";
-  if (b.includes("citizen")) return "/chollos/chollo-6.jpg";
-  if (b.includes("swiss") || b.includes("eta") || b.includes("lot")) return "/chollos/chollo-3.jpg";
-  if (b.includes("seiko") && idx % 2 === 1) return "/chollos/chollo-7.jpg";
-  return "/chollos/chollo-1.jpg";
-}
+function normalizeRawCholloItem(raw: Record<string, unknown>, query: string): CholloDeal | null {
+  const id = typeof raw["id"] === "string" ? raw["id"].trim() : "";
+  const title = typeof raw["title"] === "string" ? raw["title"].trim() : "";
+  const brand = typeof raw["brand"] === "string" ? raw["brand"].trim() : "";
+  const platform = CHOLLO_PLATFORMS.find((value) => value === raw["platform"]);
+  const dealType = (
+    ["Subasta sin Reserva", "Rebaja Directa", "Lote Relojero", "Para Restaurar / Flip"] as const
+  ).find((value) => value === raw["dealType"]);
+  const priceEur = Number(raw["priceEur"]);
+  const marketValueEur = Number(raw["marketValueEur"]);
+  const image = typeof raw["image"] === "string" ? raw["image"].trim() : "";
+  const url = typeof raw["url"] === "string" ? raw["url"].trim() : "";
 
-function normalizeRawCholloItem(raw: Record<string, unknown>, idx: number): CholloDeal {
-  const priceEur = Number(raw["priceEur"]) || 150;
-  const marketValueEur = Number(raw["marketValueEur"]) || Math.round(priceEur * 1.55);
-  const profitMarginEur =
-    Number(raw["profitMarginEur"]) || Math.max(25, Math.round(marketValueEur - priceEur));
-  const savingsPct =
-    Number(raw["savingsPct"]) ||
-    Number(raw["discountPct"]) ||
-    Math.round((profitMarginEur / marketValueEur) * 100);
-  const rawScore = Number(raw["cholloScore"]) || Number(raw["aiScore"]) || 9.4;
-  const cholloScore = rawScore > 10 ? Math.round((rawScore / 10) * 10) / 10 : rawScore;
-  const brand = String(raw["brand"] || "Swiss");
+  if (
+    !id ||
+    !title ||
+    !brand ||
+    !platform ||
+    !dealType ||
+    !Number.isFinite(priceEur) ||
+    priceEur <= 0 ||
+    !Number.isFinite(marketValueEur) ||
+    marketValueEur <= priceEur ||
+    !isWatchDealQueryRelevant(query, title)
+  ) {
+    return null;
+  }
+
+  let parsedUrl: URL;
+  let parsedImage: URL;
+  try {
+    parsedUrl = new URL(url);
+    parsedImage = new URL(image);
+  } catch {
+    return null;
+  }
+  if (parsedUrl.protocol !== "https:" || parsedImage.protocol !== "https:") return null;
+
+  const savingsPct = Math.round(((marketValueEur - priceEur) / marketValueEur) * 100);
+  if (savingsPct < 15 || savingsPct > 65) return null;
+
+  const rawScore = Number(raw["cholloScore"] ?? raw["aiScore"]);
+  const cholloScore = Number.isFinite(rawScore)
+    ? Math.max(0, Math.min(10, rawScore > 10 ? rawScore / 10 : rawScore))
+    : undefined;
 
   return {
-    id: String(raw["id"] || `live-ebay-${idx}`),
-    title: String(raw["title"] || "Reloj Automático Verificado"),
+    id,
+    title,
     brand,
-    platform: (raw["platform"] as CholloPlatform) || "eBay",
-    dealType: (raw["dealType"] as CholloDealType) || "Rebaja Directa",
+    platform,
+    dealType,
     priceEur,
     marketValueEur,
     savingsPct,
-    profitMarginEur,
-    cholloScore,
-    aiVerdict: String(
-      raw["aiVerdict"] ||
-        raw["whyItIsAChollo"] ||
-        `Precio real verificado (${priceEur} €) un ${savingsPct}% por debajo de la media de mercado (${marketValueEur} €).`,
-    ),
-    condition: String(raw["condition"] || "Anuncio Real Verificado · Foto 1:1"),
-    location: String(raw["location"] || "Envío con Garantía eBay"),
-    timeLeft: String(raw["timeLeft"] || raw["publishedAgo"] || "Actualizado hoy (Ciclo 24h)"),
-    image: String(raw["image"] || resolveCholloFallbackImage(brand, idx)),
-    url: String(raw["url"] || "https://www.ebay.es"),
+    profitMarginEur: Math.round(marketValueEur - priceEur),
+    ...(cholloScore !== undefined ? { cholloScore } : {}),
+    aiVerdict: `Anuncio localizado. La referencia comparativa indicada es ${marketValueEur} €; comprueba el precio y el estado en la tienda.`,
+    condition: typeof raw["condition"] === "string" ? raw["condition"] : "Estado no indicado",
+    location: typeof raw["location"] === "string" ? raw["location"] : "Ubicación no indicada",
+    timeLeft:
+      typeof raw["timeLeft"] === "string" ? raw["timeLeft"] : "Disponibilidad no comprobada",
+    image,
+    url,
     proEarlyAccess: Boolean(raw["proEarlyAccess"]),
-    calibreRef: String(raw["calibreRef"] || raw["model"] || `${brand} Verificado`),
+    ...(typeof raw["calibreRef"] === "string"
+      ? { calibreRef: raw["calibreRef"] }
+      : typeof raw["model"] === "string"
+        ? { calibreRef: raw["model"] }
+        : {}),
   };
 }
 
@@ -408,11 +422,15 @@ export async function fetchLiveChollosFromApi(
     if (res.ok && contentType.includes("application/json")) {
       const data = await res.json();
       if (Array.isArray(data.items) && data.items.length > 0) {
-        const normalized = data.items.map((item: Record<string, unknown>, i: number) =>
-          normalizeRawCholloItem(item, i),
-        );
-        if (!q) saveDailyChollosSyncState(normalized);
-        return normalized;
+        const normalized = data.items.flatMap((item: unknown) => {
+          if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+          const deal = normalizeRawCholloItem(item as Record<string, unknown>, q);
+          return deal ? [deal] : [];
+        });
+        if (normalized.length > 0) {
+          if (!q) saveDailyChollosSyncState(normalized);
+          return normalized;
+        }
       }
     }
   } catch {
@@ -433,11 +451,15 @@ export async function fetchLiveChollosFromApi(
     if (res.ok && contentType.includes("application/json")) {
       const data = await res.json();
       if (Array.isArray(data.items) && data.items.length > 0) {
-        const normalized = data.items.map((item: Record<string, unknown>, i: number) =>
-          normalizeRawCholloItem(item, i),
-        );
-        if (!q) saveDailyChollosSyncState(normalized);
-        return normalized;
+        const normalized = data.items.flatMap((item: unknown) => {
+          if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+          const deal = normalizeRawCholloItem(item as Record<string, unknown>, q);
+          return deal ? [deal] : [];
+        });
+        if (normalized.length > 0) {
+          if (!q) saveDailyChollosSyncState(normalized);
+          return normalized;
+        }
       }
     }
   } catch {
@@ -457,11 +479,15 @@ export async function fetchLiveChollosFromApi(
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.items) && data.items.length > 0) {
-        const normalized = data.items.map((item: Record<string, unknown>, i: number) =>
-          normalizeRawCholloItem(item, i),
-        );
-        if (!q) saveDailyChollosSyncState(normalized);
-        return normalized;
+        const normalized = data.items.flatMap((item: unknown) => {
+          if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+          const deal = normalizeRawCholloItem(item as Record<string, unknown>, q);
+          return deal ? [deal] : [];
+        });
+        if (normalized.length > 0) {
+          if (!q) saveDailyChollosSyncState(normalized);
+          return normalized;
+        }
       }
     }
   } catch {
@@ -477,17 +503,8 @@ export async function fetchLiveChollosFromApi(
       return cloudDeals;
     }
   } catch {
-    // Fallback to verified daily deals below
+    // No verified fallback is available when live scanning fails.
   }
 
-  if (!q) {
-    saveDailyChollosSyncState(DAILY_CHOLLOS);
-    return DAILY_CHOLLOS;
-  }
-
-  const qLower = q.toLowerCase();
-  const matchingDaily = DAILY_CHOLLOS.filter((d) =>
-    `${d.title} ${d.brand} ${d.calibreRef ?? ""}`.toLowerCase().includes(qLower),
-  );
-  return matchingDaily.length > 0 ? matchingDaily : DAILY_CHOLLOS.slice(0, 4);
+  return [];
 }
